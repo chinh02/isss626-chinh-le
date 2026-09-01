@@ -1,0 +1,48 @@
+---
+title: "Fieldwork"
+description: "The future archive of GIS work by Le Truong Chinh."
+toc: false
+page-layout: full
+---
+
+::: {.atlas-page-head}
+<p class="atlas-kicker">FIELD INDEX · AY2026–27</p>
+
+# The archive starts empty on purpose.
+
+<p class="atlas-lead">This page establishes where future work will live without reproducing any hands-on or in-class exercise material. Each entry will be written from my own analysis as the course progresses.</p>
+:::
+
+::: {.atlas-work-grid}
+::: {#field-notes .atlas-work-section}
+<span class="atlas-work-code">A / NOTES</span>
+## Field notes
+
+Concise records of spatial techniques, data decisions, and ideas worth returning to.
+
+<p class="atlas-empty"><i></i> No entries published yet</p>
+:::
+
+::: {#studio-work .atlas-work-section}
+<span class="atlas-work-code">B / STUDIO</span>
+## Studio work
+
+Course-guided investigations documented in my own words, code, maps, and conclusions.
+
+<p class="atlas-empty"><i></i> No entries published yet</p>
+:::
+
+::: {#independent-inquiries .atlas-work-section}
+<span class="atlas-work-code">C / INQUIRY</span>
+## Independent inquiries
+
+Extended geospatial questions connecting analytical methods to real places and decisions.
+
+<p class="atlas-empty"><i></i> No entries published yet</p>
+:::
+:::
+
+::: {.atlas-publishing-rule}
+<span>ENTRY STANDARD</span>
+<p><strong>Question</strong> → data → method → map → interpretation → reproducibility note</p>
+:::

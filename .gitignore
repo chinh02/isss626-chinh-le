@@ -1,0 +1,7 @@
+/.quarto/
+/node_modules/
+.Rhistory
+.RData
+.DS_Store
+
+**/*.quarto_ipynb

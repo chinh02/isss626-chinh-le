@@ -1,0 +1,44 @@
+[
+  {
+    "objectID": "work.html",
+    "href": "work.html",
+    "title": "Fieldwork",
+    "section": "",
+    "text": "FIELD INDEX · AY2026–27\n\n\nThe archive starts empty on purpose.\n\nThis page establishes where future work will live without reproducing any hands-on or in-class exercise material. Each entry will be written from my own analysis as the course progresses.\n\n\n\n\n\nA / NOTES ## Field notes\nConcise records of spatial techniques, data decisions, and ideas worth returning to.\n\n No entries published yet\n\n\n\nB / STUDIO ## Studio work\nCourse-guided investigations documented in my own words, code, maps, and conclusions.\n\n No entries published yet\n\n\n\nC / INQUIRY ## Independent inquiries\nExtended geospatial questions connecting analytical methods to real places and decisions.\n\n No entries published yet\n\n\n\n\nENTRY STANDARD\n\nQuestion → data → method → map → interpretation → reproducibility note"
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "STUDENT / 001 LTC\n\n\n\nABOUT THE CARTOGRAPHER\n\n\nHello, I’m Le Truong Chinh.\nI am studying ISSS626: Geospatial Analytics and Applications at Singapore Management University under the guidance of Prof Kam Tin Seong.\nThis website is my place to learn in public: to turn spatial data into careful questions, reproducible analysis, and maps that communicate honestly.\n\n\n\n\n\n01 / PURPOSE ## Why this site exists\nGIS is more than placing data on a map. I will use this notebook to document how location, distance, neighbourhood, connectivity, and scale change the way a problem is understood.\n\n\n02 / TOOLKIT ## How it is built\nThe site is authored with Quarto, styled as a custom digital atlas, and prepared for deployment on Netlify. Analytical entries can later combine prose, R code, spatial data, and interactive outputs in one reproducible document.\n\n\n03 / PRINCIPLE ## What belongs here\nOnly my own coursework, reflections, and analysis will be published. Course materials remain on the official course site; this notebook will link to them where context is needed rather than duplicate them.\n\n\n04 / REFERENCES ## Source points\n\nISSS626 official course site\nQuarto documentation\nSingapore Management University"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Le Truong Chinh | ISSS626",
+    "section": "",
+    "text": "GEOSPATIAL FIELD NOTEBOOK · 01°17′N 103°51′E\n\n\n\n\nLe Truong Chinh documents a semester of spatial questions, analytical experiments, and cartographic thinking in ISSS626.\n\n\nExplore the fieldwork About this notebook\n\n\n\nCOURSEISSS626\n\n\nGUIDANCEProf Kam Tin Seong\n\n\nTERMAY2026–27\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n01Observepattern + context\n\n\n02Modelmethod + evidence\n\n\n03Explainmap + meaning\n\n\n0   250   500 m"
+  },
+  {
+    "objectID": "index.html#a-record-of-learning-in-space",
+    "href": "index.html#a-record-of-learning-in-space",
+    "title": "Le Truong Chinh | ISSS626",
+    "section": "A record of learning in space",
+    "text": "A record of learning in space\nThis site is designed as a working atlas rather than a finished portfolio. Each future entry will begin with a spatial question, make the analytical choices traceable, and end with an interpretation that matters beyond the map."
+  },
+  {
+    "objectID": "index.html#spaces-reserved-for-the-work-ahead",
+    "href": "index.html#spaces-reserved-for-the-work-ahead",
+    "title": "Le Truong Chinh | ISSS626",
+    "section": "Spaces reserved for the work ahead",
+    "text": "Spaces reserved for the work ahead\nThe structure is ready; the exercise content is deliberately not included yet. Entries will be added as the semester progresses."
+  },
+  {
+    "objectID": "index.html#geospatial-analytics-and-applications",
+    "href": "index.html#geospatial-analytics-and-applications",
+    "title": "Le Truong Chinh | ISSS626",
+    "section": "Geospatial Analytics and Applications",
+    "text": "Geospatial Analytics and Applications\nThis learning notebook belongs to Le Truong Chinh, created for ISSS626 under the guidance of Prof Kam Tin Seong at Singapore Management University.\nVisit the official course site"
+  }
+]

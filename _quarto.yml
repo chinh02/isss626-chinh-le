@@ -1,0 +1,41 @@
+project:
+  type: website
+  output-dir: _site
+
+website:
+  title: "Le Truong Chinh · ISSS626"
+  description: "A personal field notebook for Geospatial Analytics and Applications at Singapore Management University."
+  page-navigation: true
+  open-graph: true
+  navbar:
+    pinned: true
+    title: "LTC / ISSS626"
+    left:
+      - href: index.qmd
+        text: Home
+      - href: work.qmd
+        text: Fieldwork
+      - href: about.qmd
+        text: About
+    right:
+      - href: https://isss626-ay2026-27aug.netlify.app/
+        text: Course site
+        target: _blank
+  page-footer:
+    left: "© 2026 Le Truong Chinh"
+    right: "ISSS626 · Geospatial Analytics and Applications"
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
+    smooth-scroll: true
+    link-external-newwindow: true
+    code-copy: true
+    anchor-sections: true
+
+execute:
+  freeze: auto
+
+editor: visual

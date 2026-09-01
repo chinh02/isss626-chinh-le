@@ -1,0 +1,54 @@
+---
+title: "About"
+description: "About Le Truong Chinh and this ISSS626 GIS learning notebook."
+toc: false
+page-layout: full
+---
+
+::: {.atlas-about-hero}
+::: {.atlas-about-index}
+<span>STUDENT / 001</span>
+<strong>LTC</strong>
+:::
+::: {.atlas-about-copy}
+<p class="atlas-kicker">ABOUT THE CARTOGRAPHER</p>
+
+# Hello, I’m Le Truong Chinh.
+
+I am studying **ISSS626: Geospatial Analytics and Applications** at Singapore Management University under the guidance of **Prof Kam Tin Seong**.
+
+This website is my place to learn in public: to turn spatial data into careful questions, reproducible analysis, and maps that communicate honestly.
+:::
+:::
+
+::: {.atlas-about-grid}
+::: {.atlas-about-block}
+<span>01 / PURPOSE</span>
+## Why this site exists
+
+GIS is more than placing data on a map. I will use this notebook to document how location, distance, neighbourhood, connectivity, and scale change the way a problem is understood.
+:::
+
+::: {.atlas-about-block}
+<span>02 / TOOLKIT</span>
+## How it is built
+
+The site is authored with **Quarto**, styled as a custom digital atlas, and prepared for deployment on **Netlify**. Analytical entries can later combine prose, R code, spatial data, and interactive outputs in one reproducible document.
+:::
+
+::: {.atlas-about-block}
+<span>03 / PRINCIPLE</span>
+## What belongs here
+
+Only my own coursework, reflections, and analysis will be published. Course materials remain on the official course site; this notebook will link to them where context is needed rather than duplicate them.
+:::
+
+::: {.atlas-about-block .atlas-about-links}
+<span>04 / REFERENCES</span>
+## Source points
+
+- [ISSS626 official course site](https://isss626-ay2026-27aug.netlify.app/)
+- [Quarto documentation](https://quarto.org/docs/guide/)
+- [Singapore Management University](https://www.smu.edu.sg/)
+:::
+:::
