@@ -2,7 +2,7 @@
 
 A Quarto website for documenting coursework in **ISSS626: Geospatial Analytics and Applications** under the guidance of **Prof Kam Tin Seong**.
 
-The starter intentionally contains no hands-on or in-class exercise content. It provides a distinct visual system, an empty fieldwork archive, an about page, and Netlify deployment configuration.
+The starter intentionally contains no exercise content yet. It provides a concise homepage and three empty sections for hands-on exercises, take-home exercises, and learning notes.
 
 ## Preview locally
 

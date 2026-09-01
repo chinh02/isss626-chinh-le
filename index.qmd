@@ -1,139 +1,45 @@
 ---
 title: "Le Truong Chinh | ISSS626"
-description: "A personal GIS field notebook by Le Truong Chinh."
+description: "ISSS626 coursework and GIS learning by Le Truong Chinh."
 page-layout: full
 toc: false
 ---
 
-::: {.atlas-hero}
-::: {.atlas-hero-copy}
-<p class="atlas-kicker">GEOSPATIAL FIELD NOTEBOOK · 01°17′N 103°51′E</p>
+::: {.simple-home}
+::: {.home-intro}
+<p class="eyebrow">ISSS626 · GEOSPATIAL ANALYTICS</p>
 
-# Reading place, one layer at a time.
+# Le Truong Chinh
 
-<p class="atlas-lead"><strong>Le Truong Chinh</strong> documents a semester of spatial questions, analytical experiments, and cartographic thinking in ISSS626.</p>
-
-::: {.atlas-actions}
-[Hands-on exercise](hands-on-exercise.qmd){.atlas-button .atlas-button-primary}
-[Take-home exercise](take-home-exercise.qmd){.atlas-button .atlas-button-quiet}
-[Learning notes](learning-notes.qmd){.atlas-button .atlas-button-quiet}
+This website documents my exercises and learning notes for **ISSS626: Geospatial Analytics and Applications**, under the guidance of **Prof Kam Tin Seong**.
 :::
 
-::: {.atlas-facts}
-<div><span>COURSE</span><strong>ISSS626</strong></div>
-<div><span>GUIDANCE</span><strong>Prof Kam Tin Seong</strong></div>
-<div><span>TERM</span><strong>AY2026–27</strong></div>
-:::
-:::
-
-::: {.atlas-plot role="img" aria-label="An abstract spatial workflow connecting observation, modelling, and explanation"}
-<div class="atlas-crosshair atlas-crosshair-one" aria-hidden="true"></div>
-<div class="atlas-crosshair atlas-crosshair-two" aria-hidden="true"></div>
-<div class="atlas-route atlas-route-one" aria-hidden="true"></div>
-<div class="atlas-route atlas-route-two" aria-hidden="true"></div>
-<div class="atlas-node atlas-node-observe"><span>01</span><strong>Observe</strong><small>pattern + context</small></div>
-<div class="atlas-node atlas-node-model"><span>02</span><strong>Model</strong><small>method + evidence</small></div>
-<div class="atlas-node atlas-node-explain"><span>03</span><strong>Explain</strong><small>map + meaning</small></div>
-<div class="atlas-scale" aria-hidden="true"><span></span><span></span><span></span><small>0&nbsp;&nbsp;&nbsp;250&nbsp;&nbsp;&nbsp;500 m</small></div>
-:::
-:::
-
-::: {.atlas-strip}
-<span>LOCATION</span>
-<p>Singapore Management University</p>
-<span>DISCIPLINE</span>
-<p>Geospatial Analytics & Applications</p>
-<span>STATUS</span>
-<p><i></i> Field notebook active</p>
-:::
-
-::: {.atlas-section .atlas-section-intro}
-::: {.atlas-section-label}
-<span>01 / APPROACH</span>
-:::
-::: {.atlas-section-copy}
-## A record of learning in space
-
-This site is designed as a working atlas rather than a finished portfolio. Each future entry will begin with a spatial question, make the analytical choices traceable, and end with an interpretation that matters beyond the map.
-:::
-:::
-
-::: {.atlas-principles}
-::: {.atlas-principle}
+::: {.section-grid}
+::: {.section-card}
 <span>01</span>
-### Observe
+## Hands-on exercise
 
-Look for distributions, relationships, scale, and the context a dataset leaves out.
+Practical coursework and geospatial workflows.
+
+[Open section →](hands-on-exercise.qmd){.section-link}
 :::
 
-::: {.atlas-principle}
+::: {.section-card}
 <span>02</span>
-### Model
+## Take-home exercise
 
-Build reproducible spatial workflows where assumptions and limitations remain visible.
+Extended assignments and spatial analysis.
+
+[Open section →](take-home-exercise.qmd){.section-link}
 :::
 
-::: {.atlas-principle}
+::: {.section-card}
 <span>03</span>
-### Communicate
+## Learning notes
 
-Use maps and prose together so that evidence becomes clear without becoming simplistic.
+Concise notes and reflections from the course.
+
+[Open section →](learning-notes.qmd){.section-link}
 :::
-:::
-
-::: {.atlas-section .atlas-section-archive}
-::: {.atlas-section-label}
-<span>02 / ARCHIVE</span>
-:::
-::: {.atlas-section-copy}
-## Spaces reserved for the work ahead
-
-The structure is ready; the exercise content is deliberately not included yet. Entries will be added as the semester progresses. [View the complete collection index](work.qmd).
-:::
-:::
-
-::: {.atlas-collections}
-::: {.atlas-collection}
-<span class="atlas-collection-number">A</span>
-<p class="atlas-status">OPENING DURING TERM</p>
-### Hands-on exercise
-
-Practical explorations of geospatial techniques, workflows, and cartographic decisions.
-
-[Open the collection →](hands-on-exercise.qmd)
-:::
-
-::: {.atlas-collection}
-<span class="atlas-collection-number">B</span>
-<p class="atlas-status">OPENING DURING TERM</p>
-### Take-home exercise
-
-Extended analyses that connect spatial methods to a focused real-world question.
-
-[Open the collection →](take-home-exercise.qmd)
-:::
-
-::: {.atlas-collection}
-<span class="atlas-collection-number">C</span>
-<p class="atlas-status">OPENING DURING TERM</p>
-### Learning notes
-
-Personal explanations, technical reminders, and reflections from the learning journey.
-
-[Open the collection →](learning-notes.qmd)
-:::
-:::
-
-::: {.atlas-course-note}
-::: {.atlas-course-note-mark}
-<span>ISSS</span>
-<strong>626</strong>
-:::
-::: {.atlas-course-note-copy}
-## Geospatial Analytics and Applications
-
-This learning notebook belongs to **Le Truong Chinh**, created for ISSS626 under the guidance of **Prof Kam Tin Seong** at Singapore Management University.
-
-[Visit the official course site](https://isss626-ay2026-27aug.netlify.app/){.atlas-text-link}
 :::
 :::

@@ -19,15 +19,8 @@ website:
         text: Take-home exercise
       - href: learning-notes.qmd
         text: Learning notes
-      - href: about.qmd
-        text: About
-    right:
-      - href: https://isss626-ay2026-27aug.netlify.app/
-        text: Course site
-        target: _blank
   page-footer:
-    left: "© 2026 Le Truong Chinh"
-    right: "ISSS626 · Geospatial Analytics and Applications"
+    center: "Le Truong Chinh · ISSS626 · Prof Kam Tin Seong"
 
 format:
   html:

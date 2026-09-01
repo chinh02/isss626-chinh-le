@@ -1,35 +1,22 @@
 ---
 title: "Learning notes"
 description: "GIS learning notes by Le Truong Chinh for ISSS626."
-toc: false
 page-layout: full
+toc: false
 ---
 
-::: {.atlas-page-head .atlas-page-head-notes}
-<p class="atlas-kicker">COLLECTION C · NOTES</p>
+::: {.section-page}
+<p class="eyebrow">SECTION 03</p>
 
 # Learning notes
 
-<p class="atlas-lead">Concepts, technical reminders, and reflections collected throughout the GIS learning journey.</p>
+Concise notes and reflections from my GIS learning journey.
+
+::: {.empty-section}
+<span>NO ENTRIES YET</span>
+
+Notes will be added here during the course.
 :::
 
-::: {.atlas-collection-page}
-::: {.atlas-collection-intro}
-<span>ABOUT THIS COLLECTION</span>
-## Ideas worth returning to
-
-This space will hold concise explanations in my own words: what a method is for, how it works, when it can mislead, and what I want to remember next time.
-:::
-
-::: {.atlas-empty-panel}
-<span>C / 000</span>
-## No notes published yet
-
-The first entry will appear here as the course develops.
-:::
-:::
-
-::: {.atlas-collection-nav}
-[← Take-home exercise](take-home-exercise.qmd)
-[Home →](index.qmd)
+[← Back to home](index.qmd){.back-link}
 :::

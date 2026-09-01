@@ -1,65 +1,30 @@
 [
   {
-    "objectID": "work.html",
-    "href": "work.html",
-    "title": "Collections",
+    "objectID": "take-home-exercise.html",
+    "href": "take-home-exercise.html",
+    "title": "Take-home exercise",
     "section": "",
-    "text": "COLLECTION INDEX · AY2026–27\n\n\nThree routes through the learning journey.\n\nChoose a collection to access practical exercises, extended assignments, or personal learning notes. Entries will be written from my own analysis as the course progresses.\n\n\n\n\n\nA / PRACTICE ## Hands-on exercise\nPractical explorations of geospatial techniques, data decisions, and map-making workflows.\n\n No entries published yet\n\nOpen collection →\n\n\nB / ANALYSIS ## Take-home exercise\nExtended investigations documented through my own questions, code, maps, and conclusions.\n\n No entries published yet\n\nOpen collection →\n\n\nC / NOTES ## Learning notes\nConcepts, technical reminders, and reflections captured throughout the course.\n\n No entries published yet\n\nOpen collection →\n\n\n\nENTRY STANDARD\n\nQuestion → data → method → map → interpretation → reproducibility note"
-  },
-  {
-    "objectID": "learning-notes.html",
-    "href": "learning-notes.html",
-    "title": "Learning notes",
-    "section": "",
-    "text": "COLLECTION C · NOTES\n\n\nLearning notes\n\nConcepts, technical reminders, and reflections collected throughout the GIS learning journey.\n\n\n\n\n\nABOUT THIS COLLECTION ## Ideas worth returning to\nThis space will hold concise explanations in my own words: what a method is for, how it works, when it can mislead, and what I want to remember next time.\n\n\nC / 000 ## No notes published yet\nThe first entry will appear here as the course develops.\n\n\n\n← Take-home exercise Home →"
-  },
-  {
-    "objectID": "hands-on-exercise.html",
-    "href": "hands-on-exercise.html",
-    "title": "Hands-on exercise",
-    "section": "",
-    "text": "COLLECTION A · PRACTICE\n\n\nHands-on exercise\n\nPractical explorations of geospatial techniques, reproducible workflows, and cartographic decisions.\n\n\n\n\n\nABOUT THIS COLLECTION ## Learning by making\nThis space will hold my own hands-on work as the course progresses. Each entry will document the question, data preparation, method, map, and key lesson learned.\n\n\nA / 000 ## No exercises published yet\nThe first entry will appear here after it has been completed and documented.\n\n\n\n← Home Take-home exercise →"
-  },
-  {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "About",
-    "section": "",
-    "text": "STUDENT / 001 LTC\n\n\n\nABOUT THE CARTOGRAPHER\n\n\nHello, I’m Le Truong Chinh.\nI am studying ISSS626: Geospatial Analytics and Applications at Singapore Management University under the guidance of Prof Kam Tin Seong.\nThis website is my place to learn in public: to turn spatial data into careful questions, reproducible analysis, and maps that communicate honestly.\n\n\n\n\n\n01 / PURPOSE ## Why this site exists\nGIS is more than placing data on a map. I will use this notebook to document how location, distance, neighbourhood, connectivity, and scale change the way a problem is understood.\n\n\n02 / TOOLKIT ## How it is built\nThe site is authored with Quarto, styled as a custom digital atlas, and prepared for deployment on Netlify. Analytical entries can later combine prose, R code, spatial data, and interactive outputs in one reproducible document.\n\n\n03 / PRINCIPLE ## What belongs here\nOnly my own coursework, reflections, and analysis will be published. Course materials remain on the official course site; this notebook will link to them where context is needed rather than duplicate them.\n\n\n04 / REFERENCES ## Source points\n\nISSS626 official course site\nQuarto documentation\nSingapore Management University"
+    "text": "SECTION 02\n\n\nTake-home exercise\nExtended assignments and spatial analysis completed during ISSS626.\n\nNO ENTRIES YET\nExercises will be added here during the course.\n\n← Back to home"
   },
   {
     "objectID": "index.html",
     "href": "index.html",
     "title": "Le Truong Chinh | ISSS626",
     "section": "",
-    "text": "GEOSPATIAL FIELD NOTEBOOK · 01°17′N 103°51′E\n\n\n\n\nLe Truong Chinh documents a semester of spatial questions, analytical experiments, and cartographic thinking in ISSS626.\n\n\nHands-on exercise Take-home exercise Learning notes\n\n\n\nCOURSEISSS626\n\n\nGUIDANCEProf Kam Tin Seong\n\n\nTERMAY2026–27\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n01Observepattern + context\n\n\n02Modelmethod + evidence\n\n\n03Explainmap + meaning\n\n\n0   250   500 m"
+    "text": "ISSS626 · GEOSPATIAL ANALYTICS\n\n\nLe Truong Chinh\nThis website documents my exercises and learning notes for ISSS626: Geospatial Analytics and Applications, under the guidance of Prof Kam Tin Seong.\n\n\n\n\n01 ## Hands-on exercise\nPractical coursework and geospatial workflows.\nOpen section →\n\n\n02 ## Take-home exercise\nExtended assignments and spatial analysis.\nOpen section →\n\n\n03 ## Learning notes\nConcise notes and reflections from the course.\nOpen section →"
   },
   {
-    "objectID": "index.html#a-record-of-learning-in-space",
-    "href": "index.html#a-record-of-learning-in-space",
-    "title": "Le Truong Chinh | ISSS626",
-    "section": "A record of learning in space",
-    "text": "A record of learning in space\nThis site is designed as a working atlas rather than a finished portfolio. Each future entry will begin with a spatial question, make the analytical choices traceable, and end with an interpretation that matters beyond the map."
-  },
-  {
-    "objectID": "index.html#spaces-reserved-for-the-work-ahead",
-    "href": "index.html#spaces-reserved-for-the-work-ahead",
-    "title": "Le Truong Chinh | ISSS626",
-    "section": "Spaces reserved for the work ahead",
-    "text": "Spaces reserved for the work ahead\nThe structure is ready; the exercise content is deliberately not included yet. Entries will be added as the semester progresses. View the complete collection index."
-  },
-  {
-    "objectID": "index.html#geospatial-analytics-and-applications",
-    "href": "index.html#geospatial-analytics-and-applications",
-    "title": "Le Truong Chinh | ISSS626",
-    "section": "Geospatial Analytics and Applications",
-    "text": "Geospatial Analytics and Applications\nThis learning notebook belongs to Le Truong Chinh, created for ISSS626 under the guidance of Prof Kam Tin Seong at Singapore Management University.\nVisit the official course site"
-  },
-  {
-    "objectID": "take-home-exercise.html",
-    "href": "take-home-exercise.html",
-    "title": "Take-home exercise",
+    "objectID": "hands-on-exercise.html",
+    "href": "hands-on-exercise.html",
+    "title": "Hands-on exercise",
     "section": "",
-    "text": "COLLECTION B · ANALYSIS\n\n\nTake-home exercise\n\nExtended investigations connecting spatial methods, evidence, and interpretation.\n\n\n\n\n\nABOUT THIS COLLECTION ## From question to evidence\nThis space will hold my own take-home work. Each entry will make the analytical choices traceable and communicate what the spatial evidence does—and does not—support.\n\n\nB / 000 ## No exercises published yet\nThe first entry will appear here after it has been completed and documented.\n\n\n\n← Hands-on exercise Learning notes →"
+    "text": "SECTION 01\n\n\nHands-on exercise\nPractical coursework and geospatial workflows completed during ISSS626.\n\nNO ENTRIES YET\nExercises will be added here during the course.\n\n← Back to home"
+  },
+  {
+    "objectID": "learning-notes.html",
+    "href": "learning-notes.html",
+    "title": "Learning notes",
+    "section": "",
+    "text": "SECTION 03\n\n\nLearning notes\nConcise notes and reflections from my GIS learning journey.\n\nNO ENTRIES YET\nNotes will be added here during the course.\n\n← Back to home"
   }
 ]
