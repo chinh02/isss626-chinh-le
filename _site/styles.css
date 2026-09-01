@@ -69,9 +69,16 @@ a {
   padding: clamp(4rem, 10vw, 8rem) 0;
 }
 
+.home-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(350px, 0.92fr);
+  gap: clamp(2.5rem, 7vw, 6rem);
+  align-items: center;
+  margin-bottom: clamp(3rem, 7vw, 5rem);
+}
+
 .home-intro {
   max-width: 760px;
-  margin-bottom: clamp(3rem, 7vw, 5rem);
 }
 
 .eyebrow,
@@ -106,6 +113,185 @@ a {
 
 .home-intro strong {
   color: var(--ink);
+}
+
+.gis-figure {
+  position: relative;
+  min-height: 330px;
+  overflow: hidden;
+  color: var(--white);
+  background-color: var(--ink);
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.09) 1px, transparent 1px),
+    radial-gradient(circle at 22% 78%, rgba(57, 115, 95, 0.62), transparent 35%);
+  background-size: 36px 36px, 36px 36px, 100% 100%;
+  border: 1px solid rgba(23, 51, 61, 0.2);
+}
+
+.gis-figure::before,
+.gis-figure::after {
+  position: absolute;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 50%;
+  content: "";
+}
+
+.gis-figure::before {
+  width: 220px;
+  height: 140px;
+  top: 68px;
+  left: 70px;
+  transform: rotate(-14deg);
+}
+
+.gis-figure::after {
+  width: 300px;
+  height: 190px;
+  right: -115px;
+  bottom: -70px;
+  transform: rotate(20deg);
+}
+
+.gis-coordinate {
+  position: absolute;
+  z-index: 4;
+  font-family: var(--mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.06em;
+  opacity: 0.72;
+}
+
+.gis-coordinate-top {
+  top: 1rem;
+  left: 1rem;
+}
+
+.gis-coordinate-bottom {
+  right: 1rem;
+  bottom: 1rem;
+}
+
+.gis-route {
+  position: absolute;
+  z-index: 2;
+  height: 2px;
+  background: repeating-linear-gradient(90deg, var(--accent) 0 8px, transparent 8px 13px);
+  transform-origin: left center;
+  animation: route-flow 2.8s linear infinite;
+}
+
+.gis-route-one {
+  top: 70%;
+  left: 23%;
+  width: 46%;
+  transform: rotate(-46deg);
+}
+
+.gis-route-two {
+  top: 34%;
+  left: 51%;
+  width: 31%;
+  transform: rotate(47deg);
+}
+
+.gis-scan {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.36);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.24);
+  animation: map-scan 5s ease-in-out infinite;
+}
+
+.gis-point {
+  position: absolute;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 0.5rem;
+  align-items: center;
+  padding: 0.55rem 0.7rem;
+  background: rgba(23, 51, 61, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  font-family: var(--mono);
+}
+
+.gis-point i {
+  grid-row: 1 / 3;
+  display: block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 0 rgba(216, 91, 63, 0.58);
+  animation: point-pulse 2.4s ease-out infinite;
+}
+
+.gis-point b {
+  font-size: 0.66rem;
+  font-weight: 600;
+}
+
+.gis-point small {
+  color: #b7c7c8;
+  font-size: 0.54rem;
+}
+
+.gis-point-one {
+  left: 12%;
+  bottom: 16%;
+}
+
+.gis-point-two {
+  top: 21%;
+  left: 43%;
+}
+
+.gis-point-two i {
+  animation-delay: 0.8s;
+}
+
+.gis-point-three {
+  right: 8%;
+  bottom: 18%;
+}
+
+.gis-point-three i {
+  animation-delay: 1.6s;
+}
+
+@keyframes route-flow {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 26px 0;
+  }
+}
+
+@keyframes map-scan {
+  0%, 100% {
+    left: 8%;
+    opacity: 0;
+  }
+  12%, 88% {
+    opacity: 1;
+  }
+  50% {
+    left: 92%;
+  }
+}
+
+@keyframes point-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(216, 91, 63, 0.58);
+  }
+  70%, 100% {
+    box-shadow: 0 0 0 9px rgba(216, 91, 63, 0);
+  }
 }
 
 .section-grid {
@@ -193,6 +379,14 @@ a {
 }
 
 @media (max-width: 850px) {
+  .home-top {
+    grid-template-columns: 1fr;
+  }
+
+  .gis-figure {
+    min-height: 300px;
+  }
+
   .section-grid {
     grid-template-columns: 1fr;
   }
@@ -203,6 +397,14 @@ a {
 
   .section-card h2 {
     margin-top: 1.8rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gis-route,
+  .gis-scan,
+  .gis-point i {
+    animation: none;
   }
 }
 

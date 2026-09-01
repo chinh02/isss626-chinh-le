@@ -6,12 +6,25 @@ toc: false
 ---
 
 ::: {.simple-home}
+::: {.home-top}
 ::: {.home-intro}
 <p class="eyebrow">ISSS626 · GEOSPATIAL ANALYTICS</p>
 
 # Le Truong Chinh
 
 This website documents my exercises and learning notes for **ISSS626: Geospatial Analytics and Applications**, under the guidance of **Prof Kam Tin Seong**.
+:::
+
+::: {.gis-figure role="img" aria-label="An animated spatial diagram connecting hands-on exercises, take-home exercises, and learning notes"}
+<span class="gis-coordinate gis-coordinate-top">01°17′N · 103°51′E</span>
+<span class="gis-coordinate gis-coordinate-bottom">SINGAPORE · SCALE 1:626</span>
+<span class="gis-route gis-route-one" aria-hidden="true"></span>
+<span class="gis-route gis-route-two" aria-hidden="true"></span>
+<span class="gis-scan" aria-hidden="true"></span>
+<span class="gis-point gis-point-one"><i></i><b>Hands-on</b><small>01</small></span>
+<span class="gis-point gis-point-two"><i></i><b>Take-home</b><small>02</small></span>
+<span class="gis-point gis-point-three"><i></i><b>Notes</b><small>03</small></span>
+:::
 :::
 
 ::: {.section-grid}
