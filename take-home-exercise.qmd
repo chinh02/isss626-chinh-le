@@ -1,0 +1,35 @@
+---
+title: "Take-home exercise"
+description: "Take-home geospatial exercises by Le Truong Chinh for ISSS626."
+toc: false
+page-layout: full
+---
+
+::: {.atlas-page-head .atlas-page-head-analysis}
+<p class="atlas-kicker">COLLECTION B · ANALYSIS</p>
+
+# Take-home exercise
+
+<p class="atlas-lead">Extended investigations connecting spatial methods, evidence, and interpretation.</p>
+:::
+
+::: {.atlas-collection-page}
+::: {.atlas-collection-intro}
+<span>ABOUT THIS COLLECTION</span>
+## From question to evidence
+
+This space will hold my own take-home work. Each entry will make the analytical choices traceable and communicate what the spatial evidence does—and does not—support.
+:::
+
+::: {.atlas-empty-panel}
+<span>B / 000</span>
+## No exercises published yet
+
+The first entry will appear here after it has been completed and documented.
+:::
+:::
+
+::: {.atlas-collection-nav}
+[← Hands-on exercise](hands-on-exercise.qmd)
+[Learning notes →](learning-notes.qmd)
+:::

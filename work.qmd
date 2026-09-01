@@ -1,44 +1,50 @@
 ---
-title: "Fieldwork"
-description: "The future archive of GIS work by Le Truong Chinh."
+title: "Collections"
+description: "The GIS coursework and learning collections of Le Truong Chinh."
 toc: false
 page-layout: full
 ---
 
 ::: {.atlas-page-head}
-<p class="atlas-kicker">FIELD INDEX · AY2026–27</p>
+<p class="atlas-kicker">COLLECTION INDEX · AY2026–27</p>
 
-# The archive starts empty on purpose.
+# Three routes through the learning journey.
 
-<p class="atlas-lead">This page establishes where future work will live without reproducing any hands-on or in-class exercise material. Each entry will be written from my own analysis as the course progresses.</p>
+<p class="atlas-lead">Choose a collection to access practical exercises, extended assignments, or personal learning notes. Entries will be written from my own analysis as the course progresses.</p>
 :::
 
 ::: {.atlas-work-grid}
-::: {#field-notes .atlas-work-section}
-<span class="atlas-work-code">A / NOTES</span>
-## Field notes
+::: {#hands-on-exercise .atlas-work-section}
+<span class="atlas-work-code">A / PRACTICE</span>
+## Hands-on exercise
 
-Concise records of spatial techniques, data decisions, and ideas worth returning to.
+Practical explorations of geospatial techniques, data decisions, and map-making workflows.
 
 <p class="atlas-empty"><i></i> No entries published yet</p>
+
+[Open collection →](hands-on-exercise.qmd)
 :::
 
-::: {#studio-work .atlas-work-section}
-<span class="atlas-work-code">B / STUDIO</span>
-## Studio work
+::: {#take-home-exercise .atlas-work-section}
+<span class="atlas-work-code">B / ANALYSIS</span>
+## Take-home exercise
 
-Course-guided investigations documented in my own words, code, maps, and conclusions.
+Extended investigations documented through my own questions, code, maps, and conclusions.
 
 <p class="atlas-empty"><i></i> No entries published yet</p>
+
+[Open collection →](take-home-exercise.qmd)
 :::
 
-::: {#independent-inquiries .atlas-work-section}
-<span class="atlas-work-code">C / INQUIRY</span>
-## Independent inquiries
+::: {#learning-notes .atlas-work-section}
+<span class="atlas-work-code">C / NOTES</span>
+## Learning notes
 
-Extended geospatial questions connecting analytical methods to real places and decisions.
+Concepts, technical reminders, and reflections captured throughout the course.
 
 <p class="atlas-empty"><i></i> No entries published yet</p>
+
+[Open collection →](learning-notes.qmd)
 :::
 :::
 

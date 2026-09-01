@@ -1,0 +1,35 @@
+---
+title: "Hands-on exercise"
+description: "Hands-on geospatial exercises by Le Truong Chinh for ISSS626."
+toc: false
+page-layout: full
+---
+
+::: {.atlas-page-head .atlas-page-head-practice}
+<p class="atlas-kicker">COLLECTION A · PRACTICE</p>
+
+# Hands-on exercise
+
+<p class="atlas-lead">Practical explorations of geospatial techniques, reproducible workflows, and cartographic decisions.</p>
+:::
+
+::: {.atlas-collection-page}
+::: {.atlas-collection-intro}
+<span>ABOUT THIS COLLECTION</span>
+## Learning by making
+
+This space will hold my own hands-on work as the course progresses. Each entry will document the question, data preparation, method, map, and key lesson learned.
+:::
+
+::: {.atlas-empty-panel}
+<span>A / 000</span>
+## No exercises published yet
+
+The first entry will appear here after it has been completed and documented.
+:::
+:::
+
+::: {.atlas-collection-nav}
+[← Home](index.qmd)
+[Take-home exercise →](take-home-exercise.qmd)
+:::

@@ -13,8 +13,12 @@ website:
     left:
       - href: index.qmd
         text: Home
-      - href: work.qmd
-        text: Fieldwork
+      - href: hands-on-exercise.qmd
+        text: Hands-on exercise
+      - href: take-home-exercise.qmd
+        text: Take-home exercise
+      - href: learning-notes.qmd
+        text: Learning notes
       - href: about.qmd
         text: About
     right:

@@ -14,8 +14,9 @@ toc: false
 <p class="atlas-lead"><strong>Le Truong Chinh</strong> documents a semester of spatial questions, analytical experiments, and cartographic thinking in ISSS626.</p>
 
 ::: {.atlas-actions}
-[Explore the fieldwork](work.qmd){.atlas-button .atlas-button-primary}
-[About this notebook](about.qmd){.atlas-button .atlas-button-quiet}
+[Hands-on exercise](hands-on-exercise.qmd){.atlas-button .atlas-button-primary}
+[Take-home exercise](take-home-exercise.qmd){.atlas-button .atlas-button-quiet}
+[Learning notes](learning-notes.qmd){.atlas-button .atlas-button-quiet}
 :::
 
 ::: {.atlas-facts}
@@ -87,7 +88,7 @@ Use maps and prose together so that evidence becomes clear without becoming simp
 ::: {.atlas-section-copy}
 ## Spaces reserved for the work ahead
 
-The structure is ready; the exercise content is deliberately not included yet. Entries will be added as the semester progresses.
+The structure is ready; the exercise content is deliberately not included yet. Entries will be added as the semester progresses. [View the complete collection index](work.qmd).
 :::
 :::
 
@@ -95,31 +96,31 @@ The structure is ready; the exercise content is deliberately not included yet. E
 ::: {.atlas-collection}
 <span class="atlas-collection-number">A</span>
 <p class="atlas-status">OPENING DURING TERM</p>
-### Field notes
+### Hands-on exercise
 
-Short records of techniques, observations, and cartographic decisions.
+Practical explorations of geospatial techniques, workflows, and cartographic decisions.
 
-[View the empty collection →](work.qmd#field-notes)
+[Open the collection →](hands-on-exercise.qmd)
 :::
 
 ::: {.atlas-collection}
 <span class="atlas-collection-number">B</span>
 <p class="atlas-status">OPENING DURING TERM</p>
-### Studio work
+### Take-home exercise
 
-Structured analyses developed through guided practice and classroom inquiry.
+Extended analyses that connect spatial methods to a focused real-world question.
 
-[View the empty collection →](work.qmd#studio-work)
+[Open the collection →](take-home-exercise.qmd)
 :::
 
 ::: {.atlas-collection}
 <span class="atlas-collection-number">C</span>
 <p class="atlas-status">OPENING DURING TERM</p>
-### Independent inquiries
+### Learning notes
 
-Longer investigations shaped around a real place, problem, and audience.
+Personal explanations, technical reminders, and reflections from the learning journey.
 
-[View the empty collection →](work.qmd#independent-inquiries)
+[Open the collection →](learning-notes.qmd)
 :::
 :::
 

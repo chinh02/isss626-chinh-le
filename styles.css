@@ -598,9 +598,88 @@ a {
   background-size: 60px 60px;
 }
 
+.atlas-page-head-practice {
+  border-bottom: 8px solid var(--atlas-green);
+}
+
+.atlas-page-head-analysis {
+  border-bottom: 8px solid var(--atlas-accent);
+}
+
+.atlas-page-head-notes {
+  border-bottom: 8px solid var(--atlas-sand);
+}
+
 .atlas-page-head h1 {
   max-width: 960px;
   font-size: clamp(3.5rem, 8vw, 8rem);
+}
+
+.atlas-collection-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+  gap: clamp(2rem, 8vw, 9rem);
+  padding: clamp(5rem, 9vw, 9rem) clamp(2rem, 8vw, 9rem);
+}
+
+.atlas-collection-intro > span,
+.atlas-empty-panel > span {
+  color: var(--atlas-accent);
+  font-family: var(--atlas-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+}
+
+.atlas-collection-intro h2,
+.atlas-empty-panel h2 {
+  margin: 2rem 0 1rem;
+  color: var(--atlas-ink);
+  font-family: var(--atlas-serif);
+  font-size: clamp(2.4rem, 4vw, 4.4rem);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.035em;
+}
+
+.atlas-collection-intro p {
+  max-width: 720px;
+  color: #53676b;
+  font-size: 1.08rem;
+  line-height: 1.75;
+}
+
+.atlas-empty-panel {
+  align-self: start;
+  min-height: 300px;
+  padding: clamp(2rem, 4vw, 4rem);
+  color: var(--atlas-mist);
+  background: var(--atlas-deep);
+  border-top: 4px solid var(--atlas-accent);
+}
+
+.atlas-empty-panel h2 {
+  color: var(--atlas-paper-bright);
+  font-size: clamp(2rem, 3vw, 3.2rem);
+}
+
+.atlas-empty-panel p {
+  line-height: 1.7;
+}
+
+.atlas-collection-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 clamp(2rem, 8vw, 9rem) clamp(5rem, 9vw, 9rem);
+  padding: 1.3rem 0;
+  border-top: 1px solid var(--atlas-line);
+  border-bottom: 1px solid var(--atlas-line);
+}
+
+.atlas-collection-nav a,
+.atlas-work-section > a {
+  font-family: var(--atlas-mono);
+  font-size: 0.72rem;
 }
 
 .atlas-work-grid {
@@ -756,7 +835,8 @@ a {
 
   .atlas-section,
   .atlas-course-note,
-  .atlas-about-hero {
+  .atlas-about-hero,
+  .atlas-collection-page {
     grid-template-columns: 1fr;
   }
 
