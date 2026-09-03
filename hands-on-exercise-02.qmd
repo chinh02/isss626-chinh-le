@@ -23,762 +23,692 @@ execute:
 ---
 
 ::: {.exercise-lead}
-This exercise follows Chapters 4 and 5 of *R for Geospatial Data Science and Analytics*. It examines the distribution of childcare centres in Singapore using first- and second-order spatial point pattern methods.
+This exercise follows Chapters 4 and 5 of *R for Geospatial Data Science and Analytics*. Each tutorial code cell is kept separate, executed, and shown with its result.
 :::
 
 ## Part 1: First-order spatial point pattern analysis
 
-### 1.1 Data and packages
+First-order analysis describes where childcare services are concentrated. I begin by preparing the data, then use the Clark--Evans test and kernel density estimation (KDE).
 
-Two official datasets are used:
-
-| Dataset | Geometry | Source |
-|---|---|---|
-| Child Care Services | Point | [ECDA via data.gov.sg](https://data.gov.sg/datasets/d_5d668e3f544335f8028f546827b773b4/view) |
-| Master Plan 2019 Subzone Boundary (No Sea) | Polygon | [URA via data.gov.sg](https://data.gov.sg/datasets/d_8594ae9ff96d0c708bc2af633048edfb/view) |
-
-The childcare file contains December 2021 records and was updated on 18 April 2026. GeoJSON is used instead of KML, so its attributes are already stored in separate fields and do not need to be extracted from an HTML `Description` field.
+### 1.1 Packages
 
 ```{r}
-#| label: setup
-library(sf)
-library(terra)
-library(spatstat)
-library(tmap)
-library(tidyverse)
-
-options(width = 90)
-tmap_mode("plot")
+pacman::p_load(sf, terra, spatstat, 
+               tmap, rvest, tidyverse)
 ```
 
 ### 1.2 Importing and preparing the geospatial data
 
-Both layers are imported with `st_read()`, transformed to Singapore SVY21 / EPSG:3414 and checked for valid geometry. The two offshore planning areas excluded in the course tutorial are also removed.
+The analysis uses the Master Plan 2019 subzone boundaries and Child Care Services data from data.gov.sg. The current childcare download is GeoJSON, so I prepared local KML and RDS copies with the same records and filenames expected by the tutorial.
 
 ```{r}
-#| label: import-data
-mpsz_sf <- st_read(
-  "data/geospatial/MasterPlan2019SubzoneBoundaryNoSea.geojson",
-  quiet = TRUE
-) |>
-  st_zm(drop = TRUE, what = "ZM") |>
-  st_transform(3414) |>
-  st_make_valid()
-
-mpsz_cl <- mpsz_sf |>
-  filter(
-    PLN_AREA_N != "WESTERN ISLANDS",
-    PLN_AREA_N != "NORTH-EASTERN ISLANDS"
-  )
-
-childcare_sf <- st_read(
-  "data/geospatial/ChildCareServices.geojson",
-  quiet = TRUE
-) |>
-  st_zm(drop = TRUE, what = "ZM") |>
-  st_transform(3414)
+mpsz_sf <- st_read("chap04/data/MasterPlan2019SubzoneBoundaryNoSeaKML.kml") %>% 
+  st_zm(drop = TRUE, what = "ZM") %>% st_transform(crs = 3414)
 ```
 
-The imported layers have the expected geometry types and a common projected coordinate reference system.
+The KML stores the boundary attributes in an HTML table. This function extracts one named field from that table.
 
 ```{r}
-#| label: check-imported-data
-tibble(
-  layer = c("Child care services", "Planning subzones"),
-  features = c(nrow(childcare_sf), nrow(mpsz_cl)),
-  geometry = c(
-    as.character(unique(st_geometry_type(childcare_sf))),
-    paste(unique(st_geometry_type(mpsz_cl)), collapse = ", ")
-  ),
-  epsg = c(st_crs(childcare_sf)$epsg, st_crs(mpsz_cl)$epsg)
-) |>
-  knitr::kable()
+extract_kml_field <- function(html_text, field_name) {
+  if (is.na(html_text) || html_text == "") return(NA_character_)
+  
+  page <- read_html(html_text)
+  rows <- page %>% html_elements("tr")
+  
+  value <- rows %>%
+    keep(~ html_text2(html_element(.x, "th")) == field_name) %>%
+    html_element("td") %>%
+    html_text2()
+  
+  if (length(value) == 0) NA_character_ else value
+}
 ```
 
-There are `r nrow(childcare_sf)` childcare service records. `r sum(duplicated(st_coordinates(childcare_sf)))` records share coordinates with an earlier record, usually because multiple services operate at the same address. They are retained as separate service events, but this should be considered when interpreting nearest-neighbour results.
+```{r}
+mpsz_sf <- mpsz_sf %>%
+  mutate(
+    REGION_N = map_chr(Description, extract_kml_field, "REGION_N"),
+    PLN_AREA_N = map_chr(Description, extract_kml_field, "PLN_AREA_N"),
+    SUBZONE_N = map_chr(Description, extract_kml_field, "SUBZONE_N"),
+    SUBZONE_C = map_chr(Description, extract_kml_field, "SUBZONE_C")
+  ) %>%
+  select(-Name, -Description) %>%
+  relocate(geometry, .after = last_col())
+```
 
-### 1.3 Mapping the two layers
-
-A static map confirms that the childcare points and planning boundaries occupy the same spatial extent.
+The tutorial removes three offshore areas before creating the Singapore study window.
 
 ```{r}
-#| label: map-imported-data
-#| fig-cap: "Childcare service locations within Singapore planning subzones."
+mpsz_cl <- mpsz_sf %>%
+  filter(SUBZONE_N != "SOUTHERN GROUP",
+         PLN_AREA_N != "WESTERN ISLANDS",
+         PLN_AREA_N != "NORTH-EASTERN ISLANDS")
+```
+
+```{r}
+write_rds(mpsz_cl, 
+          "chap04/data/mpsz_cl.rds")
+```
+
+```{r}
+mpsz_cl <- read_rds("chap04/data/mpsz_cl.rds")
+```
+
+The childcare locations are also transformed to Singapore SVY21 (EPSG:3414), whose units are metres.
+
+```{r}
+childcare_sf <- st_read("chap04/data/ChildCareServices.kml") %>% 
+  st_zm(drop = TRUE, what = "ZM") %>%
+  st_transform(crs = 3414)
+```
+
+### 1.3 Mapping the two datasets
+
+The first map checks that the childcare points and subzone boundaries share the same spatial extent.
+
+```{r}
 tm_shape(mpsz_cl) +
-  tm_polygons(fill = "#edf1ed", col = "#80938c", lwd = 0.5) +
-  tm_shape(childcare_sf) +
-  tm_dots(fill = "#d85b3f", col = "white", size = 0.025, lwd = 0.2) +
-  tm_layout(frame = FALSE)
+  tm_polygons() +
+tm_shape(childcare_sf)+
+  tm_dots()
 ```
 
-The same points can be explored interactively. The map is returned to static plot mode immediately after it is created.
+The interactive version makes it possible to zoom and inspect individual points. The final line returns `tmap` to static mode.
 
 ```{r}
-#| label: interactive-childcare-map
-#| fig-cap: "Interactive map of childcare service locations."
-tmap_mode("view")
-
-childcare_view <- tm_shape(mpsz_cl) +
-  tm_borders(col = "#748883", lwd = 1) +
-  tm_shape(childcare_sf) +
-  tm_dots(
-    fill = "#d85b3f",
-    size = 0.03,
-    popup.vars = c("Centre" = "NAME", "Address" = "ADDRESSSTREETNAME")
-  )
-
-childcare_view
-tmap_mode("plot")
+tmap_mode('view')
+tm_shape(childcare_sf)+
+  tm_dots()
+tmap_mode('plot')
 ```
 
-### 1.4 Converting `sf` objects to `ppp` and `owin`
+### 1.4 Converting the data for `spatstat`
 
-`spatstat` represents point events with a planar point pattern (`ppp`) and the study boundary with an observation window (`owin`). The childcare attributes are removed because this is an unmarked point pattern analysis.
+`spatstat` represents points as a `ppp` object and the study area as an `owin` object.
 
 ```{r}
-#| label: create-ppp
-childcare_ppp <- as.ppp(childcare_sf) |>
-  unmark()
+childcare_ppp <- as.ppp(childcare_sf)
+```
 
+```{r}
 class(childcare_ppp)
+```
+
+```{r}
 summary(childcare_ppp)
 ```
 
-The subzones are dissolved into a single Singapore study boundary before conversion to `owin`. This removes internal subzone borders from the observation window.
-
 ```{r}
-#| label: create-owin
-sg_boundary <- st_union(mpsz_cl)
-sg_owin <- as.owin(sg_boundary)
-
-class(sg_owin)
-plot(sg_owin, main = "Singapore observation window")
+sg_owin <- as.owin(mpsz_cl)
 ```
 
-Only childcare events inside the Singapore window are retained.
+```{r}
+class(sg_owin)
+```
 
 ```{r}
-#| label: combine-ppp-owin
-childcareSG_ppp <- childcare_ppp[sg_owin]
+plot(sg_owin)
+```
+
+Only childcare points inside the Singapore observation window are retained.
+
+```{r}
+childcareSG_ppp = childcare_ppp[sg_owin]
+```
+
+```{r}
 childcareSG_ppp
 ```
 
-### 1.5 Clark–Evans nearest-neighbour test
+### 1.5 Clark--Evans nearest-neighbour test
 
-The Clark–Evans test evaluates whether nearest-neighbour distances are shorter than expected under complete spatial randomness (CSR).
-
-- $H_0$: childcare services follow CSR.
-- $H_1$: childcare services are more clustered than CSR.
-
-First, the asymptotic Z-test is performed without edge correction.
+The Clark--Evans test compares observed nearest-neighbour spacing with complete spatial randomness (CSR). An R value below 1 indicates that points are closer together than expected.
 
 ```{r}
-#| label: clark-evans-z
-clark_sg_z <- clarkevans.test(
-  childcareSG_ppp,
-  correction = "none",
-  alternative = "clustered"
-)
-
-clark_sg_z
+clarkevans.test(childcareSG_ppp,
+                correction="none",
+                clipregion="sg_owin",
+                alternative=c("clustered"))
 ```
 
-Next, the p-value is estimated from 99 CSR simulations while holding the number of points and the observation window constant.
+The Monte Carlo version compares the observed pattern with 99 simulated random patterns.
 
 ```{r}
-#| label: clark-evans-monte-carlo
-set.seed(626)
-
-clark_sg_mc <- clarkevans.test(
-  childcareSG_ppp,
-  correction = "none",
-  alternative = "clustered",
-  method = "MonteCarlo",
-  nsim = 99
-)
-
-clark_sg_mc
+clarkevans.test(childcareSG_ppp,
+                correction="none",
+                clipregion="sg_owin",
+                alternative=c("clustered"),
+                method="MonteCarlo",
+                nsim=99)
 ```
 
-The Monte Carlo test gives $R = `r round(unname(clark_sg_mc$statistic), 3)`$ and $p = `r format.pval(clark_sg_mc$p.value, digits = 3)`$. At the 5% level, the CSR hypothesis is `r if (clark_sg_mc$p.value < 0.05) "rejected" else "not rejected"`.
+Both tests provide evidence that childcare services are clustered rather than randomly distributed.
 
 ### 1.6 Kernel density estimation
 
-Kernel density estimation (KDE) transforms the childcare points into a continuous intensity surface. The first surface uses Diggle's automatic bandwidth, a Gaussian kernel and edge correction.
+KDE turns the individual service locations into a continuous density surface. The first estimate uses Diggle's automatic bandwidth and an edge correction.
 
 ```{r}
-#| label: kde-diggle-metres
 kde_SG_diggle <- density(
   childcareSG_ppp,
-  sigma = bw.diggle,
-  edge = TRUE,
-  kernel = "gaussian"
-)
+  sigma=bw.diggle,
+  edge=TRUE,
+  kernel="gaussian") 
+```
 
-plot(kde_SG_diggle, main = "KDE using bw.diggle (points per m²)")
+```{r}
+#| fig-height: 6
+plot(kde_SG_diggle)
+```
+
+```{r}
 summary(kde_SG_diggle)
 ```
 
-The selected bandwidth is shown in metres.
+The very small values are services per square metre. The selected bandwidth can be inspected directly.
 
 ```{r}
-#| label: diggle-bandwidth-metres
-bw_m <- bw.diggle(childcareSG_ppp)
-bw_m
+bw <- bw.diggle(childcareSG_ppp)
+bw
 ```
 
-Rescaling the point pattern to kilometres produces identical spatial shapes and more readable density values.
+Rescaling the point pattern from metres to kilometres makes the density values easier to read.
 
 ```{r}
-#| label: rescale-to-kilometres
-childcareSG_ppp_km <- rescale.ppp(childcareSG_ppp, 1000, "km")
-
-kde_childcareSG_km <- density(
-  childcareSG_ppp_km,
-  sigma = bw.diggle,
-  edge = TRUE,
-  kernel = "gaussian"
-)
-
-plot(kde_childcareSG_km, main = "KDE using bw.diggle (points per km²)")
+childcareSG_ppp_km <- rescale.ppp(
+  childcareSG_ppp, 1000, "km")
 ```
 
-#### Comparing automatic bandwidth selectors
-
-Different selectors make different assumptions about the point pattern. Scott's selector returns separate bandwidths for the x and y directions.
-
 ```{r}
-#| label: compare-bandwidths
-bw_cvl <- bw.CvL(childcareSG_ppp_km)
-bw_scott <- bw.scott(childcareSG_ppp_km)
-bw_ppl_value <- bw.ppl(childcareSG_ppp_km)
-bw_diggle_value <- bw.diggle(childcareSG_ppp_km)
-
-tibble(
-  method = c("bw.CvL", "bw.scott", "bw.ppl", "bw.diggle"),
-  bandwidth_x_km = c(
-    as.numeric(bw_cvl),
-    as.numeric(bw_scott[1]),
-    as.numeric(bw_ppl_value),
-    as.numeric(bw_diggle_value)
-  ),
-  bandwidth_y_km = c(
-    as.numeric(bw_cvl),
-    as.numeric(bw_scott[2]),
-    as.numeric(bw_ppl_value),
-    as.numeric(bw_diggle_value)
-  )
-) |>
-  mutate(across(starts_with("bandwidth"), ~ round(.x, 3))) |>
-  knitr::kable()
+kde_childcareSG_km <- density(childcareSG_ppp_km,
+                              sigma=bw.diggle,
+                              edge=TRUE,
+                              kernel="gaussian")
 ```
 
-The smaller Diggle bandwidth preserves tighter local peaks, while the larger likelihood cross-validation bandwidth gives a smoother surface.
+```{r}
+#| fig-height: 6
+plot(kde_childcareSG_km)
+```
+
+The map pattern is unchanged, but the values are now expressed per square kilometre.
+
+#### Comparing automatic bandwidth methods
+
+The following cells calculate the four bandwidth selectors used in the tutorial.
 
 ```{r}
-#| label: compare-diggle-ppl
-#| fig-width: 12
-#| fig-height: 5
-kde_childcareSG_ppl <- density(
-  childcareSG_ppp_km,
-  sigma = bw.ppl,
-  edge = TRUE,
-  kernel = "gaussian"
-)
+bw.CvL(childcareSG_ppp_km)
+```
 
-par(mfrow = c(1, 2))
+```{r}
+bw.scott(childcareSG_ppp_km)
+```
+
+```{r}
+bw.ppl(childcareSG_ppp_km)
+```
+
+```{r}
+bw.diggle(childcareSG_ppp_km)
+```
+
+A smaller bandwidth preserves more local detail, while a larger bandwidth produces a smoother regional pattern.
+
+```{r}
+#| fig-width: 16
+#| fig-height: 6
+kde_childcareSG.ppl <- density(childcareSG_ppp_km, 
+                               sigma=bw.ppl, 
+                               edge=TRUE,
+                               kernel="gaussian")
+par(mfrow=c(1,2))
 plot(kde_childcareSG_km, main = "bw.diggle")
-plot(kde_childcareSG_ppl, main = "bw.ppl")
-par(mfrow = c(1, 1))
+plot(kde_childcareSG.ppl, main = "bw.ppl")
 ```
 
-#### Comparing kernel functions
+#### Comparing kernel shapes
 
-The same Diggle bandwidth is used so that only the kernel shape changes.
+With the same bandwidth, the four kernels distribute weight around each location differently.
 
-```{r}
-#| label: compare-kernels
-#| fig-width: 12
-#| fig-height: 10
-par(mfrow = c(2, 2))
-
-for (kernel_name in c("gaussian", "epanechnikov", "quartic", "disc")) {
-  plot(
-    density(
-      childcareSG_ppp_km,
-      sigma = as.numeric(bw_diggle_value),
-      edge = TRUE,
-      kernel = kernel_name
-    ),
-    main = tools::toTitleCase(kernel_name)
-  )
-}
-
-par(mfrow = c(1, 1))
+```{r fig.width=16, fig.height=12}
+par(mfrow=c(2,2))
+plot(density(childcareSG_ppp_km, 
+             sigma=0.2959712, 
+             edge=TRUE, 
+             kernel="gaussian"), 
+     main="Gaussian")
+plot(density(childcareSG_ppp_km, 
+             sigma=0.2959712, 
+             edge=TRUE, 
+             kernel="epanechnikov"), 
+     main="Epanechnikov")
+plot(density(childcareSG_ppp_km, 
+             sigma=0.2959712, 
+             edge=TRUE, 
+             kernel="quartic"), 
+     main="Quartic")
+plot(density(childcareSG_ppp_km, 
+             sigma=0.2959712, 
+             edge=TRUE, 
+             kernel="disc"), 
+     main="Disc")
 ```
 
 ### 1.7 Fixed and adaptive KDE
 
-A fixed bandwidth of 0.6 km applies the same smoothing scale everywhere. Adaptive KDE changes the local bandwidth in response to the distribution of observations.
+The fixed estimate applies a 0.6 km bandwidth everywhere.
 
 ```{r}
-#| label: fixed-adaptive-kde
-#| fig-width: 12
-#| fig-height: 5
-kde_childcareSG_fixed <- density(
-  childcareSG_ppp_km,
-  sigma = 0.6,
-  edge = TRUE,
-  kernel = "gaussian"
-)
-
-kde_childcareSG_adaptive <- adaptive.density(
-  childcareSG_ppp_km,
-  method = "kernel",
-  dimyx = 96
-)
-
-par(mfrow = c(1, 2))
-plot(kde_childcareSG_fixed, main = "Fixed bandwidth: 0.6 km")
-plot(kde_childcareSG_adaptive, main = "Adaptive bandwidth")
-par(mfrow = c(1, 1))
+#| fig-height: 6
+kde_childcareSG_fb <- density(childcareSG_ppp_km,
+                              sigma=0.6, 
+                              edge=TRUE,
+                              kernel="gaussian")
+plot(kde_childcareSG_fb)
 ```
 
-### 1.8 A cartographic KDE map
-
-The metre-based KDE image is converted to a `SpatRaster`. Its values are multiplied by one million to change points per m² into points per km², while its SVY21 coordinates remain in metres.
+The adaptive estimate changes its smoothing according to the local point pattern.
 
 ```{r}
-#| label: kde-to-terra
-kde_childcare_terra <- rast(kde_SG_diggle)
-values(kde_childcare_terra) <- values(kde_childcare_terra) * 1e6
-names(kde_childcare_terra) <- "centres_per_km2"
-crs(kde_childcare_terra) <- "EPSG:3414"
+#| fig-height: 6
+kde_childcareSG_ab <- adaptive.density(
+  childcareSG_ppp_km, 
+  method="kernel")
+plot(kde_childcareSG_ab)
+```
 
-kde_childcare_terra
+```{r fig.width=16, fig.height=6}
+par(mfrow=c(1,2))
+plot(kde_childcareSG_fb, main = "Fixed bandwidth")
+plot(kde_childcareSG_ab, main = "Adaptive bandwidth")
+```
+
+### 1.8 Converting the KDE surface to a raster map
+
+The `im` density surface is converted to a `SpatRaster` so it can be mapped with `tmap`.
+
+```{r}
+kde_childcareSG_bw_terra <- rast(kde_childcareSG_km)
 ```
 
 ```{r}
-#| label: cartographic-kde
-#| fig-height: 6.5
-#| fig-cap: "Kernel density of childcare services in centres per square kilometre."
-tm_shape(kde_childcare_terra) +
-  tm_raster(
-    col.scale = tm_scale_continuous(values = "viridis"),
-    col.legend = tm_legend(title = "Centres per km²")
-  ) +
-  tm_shape(sg_boundary) +
-  tm_borders(col = "white", lwd = 1) +
-  tm_compass(position = tm_pos_in("left", "top")) +
-  tm_layout(frame = FALSE)
+class(kde_childcareSG_bw_terra)
+```
+
+```{r}
+kde_childcareSG_bw_terra
+```
+
+The raster does not carry a coordinate reference system automatically, so the tutorial assigns EPSG:3414.
+
+```{r}
+crs(kde_childcareSG_bw_terra) <- "EPSG:3414"
+```
+
+```{r}
+kde_childcareSG_bw_terra
+```
+
+```{r}
+tm_shape(kde_childcareSG_bw_terra) + 
+  tm_raster(col.scale = 
+              tm_scale_continuous(
+                values = "viridis"),
+            col.legend = tm_legend(
+            title = "Density values",
+            title.size = 0.7,
+            text.size = 0.7,
+            bg.color = "white",
+            bg.alpha = 0.7,
+            position = tm_pos_in(
+              "right", "bottom"),
+            frame = TRUE)) +
+  tm_graticules(labels.size = 0.7) +
+  tm_compass() +
+  tm_layout(scale = 1.0)
 ```
 
 ### 1.9 Analysis by planning area
 
-Following the tutorial, four planning areas are extracted and dissolved into separate study windows.
+The tutorial compares Punggol, Tampines, Choa Chu Kang and Jurong West.
 
 ```{r}
-#| label: extract-planning-areas
-pg <- mpsz_cl |>
-  filter(PLN_AREA_N == "PUNGGOL") |>
-  summarise()
+pg <- mpsz_cl %>%
+  filter(PLN_AREA_N == "PUNGGOL")
+tm <- mpsz_cl %>%
+  filter(PLN_AREA_N == "TAMPINES")
+ck <- mpsz_cl %>%
+  filter(PLN_AREA_N == "CHOA CHU KANG")
+jw <- mpsz_cl %>%
+  filter(PLN_AREA_N == "JURONG WEST")
+```
 
-tm <- mpsz_cl |>
-  filter(PLN_AREA_N == "TAMPINES") |>
-  summarise()
-
-ck <- mpsz_cl |>
-  filter(PLN_AREA_N == "CHOA CHU KANG") |>
-  summarise()
-
-jw <- mpsz_cl |>
-  filter(PLN_AREA_N == "JURONG WEST") |>
-  summarise()
-
-par(mfrow = c(2, 2))
-plot(st_geometry(pg), main = "Punggol")
+```{r}
+#| fig-width: 16
+#| fig-height: 12
+par(mfrow=c(2,2))
+plot(st_geometry(pg), main = "Ponggol")
 plot(st_geometry(tm), main = "Tampines")
 plot(st_geometry(ck), main = "Choa Chu Kang")
 plot(st_geometry(jw), main = "Jurong West")
-par(mfrow = c(1, 1))
 ```
 
-Each planning area becomes an `owin`, which is then used to clip the national point pattern.
+Each planning area is converted to its own observation window.
 
 ```{r}
-#| label: planning-area-patterns
-pg_owin <- as.owin(pg)
-tm_owin <- as.owin(tm)
-ck_owin <- as.owin(ck)
-jw_owin <- as.owin(jw)
+pg_owin = as.owin(pg)
+tm_owin = as.owin(tm)
+ck_owin = as.owin(ck)
+jw_owin = as.owin(jw)
+```
 
-childcare_pg_ppp <- childcare_ppp[pg_owin]
-childcare_tm_ppp <- childcare_ppp[tm_owin]
-childcare_ck_ppp <- childcare_ppp[ck_owin]
-childcare_jw_ppp <- childcare_ppp[jw_owin]
+The Singapore point pattern is clipped to each window.
 
-childcare_pg_ppp_km <- rescale.ppp(childcare_pg_ppp, 1000, "km")
-childcare_tm_ppp_km <- rescale.ppp(childcare_tm_ppp, 1000, "km")
-childcare_ck_ppp_km <- rescale.ppp(childcare_ck_ppp, 1000, "km")
-childcare_jw_ppp_km <- rescale.ppp(childcare_jw_ppp, 1000, "km")
-
-tibble(
-  planning_area = c("Punggol", "Tampines", "Choa Chu Kang", "Jurong West"),
-  childcare_services = c(
-    npoints(childcare_pg_ppp),
-    npoints(childcare_tm_ppp),
-    npoints(childcare_ck_ppp),
-    npoints(childcare_jw_ppp)
-  )
-) |>
-  knitr::kable()
+```{r}
+childcare_pg_ppp = childcare_ppp[pg_owin]
+childcare_tm_ppp = childcare_ppp[tm_owin]
+childcare_ck_ppp = childcare_ppp[ck_owin]
+childcare_jw_ppp = childcare_ppp[jw_owin]
 ```
 
 ```{r}
-#| label: plot-planning-area-patterns
-#| fig-width: 12
-#| fig-height: 10
-par(mfrow = c(2, 2))
-plot(childcare_pg_ppp_km, main = "Punggol")
-plot(childcare_tm_ppp_km, main = "Tampines")
-plot(childcare_ck_ppp_km, main = "Choa Chu Kang")
-plot(childcare_jw_ppp_km, main = "Jurong West")
-par(mfrow = c(1, 1))
+childcare_pg_ppp.km = rescale.ppp(childcare_pg_ppp, 1000, "km")
+childcare_tm_ppp.km = rescale.ppp(childcare_tm_ppp, 1000, "km")
+childcare_ck_ppp.km = rescale.ppp(childcare_ck_ppp, 1000, "km")
+childcare_jw_ppp.km = rescale.ppp(childcare_jw_ppp, 1000, "km")
 ```
 
-Clark–Evans tests are run for Choa Chu Kang and Tampines, the two areas used again in Part 2.
-
-```{r}
-#| label: planning-area-clark-evans
-clark_ck <- clarkevans.test(
-  childcare_ck_ppp,
-  correction = "none",
-  alternative = "two.sided"
-)
-
-clark_tm <- clarkevans.test(
-  childcare_tm_ppp,
-  correction = "none",
-  alternative = "two.sided"
-)
-
-tibble(
-  planning_area = c("Choa Chu Kang", "Tampines"),
-  R = c(unname(clark_ck$statistic), unname(clark_tm$statistic)),
-  p_value = c(clark_ck$p.value, clark_tm$p.value),
-  decision_at_5_percent = if_else(
-    p_value < 0.05,
-    "Reject CSR",
-    "Do not reject CSR"
-  )
-) |>
-  mutate(across(c(R, p_value), ~ round(.x, 4))) |>
-  knitr::kable()
+```{r fig.width=16, fig.height=12}
+par(mfrow=c(2,2))
+plot(unmark(childcare_pg_ppp.km), 
+  main="Punggol")
+plot(unmark(childcare_tm_ppp.km), 
+  main="Tampines")
+plot(unmark(childcare_ck_ppp.km), 
+  main="Choa Chu Kang")
+plot(unmark(childcare_jw_ppp.km), 
+  main="Jurong West")
 ```
 
-Finally, Diggle-bandwidth KDE surfaces are computed separately for all four planning areas.
+The Clark--Evans tests below compare Choa Chu Kang and Tampines.
 
 ```{r}
-#| label: planning-area-kde
-#| fig-width: 12
-#| fig-height: 10
-par(mfrow = c(2, 2))
+clarkevans.test(childcare_ck_ppp,
+                correction="none",
+                clipregion=NULL,
+                alternative=c("two.sided"),
+                nsim=999)
+```
 
-plot(
-  density(childcare_pg_ppp_km, sigma = bw.diggle, edge = TRUE),
-  main = "Punggol"
-)
-plot(
-  density(childcare_tm_ppp_km, sigma = bw.diggle, edge = TRUE),
-  main = "Tampines"
-)
-plot(
-  density(childcare_ck_ppp_km, sigma = bw.diggle, edge = TRUE),
-  main = "Choa Chu Kang"
-)
-plot(
-  density(childcare_jw_ppp_km, sigma = bw.diggle, edge = TRUE),
-  main = "Jurong West"
-)
+```{r}
+clarkevans.test(childcare_tm_ppp,
+                correction="none",
+                clipregion=NULL,
+                alternative=c("two.sided"),
+                nsim=999)
+```
 
-par(mfrow = c(1, 1))
+Finally, a separate automatic bandwidth is used to show the density pattern within each planning area.
+
+```{r}
+#| fig-width: 16
+#| fig-height: 15
+par(mfrow=c(2,2))
+plot(density(childcare_pg_ppp.km, 
+             sigma=bw.diggle, 
+             edge=TRUE, 
+             kernel="gaussian"),
+     main="Punggol")
+plot(density(childcare_tm_ppp.km, 
+             sigma=bw.diggle, 
+             edge=TRUE, 
+             kernel="gaussian"),
+     main="Tempines")
+plot(density(childcare_ck_ppp.km, 
+             sigma=bw.diggle, 
+             edge=TRUE, 
+             kernel="gaussian"),
+     main="Choa Chu Kang")
+plot(density(childcare_jw_ppp.km, 
+             sigma=bw.diggle, 
+             edge=TRUE, 
+             kernel="gaussian"),
+     main="Jurong West")
 ```
 
 ## Part 2: Second-order spatial point pattern analysis
 
-Second-order methods examine how points relate to one another across a range of distances. Choa Chu Kang and Tampines are compared using G, F, K and L functions.
+Second-order analysis asks whether nearby childcare services are related at different distance ranges. The tutorial uses the G, F, K and L functions for Choa Chu Kang and Tampines.
 
-For every test:
-
-- $H_0$: childcare services follow CSR within the planning area.
-- $H_1$: childcare services do not follow CSR within the planning area.
-
-### 2.1 G-function: nearest-event distances
-
-The G-function describes the distance from each observed event to its nearest neighbouring event. A curve above the theoretical CSR curve indicates more short nearest-neighbour distances.
+### 2.1 Packages and data preparation
 
 ```{r}
-#| label: g-function
-#| fig-width: 12
-#| fig-height: 5
-G_ck <- Gest(childcare_ck_ppp, correction = "border")
-G_tm <- Gest(childcare_tm_ppp, correction = "best")
-
-par(mfrow = c(1, 2))
-plot(G_ck, main = "G-function: Choa Chu Kang")
-plot(G_tm, main = "G-function: Tampines")
-par(mfrow = c(1, 1))
-```
-
-Pointwise CSR envelopes are generated from 999 simulations, matching the simulation count in the tutorial.
-
-```{r}
-#| label: g-envelopes
-#| fig-width: 12
-#| fig-height: 5
-set.seed(626)
-G_ck_csr <- envelope(
-  childcare_ck_ppp,
-  Gest,
-  correction = "border",
-  nsim = 999,
-  rank = 1,
-  verbose = FALSE
-)
-
-set.seed(626)
-G_tm_csr <- envelope(
-  childcare_tm_ppp,
-  Gest,
-  correction = "best",
-  nsim = 999,
-  rank = 1,
-  verbose = FALSE
-)
-
-par(mfrow = c(1, 2))
-plot(G_ck_csr, main = "G CSR envelope: Choa Chu Kang")
-plot(G_tm_csr, main = "G CSR envelope: Tampines")
-par(mfrow = c(1, 1))
-```
-
-### 2.2 F-function: empty-space distances
-
-The F-function measures the distance from arbitrary locations in the window to the nearest observed event. A curve below CSR is consistent with larger empty spaces between clusters.
-
-```{r}
-#| label: f-function
-#| fig-width: 12
-#| fig-height: 5
-F_ck <- Fest(childcare_ck_ppp, correction = "best")
-F_tm <- Fest(childcare_tm_ppp, correction = "best")
-
-par(mfrow = c(1, 2))
-plot(F_ck, main = "F-function: Choa Chu Kang")
-plot(F_tm, main = "F-function: Tampines")
-par(mfrow = c(1, 1))
+pacman::p_load(sf, spatstat, tmap, tidyverse)
 ```
 
 ```{r}
-#| label: f-envelopes
-#| fig-width: 12
-#| fig-height: 5
-set.seed(626)
-F_ck_csr <- envelope(
-  childcare_ck_ppp,
-  Fest,
-  correction = "best",
-  nsim = 999,
-  rank = 1,
-  verbose = FALSE
-)
-
-set.seed(626)
-F_tm_csr <- envelope(
-  childcare_tm_ppp,
-  Fest,
-  correction = "best",
-  nsim = 999,
-  rank = 1,
-  verbose = FALSE
-)
-
-par(mfrow = c(1, 2))
-plot(F_ck_csr, main = "F CSR envelope: Choa Chu Kang")
-plot(F_tm_csr, main = "F CSR envelope: Tampines")
-par(mfrow = c(1, 1))
-```
-
-### 2.3 K-function: neighbours within distance $r$
-
-Ripley's K-function counts neighbours within increasing distances. Plotting $K(r)-K_{CSR}(r)$ centres the theoretical CSR expectation on zero; positive values indicate more neighbours than expected.
-
-```{r}
-#| label: k-function
-#| fig-width: 12
-#| fig-height: 5
-K_ck <- Kest(childcare_ck_ppp, correction = "Ripley")
-K_tm <- Kest(childcare_tm_ppp, correction = "Ripley")
-
-par(mfrow = c(1, 2))
-plot(K_ck, . - theo ~ r, main = "K - K(CSR): Choa Chu Kang")
-abline(h = 0, lty = 2, col = "grey40")
-plot(K_tm, . - theo ~ r, main = "K - K(CSR): Tampines")
-abline(h = 0, lty = 2, col = "grey40")
-par(mfrow = c(1, 1))
-```
-
-The K envelopes use 99 simulations and a rank-one global envelope, as in the tutorial. `global = TRUE` is used in place of the tutorial's misspelled `glocal` argument.
-
-```{r}
-#| label: k-envelopes
-#| fig-width: 12
-#| fig-height: 5
-set.seed(626)
-K_ck_csr <- envelope(
-  childcare_ck_ppp,
-  Kest,
-  correction = "Ripley",
-  nsim = 99,
-  rank = 1,
-  global = TRUE,
-  verbose = FALSE
-)
-
-set.seed(626)
-K_tm_csr <- envelope(
-  childcare_tm_ppp,
-  Kest,
-  correction = "Ripley",
-  nsim = 99,
-  rank = 1,
-  global = TRUE,
-  verbose = FALSE
-)
-
-par(mfrow = c(1, 2))
-plot(K_ck_csr, . - theo ~ r, main = "K global envelope: Choa Chu Kang")
-abline(h = 0, lty = 2, col = "grey40")
-plot(K_tm_csr, . - theo ~ r, main = "K global envelope: Tampines")
-abline(h = 0, lty = 2, col = "grey40")
-par(mfrow = c(1, 1))
-```
-
-### 2.4 L-function: variance-stabilised K
-
-The L-function transforms K to make departures from CSR easier to compare across distances. Under CSR, $L(r)-r=0$.
-
-```{r}
-#| label: l-function
-#| fig-width: 12
-#| fig-height: 5
-L_ck <- Lest(childcare_ck_ppp, correction = "Ripley")
-L_tm <- Lest(childcare_tm_ppp, correction = "Ripley")
-
-par(mfrow = c(1, 2))
-plot(L_ck, . - theo ~ r, main = "L - L(CSR): Choa Chu Kang")
-abline(h = 0, lty = 2, col = "grey40")
-plot(L_tm, . - theo ~ r, main = "L - L(CSR): Tampines")
-abline(h = 0, lty = 2, col = "grey40")
-par(mfrow = c(1, 1))
+mpsz_cl <- read_rds("chap04/data/mpsz_cl.rds")
 ```
 
 ```{r}
-#| label: l-envelopes
-#| fig-width: 12
-#| fig-height: 5
-set.seed(626)
-L_ck_csr <- envelope(
-  childcare_ck_ppp,
-  Lest,
-  correction = "Ripley",
-  nsim = 99,
-  rank = 1,
-  global = TRUE,
-  verbose = FALSE
-)
-
-set.seed(626)
-L_tm_csr <- envelope(
-  childcare_tm_ppp,
-  Lest,
-  correction = "Ripley",
-  nsim = 99,
-  rank = 1,
-  global = TRUE,
-  verbose = FALSE
-)
-
-par(mfrow = c(1, 2))
-plot(L_ck_csr, . - theo ~ r, main = "L global envelope: Choa Chu Kang")
-abline(h = 0, lty = 2, col = "grey40")
-plot(L_tm_csr, . - theo ~ r, main = "L global envelope: Tampines")
-abline(h = 0, lty = 2, col = "grey40")
-par(mfrow = c(1, 1))
+childcare_sf <- read_rds("chap04/data/childcare_sf.rds")
 ```
 
-### 2.5 CSR envelope summary
-
-The table records whether each observed function leaves its simulated CSR envelope at any evaluated distance. Leaving an envelope is evidence against CSR at one or more spatial scales; the plots show the direction and distance range of the departure.
+The tutorial uses `rjitter()` to move exactly coincident points by a very small random amount before the second-order analysis.
 
 ```{r}
-#| label: envelope-summary
-summarise_envelope <- function(envelope_object, function_name, area_name) {
-  valid <- with(
-    envelope_object,
-    is.finite(obs) & is.finite(lo) & is.finite(hi) & is.finite(theo)
-  )
+childcare_ppp <- as.ppp(childcare_sf) %>%
+  rjitter(retry = TRUE,
+          nsim = 1,
+          drop = TRUE)
 
-  delta <- envelope_object$obs[valid] - envelope_object$theo[valid]
-  distance <- envelope_object$r[valid]
-  strongest <- which.max(abs(delta))
-
-  tibble(
-    statistic = function_name,
-    planning_area = area_name,
-    leaves_CSR_envelope = any(
-      envelope_object$obs[valid] < envelope_object$lo[valid] |
-        envelope_object$obs[valid] > envelope_object$hi[valid]
-    ),
-    strongest_departure = if_else(delta[strongest] > 0, "Above CSR", "Below CSR"),
-    distance_metres = round(distance[strongest])
-  )
-}
-
-bind_rows(
-  summarise_envelope(G_ck_csr, "G", "Choa Chu Kang"),
-  summarise_envelope(G_tm_csr, "G", "Tampines"),
-  summarise_envelope(F_ck_csr, "F", "Choa Chu Kang"),
-  summarise_envelope(F_tm_csr, "F", "Tampines"),
-  summarise_envelope(K_ck_csr, "K", "Choa Chu Kang"),
-  summarise_envelope(K_tm_csr, "K", "Tampines"),
-  summarise_envelope(L_ck_csr, "L", "Choa Chu Kang"),
-  summarise_envelope(L_tm_csr, "L", "Tampines")
-) |>
-  knitr::kable()
+sg_owin <- as.owin(mpsz_cl)
 ```
 
-The four functions describe complementary aspects of the same point pattern. G focuses on event-to-event spacing, F on empty space, and K/L on cumulative interaction across distance. Results should therefore be interpreted together rather than from a single curve.
+```{r}
+pg <- mpsz_cl %>%
+  filter(PLN_AREA_N == "PUNGGOL")
+tm <- mpsz_cl %>%
+  filter(PLN_AREA_N == "TAMPINES")
+ck <- mpsz_cl %>%
+  filter(PLN_AREA_N == "CHOA CHU KANG")
+jw <- mpsz_cl %>%
+  filter(PLN_AREA_N == "JURONG WEST")
+
+pg_owin = as.owin(pg)
+tm_owin = as.owin(tm)
+ck_owin = as.owin(ck)
+jw_owin = as.owin(jw)
+
+childcare_pg_ppp = childcare_ppp[pg_owin]
+childcare_tm_ppp = childcare_ppp[tm_owin]
+childcare_ck_ppp = childcare_ppp[ck_owin]
+childcare_jw_ppp = childcare_ppp[jw_owin]
+
+childcare_pg_ppp.km = rescale.ppp(childcare_pg_ppp, 1000, "km")
+childcare_tm_ppp.km = rescale.ppp(childcare_tm_ppp, 1000, "km")
+childcare_ck_ppp.km = rescale.ppp(childcare_ck_ppp, 1000, "km")
+childcare_jw_ppp.km = rescale.ppp(childcare_jw_ppp, 1000, "km")
+```
+
+```{r fig.width=16, fig.height=12}
+par(mfrow=c(2,2))
+plot(unmark(childcare_pg_ppp.km), main="Punggol")
+plot(unmark(childcare_tm_ppp.km), main="Tampines")
+plot(unmark(childcare_ck_ppp.km), main="Choa Chu Kang")
+plot(unmark(childcare_jw_ppp.km), main="Jurong West")
+```
+
+The random seed makes the Monte Carlo results reproducible.
+
+```{r}
+set.seed(1234)
+```
+
+### 2.2 G-function: nearest-event distances
+
+The G-function measures the distance from each childcare service to its nearest neighbouring service.
+
+#### Choa Chu Kang
+
+```{r}
+G_CK = Gest(childcare_ck_ppp, correction = "border")
+plot(G_CK, xlim=c(0,500))
+```
+
+The envelope shows the range expected from 999 simulated random patterns.
+
+```{r}
+G_CK.csr <- envelope(childcare_ck_ppp, Gest, nsim = 999)
+plot(G_CK.csr)
+```
+
+#### Tampines
+
+```{r}
+G_tm = Gest(childcare_tm_ppp, correction = "best")
+plot(G_tm)
+```
+
+```{r}
+G_tm.csr <- envelope(childcare_tm_ppp, Gest, correction = "all", nsim = 999)
+plot(G_tm.csr)
+```
+
+An observed curve above the random envelope at short distances means nearest neighbours occur sooner than expected, which suggests clustering.
+
+### 2.3 F-function: empty-space distances
+
+The F-function measures the distance from empty locations in the study area to the nearest childcare service.
+
+#### Choa Chu Kang
+
+```{r}
+F_CK = Fest(childcare_ck_ppp)
+plot(F_CK)
+```
+
+```{r}
+F_CK.csr <- envelope(childcare_ck_ppp, Fest, nsim = 999)
+plot(F_CK.csr)
+```
+
+#### Tampines
+
+```{r}
+F_tm = Fest(childcare_tm_ppp, correction = "best")
+plot(F_tm)
+```
+
+```{r}
+F_tm.csr <- envelope(childcare_tm_ppp, Fest, correction = "all", nsim = 999)
+plot(F_tm.csr)
+```
+
+The G- and F-functions complement each other: G begins at service locations, while F begins in the empty space between them.
+
+### 2.4 K-function: neighbours within distance $r$
+
+The K-function counts neighbouring events within increasing distances. The tutorial plots K minus the distance line used as its CSR reference.
+
+#### Choa Chu Kang
+
+```{r}
+K_ck = Kest(childcare_ck_ppp, correction = "Ripley")
+plot(K_ck, . -r ~ r, ylab= "K(d)-r", xlab = "d(m)")
+```
+
+```{r}
+K_ck.csr <- envelope(childcare_ck_ppp, Kest, nsim = 99, rank = 1, glocal=TRUE)
+
+```
+
+```{r fig.width=8, fig.height=5}
+plot(K_ck.csr, . - r ~ r, xlab="d", ylab="K(d)-r")
+```
+
+#### Tampines
+
+```{r}
+K_tm = Kest(childcare_tm_ppp, correction = "Ripley")
+plot(K_tm, . -r ~ r, 
+     ylab= "K(d)-r", xlab = "d(m)", 
+     xlim=c(0,1000))
+```
+
+```{r}
+K_tm.csr <- envelope(childcare_tm_ppp, Kest, nsim = 99, rank = 1, glocal=TRUE)
+
+```
+
+```{r fig.width=7,  fig.height=4.5}
+plot(K_tm.csr, . - r ~ r, 
+     xlab="d", ylab="K(d)-r", xlim=c(0,500))
+```
+
+### 2.5 L-function: variance-stabilised K
+
+The L-function is a transformed version of K that is easier to compare across distances.
+
+#### Choa Chu Kang
+
+```{r}
+L_ck = Lest(childcare_ck_ppp, correction = "Ripley")
+plot(L_ck, . -r ~ r, 
+     ylab= "L(d)-r", xlab = "d(m)")
+```
+
+```{r}
+L_ck.csr <- envelope(childcare_ck_ppp, Lest, nsim = 99, rank = 1, glocal=TRUE)
+
+```
+
+```{r fig.width=8, fig.height=5}
+plot(L_ck.csr, . - r ~ r, xlab="d", ylab="L(d)-r")
+```
+
+#### Tampines
+
+```{r}
+L_tm = Lest(childcare_tm_ppp, correction = "Ripley")
+plot(L_tm, . -r ~ r, 
+     ylab= "L(d)-r", xlab = "d(m)", 
+     xlim=c(0,1000))
+```
+
+```{r}
+L_tm.csr <- envelope(childcare_tm_ppp, Lest, nsim = 99, rank = 1, glocal=TRUE)
+
+```
+
+```{r fig.width=7,  fig.height=5.5}
+plot(L_tm.csr, . - r ~ r, 
+     xlab="d", ylab="L(d)-r", xlim=c(0,500))
+```
+
+Together, the G, F, K and L plots show whether departures from randomness happen only among nearest neighbours or persist across a wider distance range.
 
 ## Some other questions I would like to address
 
-After looking at the tutorial results, I have three more questions:
+After completing the tutorial, I would also like to ask:
 
-1. Does having more childcare services mean an area has a higher concentration?
-2. Do services that share the same map location change the result?
-3. Where is the main concentration in each planning area when I use the same map setting?
+1. Does an area with more services also have a higher concentration?
+2. Do services sharing the same map location affect the nearest-neighbour result?
+3. Where is the strongest concentration when every area uses the same smoothing distance?
 
 ### 3.1 Does having more services mean a higher concentration?
 
-The four planning areas have different sizes, so I compare both the total number of services and the number per square kilometre. I also prepare a second version of the data with only one point at each map location. The second version is used in the next question.
+The four planning areas differ in size, so comparing totals alone is not enough. Here I compare the number of services per square kilometre. I use the original point coordinates, before the tutorial's random jitter, so shared locations can be checked in the next question.
 
 ```{r}
-#| label: cross-area-sensitivity
+raw_childcare_ppp <- as.ppp(childcare_sf)
+
 area_patterns <- list(
-  "Punggol" = childcare_pg_ppp,
-  "Tampines" = childcare_tm_ppp,
-  "Choa Chu Kang" = childcare_ck_ppp,
-  "Jurong West" = childcare_jw_ppp
+  "Punggol" = raw_childcare_ppp[pg_owin],
+  "Tampines" = raw_childcare_ppp[tm_owin],
+  "Choa Chu Kang" = raw_childcare_ppp[ck_owin],
+  "Jurong West" = raw_childcare_ppp[jw_owin]
 )
 
 unique_location_pattern <- function(point_pattern) {
@@ -817,30 +747,24 @@ area_comparison <- imap_dfr(area_patterns, function(point_pattern, area_name) {
   )
 })
 
-area_comparison |>
+area_comparison %>%
   transmute(
     `Planning area` = planning_area,
     `Area (km²)` = round(area_km2, 2),
     Services = services,
     `Services per km²` = round(services_per_km2, 2)
-  ) |>
+  ) %>%
   knitr::kable()
 ```
 
-Tampines has the most services, with `r area_comparison |> filter(planning_area == "Tampines") |> pull(services)`. Choa Chu Kang has only `r area_comparison |> filter(planning_area == "Choa Chu Kang") |> pull(services)`, but it is much smaller. As a result, Choa Chu Kang has the highest concentration at `r round(area_comparison |> filter(planning_area == "Choa Chu Kang") |> pull(services_per_km2), 2)` services per km². This shows why the total count alone can be misleading.
+Tampines has the largest total, but Choa Chu Kang has the most services relative to its area. This is why a count and a density answer different questions.
 
 ### 3.2 Do shared map locations change the result?
 
-Some services have exactly the same coordinates, possibly because they are located at the same address or building. The nearest-neighbour test treats the distance between these records as zero, which can make the points look strongly grouped.
-
-I run the test again using one point per map location. The test produces a value called **R**:
-
-- R close to 1 means the points look roughly random.
-- R below 1 means the points are closer together than expected.
+When two records have exactly the same coordinates, their nearest-neighbour distance is zero. I repeat the Clark--Evans test after keeping one point at each location.
 
 ```{r}
-#| label: shared-location-results
-area_comparison |>
+area_comparison %>%
   transmute(
     `Planning area` = planning_area,
     `R: all records` = round(original_R, 3),
@@ -849,16 +773,14 @@ area_comparison |>
       unique_location_p < 0.05 & unique_location_R < 1 ~ "Still appears clustered",
       TRUE ~ "No clear clustering"
     )
-  ) |>
+  ) %>%
   knitr::kable()
 ```
 
-The chart shows the same comparison visually. A point moving towards the dashed line means the pattern looks less clustered after shared locations are counted once.
+R near 1 looks more like randomness; lower values suggest stronger grouping. The chart shows how far each result moves after shared locations are counted once.
 
 ```{r}
-#| label: clark-evans-sensitivity-chart
 #| fig-height: 5.5
-#| fig-cap: "How the result changes when shared map locations are counted once."
 ggplot(
   area_comparison,
   aes(y = reorder(planning_area, original_R))
@@ -913,18 +835,13 @@ ggplot(
   )
 ```
 
-Choa Chu Kang changes the most. Its R value moves from `r round(area_comparison |> filter(planning_area == "Choa Chu Kang") |> pull(original_R), 3)` to `r round(area_comparison |> filter(planning_area == "Choa Chu Kang") |> pull(unique_location_R), 3)`. Once repeated locations are counted once, its points no longer show clear clustering. This suggests that much of the original result comes from several services sharing the same location.
-
-Tampines still looks clustered after the same adjustment, with R = `r round(area_comparison |> filter(planning_area == "Tampines") |> pull(unique_location_R), 3)`. Jurong West also remains clustered, while Punggol no longer shows a clear pattern.
-
-The G, F, K and L charts tell a similar story. In Tampines, all four observed curves move outside the simulated random ranges. Choa Chu Kang is less clear: its F curve stays inside the random range, while its strongest G and L differences occur at about one or two metres. Those very short distances are likely related to services sharing coordinates.
+The comparison shows whether the clustering result is robust or mainly driven by several services recorded at the same address.
 
 ### 3.3 Where are the strongest concentrations?
 
-The earlier KDE maps choose a different smoothing distance for each planning area. That is useful for viewing each area separately, but it makes the peak values difficult to compare. Here, I use the same 600-metre smoothing distance for all four areas.
+The tutorial's planning-area maps select different bandwidths. For a direct comparison, I apply the same 0.6 km bandwidth to all four areas and locate each surface's peak.
 
 ```{r}
-#| label: fixed-bandwidth-hotspots
 find_fixed_hotspot <- function(point_pattern, area_name) {
   point_pattern_km <- rescale.ppp(point_pattern, 1000, "km")
 
@@ -951,33 +868,31 @@ find_fixed_hotspot <- function(point_pattern, area_name) {
 hotspot_points <- imap_dfr(
   area_patterns,
   ~ find_fixed_hotspot(.x, .y)
-) |>
+) %>%
   st_as_sf(coords = c("easting", "northing"), crs = 3414)
 
 hotspot_comparison <- st_join(
   hotspot_points,
-  mpsz_cl |> select(SUBZONE_N),
+  mpsz_cl %>% select(SUBZONE_N),
   join = st_within
-) |>
-  st_drop_geometry() |>
+) %>%
+  st_drop_geometry() %>%
   transmute(
     `Planning area` = planning_area,
     `Peak subzone` = str_to_title(SUBZONE_N),
     `Estimated services per km² at peak` = round(peak_density, 1)
-  ) |>
+  ) %>%
   arrange(desc(`Estimated services per km² at peak`))
 
-hotspot_comparison |>
+hotspot_comparison %>%
   knitr::kable()
 ```
 
-Using the same map setting, the strongest concentration appears in Taman Jurong, followed by Peng Siang, Punggol Field and Tampines West. This only tells me where services are concentrated. It does not tell me whether an area has enough childcare places because the data does not include enrolment capacity or demand.
+This comparison identifies where services are concentrated, but it cannot say whether provision is sufficient. That would also require enrolment capacity and local demand data.
 
-### 3.4 What do I take away from this?
+### 3.4 Main takeaway
 
-The total number of services does not give the whole picture. Choa Chu Kang has the highest number of services relative to its size, but its apparent clustering mostly disappears when repeated map locations are counted once. Tampines has a lower number per km², yet its service locations remain clearly grouped even after that adjustment.
-
-From these results, I would describe Tampines as having the clearer clustering pattern. For Choa Chu Kang, I would be more careful: the result is strongly affected by services that share the same mapped location.
+Counts, density surfaces and point-pattern tests describe different parts of the same story. The most useful conclusion is therefore not simply which area has more services, but whether its apparent clustering remains after area size and repeated locations are considered.
 
 ## References
 
