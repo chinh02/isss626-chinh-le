@@ -22,6 +22,16 @@ Working with Singapore planning boundaries, public facilities, transport lines a
 
 [View exercise →](hands-on-exercise-01.qmd){.section-link}
 :::
+
+::: {.exercise-entry}
+<span>02</span>
+
+## Spatial point pattern analysis
+
+Analysing childcare centre locations with nearest-neighbour tests, kernel density estimation and second-order spatial statistics.
+
+[View exercise →](hands-on-exercise-02.qmd){.section-link}
+:::
 :::
 
 [← Back to home](index.qmd){.back-link}
