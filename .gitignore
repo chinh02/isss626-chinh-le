@@ -8,4 +8,6 @@
 
 # Public source data used to execute the exercises locally
 /data/
+/chap01/data/
+/chap02/data/
 /chap04/data/

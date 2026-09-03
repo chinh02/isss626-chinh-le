@@ -23,754 +23,758 @@ execute:
 ---
 
 ::: {.exercise-lead}
-This exercise follows Chapters 1 and 2 of *R for Geospatial Data Science and Analytics*. Part 1 prepares and analyses spatial data. Part 2 turns population data into choropleth maps.
+This exercise follows Chapters 1 and 2 of *R for Geospatial Data Science and Analytics*. Each tutorial code cell is kept separate and shown with its result.
 :::
 
 ## Part 1: Geospatial data wrangling
 
-### 1.1 Data acquisition
+This section follows Chapter 1. It covers data import, coordinate systems, conversion, geoprocessing and simple exploratory analysis.
 
-The exercise uses four datasets. The original Master Plan 2014 “Web” file is no longer available from its collection, so the current official “No Sea” GeoJSON is used instead. This changes the import format, but not the analysis.
-
-| Dataset | Format used | Source |
-|---|---|---|
-| Master Plan 2014 Subzone Boundary (No Sea) | GeoJSON polygon | [URA via data.gov.sg](https://data.gov.sg/datasets/d_226cacceceff94f0c8b814962a5307c9/view) |
-| Pre-Schools Location | GeoJSON point | [ECDA via data.gov.sg](https://data.gov.sg/datasets/d_61eefab99958fd70e6aab17320a71f1c/view) |
-| Cycling Path Network | GeoJSON line | [LTA via data.gov.sg](https://data.gov.sg/datasets/d_8f468b25193f64be8a16fa7d8f60f553/view) |
-| Singapore Airbnb listings, 29 June 2026 | CSV table | [Inside Airbnb](https://insideairbnb.com/get-the-data/) |
-
-The files are stored in separate geospatial and aspatial folders.
-
-```text
-data/
-├── geospatial/
-│   ├── MasterPlan2014SubzoneBoundaryNoSea.geojson
-│   ├── MasterPlan2019SubzoneBoundaryNoSea.geojson
-│   ├── PreSchoolsLocation.geojson
-│   └── CyclingPathNetwork.geojson
-└── aspatial/
-    ├── listings.csv
-    └── respopagesextod2024.csv
-```
-
-### 1.2 Getting started
-
-`sf` handles vector data, while packages in `tidyverse` import, transform and visualise the data. `tmap` is used in Part 2.
+### 1.1 Packages
 
 ```{r}
-#| label: setup
-pacman::p_load(sf, tidyverse, tmap, classInt, knitr)
-
-theme_set(theme_minimal(base_size = 12))
+pacman::p_load(sf, tidyverse)
 ```
 
-### 1.3 Importing geospatial data
+### 1.2 Importing geospatial data
 
-#### Importing the polygon layer
-
-`st_read()` imports the Master Plan 2014 subzone boundaries as a simple feature data frame named `mpsz`.
+The tutorial first imports the Master Plan 2014 subzones from an ESRI Shapefile.
 
 ```{r}
-#| label: import-mp14
-mpsz <- st_read(
-  "data/geospatial/MasterPlan2014SubzoneBoundaryNoSea.geojson"
-)
+mpsz = st_read(dsn = "chap01/data/geospatial", 
+                  layer = "MP14_SUBZONE_WEB_PL")
 ```
 
-The layer contains `r format(nrow(mpsz), big.mark = ",")` subzones and uses `r paste(unique(st_geometry_type(mpsz)), collapse = ", ")` geometry.
-
-#### Importing the line layer
-
-The cycling path network is imported in the same way.
+The cycling path layer is imported in the same way.
 
 ```{r}
-#| label: import-cycling
-cyclingpath <- st_read(
-  "data/geospatial/CyclingPathNetwork.geojson"
-)
+cyclingpath = st_read(dsn = "chap01/data/geospatial", 
+                         layer = "CyclingPathGazette")
 ```
 
-The current layer contains `r format(nrow(cyclingpath), big.mark = ",")` line features.
-
-#### Importing the point layer
-
-The pre-school locations form the point layer.
+The preschool layer is stored as KML. It is transformed to Singapore SVY21 after import.
 
 ```{r}
-#| label: import-preschools
-preschool <- st_read(
-  "data/geospatial/PreSchoolsLocation.geojson"
-)
+preschool = st_read("chap01/data/geospatial/PreSchoolsLocation.kml") %>% 
+  st_transform(crs = 3414)
 ```
 
-The file contains `r format(nrow(preschool), big.mark = ",")` pre-school points.
+### 1.3 Checking a simple feature data frame
 
-### 1.4 Checking a simple feature data frame
-
-#### Working with `st_geometry()`
-
-`st_geometry()` reports the geometry type, bounding box and coordinate reference system.
+`st_geometry()` displays the geometry column and its spatial properties.
 
 ```{r}
-#| label: inspect-geometry
 st_geometry(mpsz)
 ```
 
-#### Working with `glimpse()`
-
-`glimpse()` shows the attribute names and data types without dropping the geometry.
+`glimpse()` gives a compact view of the fields and their data types.
 
 ```{r}
-#| label: inspect-glimpse
 glimpse(mpsz)
 ```
 
-#### Working with `head()`
-
-The first five records confirm that subzone, planning-area and region names are available for later analysis.
-
 ```{r}
-#| label: inspect-head
-head(mpsz, n = 5) |>
-  select(SUBZONE_N, PLN_AREA_N, REGION_N, geometry)
+head(mpsz, n=5)  
 ```
 
-### 1.5 Plotting geospatial data
+### 1.4 Plotting geospatial data
 
-A quick geometry plot checks the shape and extent of the subzone layer.
+Plotting the complete `sf` object creates a small map for each attribute.
 
 ```{r}
-#| label: plot-mp14-geometry
-plot(
-  st_geometry(mpsz),
-  col = "#e7ece9",
-  border = "white",
-  main = "Master Plan 2014 subzones"
-)
+plot(mpsz)
 ```
 
-An attribute plot colours the polygons by planning area.
+Only the geometry can be plotted when the attributes are not needed.
 
 ```{r}
-#| label: plot-mp14-attribute
-#| fig-height: 7
-plot(
-  mpsz["PLN_AREA_N"],
-  key.pos = 4,
-  main = "Singapore planning areas"
-)
+plot(st_geometry(mpsz))
 ```
 
-### 1.6 Working with projection
-
-The current GeoJSON files are correctly labelled WGS 84 (EPSG:4326). They must be transformed to Singapore SVY21 (EPSG:3414) before calculating distances or areas.
+One selected attribute can also be mapped.
 
 ```{r}
-#| label: inspect-crs
-tibble(
-  layer = c("Subzones", "Cycling paths", "Pre-schools"),
-  crs = c(
-    st_crs(mpsz)$Name,
-    st_crs(cyclingpath)$Name,
-    st_crs(preschool)$Name
-  )
-) |>
-  kable()
+plot(mpsz["PLN_AREA_N"])
 ```
 
-`st_transform()` recalculates the coordinates in the target CRS. `st_set_crs()` is not used because the source CRS is already correct; relabelling the coordinates would put the features in the wrong place.
+The two layers can be placed on the same map because they now use the same coordinate system.
 
 ```{r}
-#| label: transform-crs
-mpsz <- st_transform(mpsz, 3414)
-cyclingpath <- st_transform(cyclingpath, 3414)
-preschool <- st_transform(preschool, 3414)
-
-tibble(
-  layer = c("Subzones", "Cycling paths", "Pre-schools"),
-  epsg = c(
-    st_crs(mpsz)$epsg,
-    st_crs(cyclingpath)$epsg,
-    st_crs(preschool)$epsg
-  )
-) |>
-  kable()
+plot(st_geometry(mpsz))
+plot(st_geometry(preschool), 
+     add = TRUE)
 ```
 
-The transformed layers now share the same projected coordinate system and can be overlaid.
+### 1.5 Working with projection
+
+The coordinate reference system of the subzone layer is checked first.
 
 ```{r}
-#| label: overlay-preschools
-ggplot() +
-  geom_sf(data = mpsz, fill = "#edf1ef", colour = "white", linewidth = 0.15) +
-  geom_sf(data = preschool, colour = "#d85b3f", size = 0.25, alpha = 0.65) +
-  coord_sf(datum = NA) +
-  labs(
-    title = "Pre-school locations",
-    subtitle = "Master Plan 2014 subzones"
-  ) +
-  theme_void()
+st_crs(mpsz)
 ```
 
-### 1.7 Importing and converting aspatial data
-
-#### Importing the Airbnb table
-
-`read_csv()` imports the latest Singapore listings as a tibble.
+The tutorial assigns EPSG:3414, the code for Singapore SVY21.
 
 ```{r}
-#| label: import-airbnb
-listings <- read_csv(
-  "data/aspatial/listings.csv",
-  show_col_types = FALSE
-)
-
-glimpse(listings)
+mpsz <- st_set_crs(mpsz, 3414)
 ```
 
-#### Creating a simple feature data frame
-
-Longitude and latitude are WGS 84 coordinates. `st_as_sf()` creates point geometry, and `st_transform()` converts the result to SVY21.
-
 ```{r}
-#| label: convert-airbnb
-listings_sf <- listings |>
-  drop_na(longitude, latitude) |>
-  st_as_sf(
-    coords = c("longitude", "latitude"),
-    crs = 4326
-  ) |>
-  st_transform(3414)
-
-listings_sf
+st_crs(mpsz)
 ```
 
-The converted object contains `r format(nrow(listings_sf), big.mark = ",")` listing points.
+The preschool geometry is inspected before transformation.
 
 ```{r}
-#| label: map-airbnb
-ggplot() +
-  geom_sf(data = mpsz, fill = "#edf1ef", colour = "white", linewidth = 0.15) +
-  geom_sf(data = listings_sf, colour = "#d85b3f", size = 0.35, alpha = 0.5) +
-  coord_sf(datum = NA) +
-  labs(
-    title = "Airbnb listings in Singapore",
-    subtitle = "Inside Airbnb snapshot, 29 June 2026"
-  ) +
-  theme_void()
+st_geometry(preschool)
 ```
 
-The listings are concentrated in the central and south-eastern parts of Singapore rather than being evenly distributed across the island.
-
-### 1.8 Geoprocessing with `sf`
-
-#### Use case 1: land around cycling paths
-
-A five-metre buffer marks the land within five metres of each cycling path segment.
+```{r}
+preschool <- st_transform(preschool, 
+                              crs = 3414)
+```
 
 ```{r}
-#| label: cycling-buffer
+st_geometry(preschool)
+```
+
+The final plot confirms that both layers align.
+
+```{r}
+plot(st_geometry(mpsz))
+plot(st_geometry(preschool), add = TRUE)
+```
+
+### 1.6 Importing and converting aspatial data
+
+The Airbnb listings are ordinary tabular data with longitude and latitude fields.
+
+```{r}
+listings <- read_csv("chap01/data/aspatial/listings.csv")
+```
+
+```{r}
+list(listings) 
+```
+
+`st_as_sf()` converts those coordinate columns to point geometry before the result is transformed to SVY21.
+
+```{r}
+listings_sf <- st_as_sf(listings, 
+                       coords = c("longitude", "latitude"),
+                       crs=4326) %>%
+  st_transform(crs = 3414)
+```
+
+```{r}
+glimpse(listings_sf)
+```
+
+```{r}
+plot(st_geometry(mpsz))
+plot(st_geometry(listings_sf), add = TRUE)
+```
+
+### 1.7 Geoprocessing with `sf`
+
+#### Buffering the cycling paths
+
+The cycling paths are first transformed to SVY21 so a buffer can be measured in metres.
+
+```{r}
+cyclingpath <- st_transform(
+  cyclingpath, crs = 3414)
+```
+
+The next cell creates a five-metre buffer around each path.
+
+```{r}
 buffer_cycling <- st_buffer(
-  cyclingpath,
-  dist = 5,
-  nQuadSegs = 30
-)
+  cyclingpath, dist=5, nQuadSegs = 30)
+```
+
+The buffer area can be added with base R syntax.
+
+```{r}
+buffer_cycling$AREA <- st_area(buffer_cycling)
+```
+
+The tutorial then shows the equivalent `dplyr` approach.
+
+```{r}
+buffer_cycling <- buffer_cycling %>%
+  mutate(AREA = st_area(geometry))
 ```
 
 ```{r}
-#| label: cycling-buffer-map
-ggplot() +
-  geom_sf(data = mpsz, fill = "#f4f5f2", colour = "white", linewidth = 0.1) +
-  geom_sf(data = buffer_cycling, fill = "#d85b3f", colour = NA, alpha = 0.75) +
-  coord_sf(datum = NA) +
-  labs(title = "Five-metre cycling path buffer") +
-  theme_void()
+sum(buffer_cycling$AREA)
 ```
 
-Summing the individual polygon areas gives the combined segment-level estimate.
+#### Clipping the buffer to Tampines West
 
 ```{r}
-#| label: cycling-buffer-area
-buffer_area_ha <- sum(st_area(buffer_cycling)) |>
-  units::set_units(ha)
-
-tibble(
-  measure = "Sum of individual 5 m buffers",
-  area_hectares = round(as.numeric(buffer_area_ha), 2)
-) |>
-  kable()
+mpsz_selected <- mpsz %>%
+  filter(SUBZONE_N == "TAMPINES WEST") 
 ```
-
-The estimate is `r round(as.numeric(buffer_area_ha), 2)` hectares. Overlapping buffers are counted more than once, so this is a segment-level total rather than a dissolved land footprint.
-
-#### Use case 2: number of pre-schools by subzone
-
-`st_intersects()` identifies which pre-school points fall inside each subzone. `lengths()` converts the list of matches into a count.
 
 ```{r}
-#| label: preschool-count
-mpsz$PreSch_count <- lengths(
-  st_intersects(mpsz, preschool)
-)
-
-mpsz |>
-  st_drop_geometry() |>
-  select(SUBZONE_N, PLN_AREA_N, PreSch_count) |>
-  arrange(desc(PreSch_count)) |>
-  slice_head(n = 10) |>
-  kable(
-    col.names = c("Subzone", "Planning area", "Pre-schools"),
-    caption = "Ten subzones with the most pre-schools"
-  )
+buffer_cycling_selected <- st_intersection(
+  buffer_cycling, mpsz_selected)
 ```
-
-`r mpsz$SUBZONE_N[which.max(mpsz$PreSch_count)]` has the highest count, with `r max(mpsz$PreSch_count)` pre-schools.
-
-### 1.9 Exploratory data analysis
-
-#### Deriving area and density
-
-Area is converted from square metres to square kilometres. Dividing the facility count by area gives pre-school density.
 
 ```{r}
-#| label: preschool-density
-mpsz <- mpsz |>
-  mutate(
-    Area_km2 = as.numeric(units::set_units(st_area(geometry), km^2)),
-    PreSch_density = PreSch_count / Area_km2
-  )
-
-mpsz |>
-  st_drop_geometry() |>
-  select(SUBZONE_N, PLN_AREA_N, PreSch_count, Area_km2, PreSch_density) |>
-  arrange(desc(PreSch_density)) |>
-  slice_head(n = 10) |>
-  mutate(
-    Area_km2 = round(Area_km2, 2),
-    PreSch_density = round(PreSch_density, 2)
-  ) |>
-  kable(
-    col.names = c("Subzone", "Planning area", "Count", "Area (km²)", "Density per km²"),
-    caption = "Ten subzones with the highest pre-school density"
-  )
+plot(st_geometry(buffer_cycling_selected))
 ```
 
-#### Histogram
+#### Counting preschools by subzone
+
+`st_intersects()` identifies the points that fall inside each subzone. `lengths()` turns those matches into a count.
 
 ```{r}
-#| label: preschool-histogram
-ggplot(mpsz, aes(x = PreSch_count)) +
-  geom_histogram(binwidth = 5, boundary = 0, colour = "white", fill = "#39735f") +
-  labs(
-    title = "Distribution of pre-schools by subzone",
-    x = "Number of pre-schools",
-    y = "Number of subzones"
-  )
+mpsz$`PreSch Count`<- lengths(st_intersects(mpsz, preschool))
 ```
-
-The distribution is right-skewed: the median subzone contains `r median(mpsz$PreSch_count)` pre-schools, while the maximum is `r max(mpsz$PreSch_count)`.
-
-#### Scatterplot
 
 ```{r}
-#| label: preschool-scatterplot
-ggplot(mpsz, aes(x = Area_km2, y = PreSch_count)) +
-  geom_point(colour = "#d85b3f", alpha = 0.65) +
-  geom_smooth(method = "lm", se = FALSE, colour = "#17333d") +
-  labs(
-    title = "Subzone area and pre-school count",
-    x = "Subzone area (km²)",
-    y = "Number of pre-schools"
-  )
+summary(mpsz$`PreSch Count`)
 ```
 
-The fitted line provides a broad comparison, but the spread of points shows that subzone size alone does not explain the number of pre-schools.
+```{r}
+top_n(mpsz, 1, `PreSch Count`)
+```
+
+Area is needed to compare subzones fairly.
+
+```{r}
+mpsz$Area <- mpsz %>%
+  st_area()
+```
+
+```{r}
+mpsz <- mpsz %>%
+  mutate(`PreSch Density` = `PreSch Count`/Area * 1000000)
+```
+
+### 1.8 Exploratory data analysis
+
+The first histogram uses base R.
+
+```{r}
+hist(mpsz$`PreSch Density`)
+```
+
+The next version uses `ggplot2` and adds labels.
+
+```{r}
+ggplot(data=mpsz, 
+       aes(x= as.numeric(`PreSch Density`)))+
+  geom_histogram(bins=20, 
+                 color="black", 
+                 fill="light blue") +
+  labs(title = "Are pre-school even distributed in Singapore?",
+       subtitle= "There are many planning subzones with a single pre-school, on the other hand, \nthere are seven planning subzones with at least 30 or more pre-schools",
+      x = "Pre-school density (per km sq)",
+      y = "Frequency")
+```
+
+The scatter plot compares raw counts with density.
+
+```{r}
+ggplot(data=mpsz, 
+       aes(y = `PreSch Count`, 
+           x= as.numeric(`PreSch Density`)))+
+  geom_point(color="black", 
+             fill="light blue") +
+  xlim(0, 40) +
+  ylim(0, 40) +
+  labs(title = "",
+      x = "Pre-school density (per km sq)",
+      y = "Pre-school count")
+```
+
+The chapter ends with an optional PDF-export cell. It remains disabled exactly as it is in the tutorial because it contains the instructor's local drive path.
+
+```{r}
+#| eval: false
+renderthis::to_pdf(from = "https://r4gdsa.netlify.app/chap01.html",
+                   to = "D://IS415_AY2022-23T2/03-Hands-on_Exercise/Hands-on_Ex1a.pdf")
+```
 
 ## Part 2: Choropleth mapping
 
-### 2.1 Getting started
+This section follows Chapter 2. It prepares Singapore population data and maps the dependency ratio by planning subzone.
 
-Part 2 uses `tmap` for thematic mapping. Static plot mode keeps the maps suitable for the report page.
+### 2.1 Packages
 
 ```{r}
-#| label: tmap-setup
-tmap_mode("plot")
+pacman::p_load(sf, tmap, tidyverse, rvest)
 ```
 
-### 2.2 Importing data
+### 2.2 Importing the subzone boundaries
 
-#### Importing Master Plan 2019 subzones
-
-The original chapter uses KML and extracts attributes from an HTML description. That KML download is no longer available, so the current official GeoJSON is used. Its subzone attributes are already stored in separate columns.
+The Master Plan 2019 KML is imported and transformed to SVY21.
 
 ```{r}
-#| label: import-mp19
-mpsz19 <- st_read(
-  "data/geospatial/MasterPlan2019SubzoneBoundaryNoSea.geojson"
-) |>
-  st_transform(3414)
-
-mpsz19 |>
-  select(REGION_N, PLN_AREA_N, SUBZONE_N, SUBZONE_C, geometry) |>
-  head(10)
+mpsz <- st_read("chap02/data/geospatial/MasterPlan2019SubzoneBoundaryNoSeaKML.kml") %>%
+  st_transform(crs = 3414)
 ```
 
-#### Importing resident population data
-
-The 2024 SingStat data is stored as a CSV with planning area, subzone, age group, sex, population and year fields.
+The KML stores its attributes in HTML. This function retrieves one requested field.
 
 ```{r}
-#| label: import-population
-popdata <- read_csv(
-  "data/aspatial/respopagesextod2024.csv",
-  na = c("na", "-", ""),
-  show_col_types = FALSE
-)
+extract_kml_field <- function(html_text, field_name) {
+  if (is.na(html_text) || html_text == "") return(NA_character_)
+  
+  page <- read_html(html_text)
+  rows <- page %>% html_elements("tr")
+  
+  value <- rows %>%
+    keep(~ html_text2(html_element(.x, "th")) == field_name) %>%
+    html_element("td") %>%
+    html_text2()
+  
+  if (length(value) == 0) NA_character_ else value
+}
+```
 
-glimpse(popdata)
+```{r}
+mpsz <- mpsz %>%
+  mutate(
+    REGION_N = map_chr(Description, extract_kml_field, "REGION_N"),
+    PLN_AREA_N = map_chr(Description, extract_kml_field, "PLN_AREA_N"),
+    SUBZONE_N = map_chr(Description, extract_kml_field, "SUBZONE_N"),
+    SUBZONE_C = map_chr(Description, extract_kml_field, "SUBZONE_C")
+  ) %>%
+  select(-Name, -Description) %>%
+  relocate(geometry, .after = last_col())
+```
+
+```{r}
+mpsz
 ```
 
 ### 2.3 Preparing the population table
 
-The dependency ratio compares young and aged residents with the economically active age group.
-
-$$
-\text{Dependency ratio} =
-\frac{\text{Young} + \text{Aged}}
-{\text{Economically active}}
-$$
-
-- **Young:** ages 0–24
-- **Economically active:** ages 25–64
-- **Aged:** ages 65 and above
-
-The data is aggregated across sex and reshaped from age-group rows to columns.
-
 ```{r}
-#| label: prepare-population
-popdata2024 <- popdata |>
-  filter(PA != "Total", SZ != "Total", AG != "Total") |>
-  group_by(PA, SZ, AG) |>
-  summarise(POP = sum(Pop, na.rm = TRUE), .groups = "drop") |>
-  pivot_wider(names_from = AG, values_from = POP, values_fill = 0) |>
-  mutate(
-    YOUNG = rowSums(across(c(
-      `0 - 4`, `5 - 9`, `10 - 14`, `15 - 19`, `20 - 24`
-    ))),
-    `ECONOMY ACTIVE` = rowSums(across(c(
-      `25 - 29`, `30 - 34`, `35 - 39`, `40 - 44`,
-      `45 - 49`, `50 - 54`, `55 - 59`, `60 - 64`
-    ))),
-    AGED = rowSums(across(c(
-      `65 - 69`, `70 - 74`, `75 - 79`, `80 - 84`,
-      `85 - 89`, `90 & Over`
-    ))),
-    TOTAL = YOUNG + `ECONOMY ACTIVE` + AGED,
-    DEPENDENCY = (YOUNG + AGED) / `ECONOMY ACTIVE`
-  ) |>
-  mutate(across(c(PA, SZ), str_to_upper)) |>
-  filter(`ECONOMY ACTIVE` > 0) |>
-  select(PA, SZ, YOUNG, `ECONOMY ACTIVE`, AGED, TOTAL, DEPENDENCY)
-
-popdata2024 |>
-  arrange(desc(DEPENDENCY)) |>
-  slice_head(n = 10) |>
-  mutate(DEPENDENCY = round(DEPENDENCY, 2)) |>
-  kable(
-    col.names = c(
-      "Planning area", "Subzone", "Young", "Economically active",
-      "Aged", "Total", "Dependency ratio"
-    ),
-    caption = "Highest calculated dependency ratios"
-  )
+popdata <- read_csv("chap02/data/aspatial/respopagesextod2024.csv")
 ```
 
-### 2.4 Joining attributes to subzones
-
-The spatial layer stays on the left of `left_join()`, so the result remains an `sf` object. Upper-case subzone names provide the common key.
+The age groups are combined into young, economically active and aged populations. The dependency ratio compares young and aged residents with the economically active group.
 
 ```{r}
-#| label: join-population
-mpsz_pop2024 <- mpsz19 |>
-  mutate(SUBZONE_N = str_to_upper(SUBZONE_N)) |>
-  left_join(
-    popdata2024,
-    by = c("SUBZONE_N" = "SZ")
-  )
-
-join_check <- mpsz_pop2024 |>
-  st_drop_geometry() |>
-  summarise(
-    subzones = n(),
-    matched = sum(!is.na(DEPENDENCY)),
-    unmatched = sum(is.na(DEPENDENCY))
-  )
-
-join_check |>
-  kable(caption = "Population-to-boundary join check")
+popdata2024 <- popdata %>%
+  group_by(PA, SZ, AG) %>%
+  summarise(`POP` = sum(`Pop`)) %>%
+  ungroup()%>%
+  pivot_wider(names_from=AG, 
+              values_from=POP) %>%
+  mutate(YOUNG = rowSums(.[3:6])
+         +rowSums(.[12])) %>%
+mutate(`ECONOMY ACTIVE` = rowSums(.[7:11])+
+rowSums(.[13:15]))%>%
+mutate(`AGED`=rowSums(.[16:21])) %>%
+mutate(`TOTAL`=rowSums(.[3:21])) %>%  
+mutate(`DEPENDENCY` = (`YOUNG` + `AGED`)
+/`ECONOMY ACTIVE`) %>%
+  select(`PA`, `SZ`, `YOUNG`, 
+       `ECONOMY ACTIVE`, `AGED`, 
+       `TOTAL`, `DEPENDENCY`)
 ```
 
-The join matches `r join_check$matched` of `r join_check$subzones` subzones. The remaining `r join_check$unmatched` polygons have no dependency value, mainly because they have no resident population record or use a different subzone label.
+The place names are changed to uppercase to match the boundary attributes. Rows without an economically active population are removed.
 
 ```{r}
-#| label: save-joined-data
-dir.create("data/rds", showWarnings = FALSE)
-write_rds(mpsz_pop2024, "data/rds/mpsz_pop2024.rds")
+popdata2024 <- popdata2024 %>%
+  mutate_at(.vars = vars(PA, SZ), 
+          .funs = list(toupper)) %>%
+  filter(`ECONOMY ACTIVE` > 0)
+```
+
+### 2.4 Joining population and boundary data
+
+```{r}
+mpsz_pop2024 <- left_join(mpsz, popdata2024,
+                          by = c("SUBZONE_N" = "SZ"))
+```
+
+```{r}
+write_rds(mpsz_pop2024, "chap02/data/rds/mpsz_pop2024.rds")
 ```
 
 ### 2.5 Quick choropleth map
 
-`qtm()` provides a fast first view of the dependency ratio.
+`qtm()` provides a quick first view of the dependency ratio.
 
 ```{r}
-#| label: quick-map
-qtm(
-  shp = mpsz_pop2024,
-  fill = "DEPENDENCY",
-  title = "Dependency ratio by subzone"
-)
+tmap_mode("plot")
+qtm(shp = mpsz_pop2024, 
+    fill = "DEPENDENCY")
 ```
 
-### 2.6 Building a choropleth with `tmap`
-
-`tm_shape()` defines the spatial object. `tm_polygons()` maps the dependency ratio to polygon fill, while `tm_borders()` separates neighbouring subzones.
+The tutorial then builds a complete map in one cell.
 
 ```{r}
-#| label: base-choropleth
 tm_shape(mpsz_pop2024) +
-  tm_polygons(
-    fill = "DEPENDENCY",
-    fill.legend = tm_legend(title = "Dependency ratio")
-  ) +
-  tm_borders(col = "white", lwd = 0.4) +
-  tm_title("Dependency ratio by planning subzone")
+  tm_polygons(fill = "DEPENDENCY",
+              fill.scale = tm_scale_intervals(
+                style = "quantile", 
+                n = 5,
+                values = "brewer.blues"),
+              fill.legend = tm_legend(
+                title = "Dependency ratio")) +
+  tm_title("Distribution of Dependency Ratio by planning subzone") +
+  tm_layout(frame = TRUE) +
+  tm_borders(fill_alpha = 0.5) +
+  tm_compass(type="8star", size = 2) +
+  tm_scalebar() +
+  tm_grid(alpha =0.2) +
+  tm_credits("Source: Planning Sub-zone boundary from Urban Redevelopment Authorithy (URA)\n and Population data from Department of Statistics DOS", 
+             position = c("left", "bottom"))
+```
+
+### 2.6 Building a choropleth step by step
+
+The next five cells add the fill and borders gradually.
+
+```{r}
+tm_shape(mpsz_pop2024) +
+  tm_polygons()
+```
+
+```{r}
+tm_shape(mpsz_pop2024)+
+  tm_polygons(fill = "DEPENDENCY")
+```
+
+```{r}
+tm_shape(mpsz_pop2024)+
+  tm_fill("DEPENDENCY")
+```
+
+```{r}
+tm_shape(mpsz_pop2024)+
+  tm_fill("DEPENDENCY") +
+  tm_borders()
+```
+
+```{r}
+tm_shape(mpsz_pop2024)+
+  tm_fill("DEPENDENCY") +
+  tm_borders(col = "grey60",
+             lwd = 0.1,
+             lty = "dashed")
 ```
 
 ### 2.7 Comparing classification methods
 
-The class method changes which subzones appear similar. Equal intervals use equally sized numeric ranges; quantiles place similar numbers of subzones in each class; Jenks natural breaks follow clusters in the data.
+Quantile classes place a similar number of subzones in each class.
 
 ```{r}
-#| label: classification-comparison
-#| fig-width: 12
-#| fig-height: 4.8
-map_equal <- tm_shape(mpsz_pop2024) +
-  tm_polygons(
-    fill = "DEPENDENCY",
-    fill.scale = tm_scale_intervals(
-      style = "equal", n = 5, values = "brewer.greens"
-    ),
-    fill.legend = tm_legend(title = "Equal")
-  ) +
-  tm_borders(col = "white", lwd = 0.3)
-
-map_quantile <- tm_shape(mpsz_pop2024) +
-  tm_polygons(
-    fill = "DEPENDENCY",
-    fill.scale = tm_scale_intervals(
-      style = "quantile", n = 5, values = "brewer.greens"
-    ),
-    fill.legend = tm_legend(title = "Quantile")
-  ) +
-  tm_borders(col = "white", lwd = 0.3)
-
-map_jenks <- tm_shape(mpsz_pop2024) +
-  tm_polygons(
-    fill = "DEPENDENCY",
-    fill.scale = tm_scale_intervals(
-      style = "jenks", n = 5, values = "brewer.greens"
-    ),
-    fill.legend = tm_legend(title = "Jenks")
-  ) +
-  tm_borders(col = "white", lwd = 0.3)
-
-tmap_arrange(map_equal, map_quantile, map_jenks, ncol = 3)
+tm_shape(mpsz_pop2024) +
+  tm_polygons(fill = "DEPENDENCY",
+              fill.scale = tm_scale_intervals(
+                style = "quantile",
+                n = 5)) +
+  tm_borders(fill_alpha = 0.5)
 ```
 
-The equal-interval map is dominated by the low classes because a few large ratios stretch the range. Quantiles provide the clearest island-wide comparison, while Jenks highlights breaks in the observed distribution.
-
-#### Comparing the number of classes
-
-The maps below hold the quantile method constant and vary the number of classes.
+Equal intervals divide the numeric range into classes of the same width.
 
 ```{r}
-#| label: class-count-comparison
-#| fig-width: 11
-#| fig-height: 8
-quantile_map <- function(classes) {
-  tm_shape(mpsz_pop2024) +
-    tm_polygons(
-      fill = "DEPENDENCY",
-      fill.scale = tm_scale_intervals(
-        style = "quantile",
-        n = classes,
-        values = "brewer.greens"
-      ),
-      fill.legend = tm_legend(title = paste(classes, "classes"))
-    ) +
-    tm_borders(col = "white", lwd = 0.25)
-}
-
-tmap_arrange(
-  quantile_map(2),
-  quantile_map(6),
-  quantile_map(10),
-  quantile_map(20),
-  ncol = 2
-)
+tm_shape(mpsz_pop2024) +
+  tm_polygons(fill = "DEPENDENCY",
+              fill.scale = tm_scale_intervals(
+                style = "equal",
+                n = 5)) +
+  tm_borders(fill_alpha = 0.5)
 ```
 
-Two classes remove most local variation. Twenty classes add detail but make the legend and spatial pattern difficult to read. Five or six classes provide a clearer balance.
-
-### 2.8 Custom breaks and colour
-
-The summary below provides the basis for manual class breaks.
-
 ```{r}
-#| label: dependency-summary
 summary(mpsz_pop2024$DEPENDENCY)
 ```
 
-The custom map uses breaks at 0.60, 0.70, 0.80 and 0.90, with the final class extending to the observed maximum.
+Custom breaks can be supplied directly.
 
 ```{r}
-#| label: custom-break-map
-dependency_max <- max(mpsz_pop2024$DEPENDENCY, na.rm = TRUE)
+tm_shape(mpsz_pop2024)+
+  tm_polygons(fill = "DEPENDENCY",
+              fill.scale = tm_scale_intervals(
+                breaks = c(0, 0.60, 0.70, 0.80, 0.90, 1.00))) +
+  tm_borders(fill_alpha = 0.5)
+```
 
+### 2.8 Choosing colour schemes
+
+```{r}
 tm_shape(mpsz_pop2024) +
-  tm_polygons(
-    fill = "DEPENDENCY",
-    fill.scale = tm_scale_intervals(
-      breaks = c(0, 0.60, 0.70, 0.80, 0.90, dependency_max),
-      values = "brewer.greens"
-    ),
-    fill.legend = tm_legend(title = "Dependency ratio")
-  ) +
-  tm_borders(col = "white", lwd = 0.3)
+  tm_polygons(fill = "DEPENDENCY",
+              fill.scale = tm_scale_intervals(
+                style = "quantile",
+                n = 5,
+                values = "brewer.greens")) +
+  tm_borders(fill_alpha = 0.5)
 ```
 
-A sequential green palette suits an ordered ratio: darker shades indicate higher values. Reversing the palette would make low values appear visually dominant, so the original direction is retained.
-
-### 2.9 Final cartographic map
-
-The final map uses six quantile classes, a concise title, border lines, a compass, a scale bar and a source note.
+Adding a minus sign reverses the palette.
 
 ```{r}
-#| label: final-map
-#| fig-height: 6.5
-final_map <- tm_shape(mpsz_pop2024) +
-  tm_polygons(
-    fill = "DEPENDENCY",
-    fill.scale = tm_scale_intervals(
-      style = "quantile",
-      n = 6,
-      values = "brewer.greens"
-    ),
-    fill.legend = tm_legend(
-      title = "Dependency ratio",
-      position = tm_pos_in("left", "bottom")
-    )
-  ) +
-  tm_borders(col = "white", lwd = 0.35) +
-  tm_title("Dependency ratio by Singapore planning subzone, 2024") +
-  tm_compass(type = "8star", position = tm_pos_in("right", "top")) +
-  tm_scalebar(position = tm_pos_in("right", "bottom")) +
-  tm_credits(
-    "Sources: URA Master Plan 2019; Singapore Department of Statistics",
-    position = tm_pos_out("left", "bottom")
-  ) +
-  tm_layout(frame = FALSE)
-
-final_map
+tm_shape(mpsz_pop2024) +
+  tm_polygons(fill = "DEPENDENCY",
+              fill.scale = tm_scale_intervals(
+                style = "quantile",
+                n = 5,
+                values = "-brewer.greens")) +
+  tm_borders(fill_alpha = 0.5)
 ```
 
-The map shows the ratio, not the absolute number of dependants. A high value indicates more young and older residents relative to ages 25–64; it does not by itself measure service demand or household burden.
-
-### 2.10 Small multiple maps
-
-Young and aged population totals are mapped separately with the same classification method.
+### 2.9 Adding map elements
 
 ```{r}
-#| label: small-multiples
-#| fig-width: 11
-#| fig-height: 5
-young_map <- tm_shape(mpsz_pop2024) +
-  tm_polygons(
-    fill = "YOUNG",
-    fill.scale = tm_scale_intervals(
-      style = "quantile", n = 5, values = "brewer.blues"
-    ),
-    fill.legend = tm_legend(title = "Young residents")
-  ) +
-  tm_borders(col = "white", lwd = 0.3)
-
-aged_map <- tm_shape(mpsz_pop2024) +
-  tm_polygons(
-    fill = "AGED",
-    fill.scale = tm_scale_intervals(
-      style = "quantile", n = 5, values = "brewer.oranges"
-    ),
-    fill.legend = tm_legend(title = "Aged residents")
-  ) +
-  tm_borders(col = "white", lwd = 0.3)
-
-tmap_arrange(young_map, aged_map, ncol = 2)
+tm_shape(mpsz_pop2024) +
+  tm_polygons(fill = "DEPENDENCY",
+              fill.scale = tm_scale_intervals(
+                style = "quantile",
+                n = 5)) +
+  tm_borders(fill_alpha = 0.5) +
+  tm_compass(type="8star", size = 2) +
+  tm_scalebar() +
+  tm_grid(lwd = 0.1, alpha = 0.2) +
+  tm_credits("Source: data.gov.sg & singstat",
+             position = c("left", "bottom"))
 ```
 
-The two maps separate population composition from the dependency ratio and make different concentrations visible.
-
-### 2.11 Mapping a selected region
-
-Filtering the `sf` object before mapping focuses the analysis on the Central Region.
+The legend is positioned automatically inside the map.
 
 ```{r}
-#| label: central-region-map
-central_region <- mpsz_pop2024 |>
+tm_shape(mpsz_pop2024) +
+  tm_polygons(fill = "DEPENDENCY",
+              fill.scale = tm_scale_intervals(
+                style = "quantile",
+                n = 5),
+              fill.legend = tm_legend(
+                title = "Dependency ratio")) +
+  tm_pos_auto_in() +
+  tm_borders(fill_alpha = 0.5) +
+  tm_compass(type="8star", size = 2) +
+  tm_scalebar() +
+  tm_grid(lwd = 0.1, alpha = 0.2) +
+  tm_credits("Source: data.gov.sg & singstat",
+             position = c("left", "bottom"))
+```
+
+### 2.10 Map styles
+
+```{r}
+tm_shape(mpsz_pop2024) +
+  tm_polygons(fill = "DEPENDENCY",
+              fill.scale = tm_scale_intervals(
+                style = "quantile",
+                n = 5,
+                values = "-brewer.greens")) + 
+  tm_borders(fill_alpha = 0.5) + 
+  tmap_style("natural")
+```
+
+```{r}
+tmap_style("white")
+```
+
+### 2.11 Small multiple maps
+
+The first method maps the young and aged populations in one `tmap` call.
+
+```{r}
+#| fig-width: 12
+#| 
+tm_shape(mpsz_pop2024) + 
+  tm_polygons(
+    fill = c("YOUNG", "AGED"),
+    fill.legend = 
+      tm_legend(position = tm_pos_in(
+        "right", "bottom")),
+    fill.scale = tm_scale_intervals(
+      style = "equal", 
+      n = 5,
+      values = "brewer.blues")) +
+  tm_borders(fill_alpha = 0.5) +
+  tmap_style("natural")
+
+```
+
+The second method creates two maps and arranges them side by side.
+
+```{r}
+youngmap <- tm_shape(mpsz_pop2024)+ 
+  tm_polygons(fill = "YOUNG",
+              fill.legend = tm_legend(
+                position = tm_pos_in(
+                  "right", "bottom"),
+                  item.height = 0.8),
+              fill.scale = tm_scale_intervals(
+                style = "quantile", 
+                values = "brewer.blues")) +
+  tm_borders(fill_alpha = 0.5) +
+  tm_title("Distribution of young population")
+                
+agedmap <- tm_shape(mpsz_pop2024)+ 
+  tm_polygons(fill = "AGED",
+              fill.legend = tm_legend(
+                position = tm_pos_in(
+                  "right", "bottom"),
+                item.height = 0.8),
+              fill.scale = tm_scale_intervals(
+              style = "quantile", 
+              values = "brewer.blues")) +
+  tm_borders(fill_alpha = 0.5) +
+  tm_title("Distribution of aged population")
+
+tmap_arrange(youngmap, agedmap, asp=1, ncol=2)
+```
+
+The dependency ratio can also be faceted by region.
+
+```{r}
+tm_shape(mpsz_pop2024) +
+  tm_fill(fill = "DEPENDENCY",
+          fill.scale = tm_scale_intervals(
+            style = "quantile",
+            values = "brewer.blues")) + 
+  tm_facets(by = "REGION_N",
+            nrow = 2, 
+            ncols = 3,
+            free.coords=TRUE, 
+            drop.units=TRUE) +
+  tm_layout(legend.show = TRUE,
+            title.position = c("center", "center"), 
+            title.size = 20) +
+  tm_borders(fill_alpha = 0.5)
+```
+
+### 2.12 Mapping a selected region
+
+```{r}
+mpsz_pop2024 %>%
+  filter(REGION_N == "CENTRAL REGION") %>%
+  tm_shape() +
+  tm_polygons(fill = "DEPENDENCY",
+              fill.scale = tm_scale_intervals(
+                style = "quantile", 
+                values = "brewer.greens"),
+              fill.legend = tm_legend()) +
+  tm_borders(fill_alpha = 0.5)
+```
+
+A box plot is added as a chart inside the map.
+
+```{r}
+mpsz_pop2024 %>%
+  filter(REGION_N == "CENTRAL REGION") %>%
+  tm_shape() +
+  tm_polygons(fill = "DEPENDENCY",
+              fill.scale = tm_scale_intervals(
+                style = "quantile", 
+                values = "brewer.greens"),
+              fill.legend = tm_legend(),
+              fill.chart = tm_chart_box()) +
+  tm_borders() +
+  tm_layout(asp = 0.8)
+```
+
+The next map highlights dependency-ratio outliers in red.
+
+```{r}
+mpsz_selected <- mpsz_pop2024 %>%
   filter(REGION_N == "CENTRAL REGION")
 
-tm_shape(central_region) +
-  tm_polygons(
-    fill = "DEPENDENCY",
-    fill.scale = tm_scale_intervals(
-      style = "quantile", n = 5, values = "brewer.greens"
-    ),
-    fill.legend = tm_legend(title = "Dependency ratio")
-  ) +
-  tm_borders(col = "white", lwd = 0.4) +
-  tm_title("Central Region dependency ratio")
+stats <- boxplot.stats(mpsz_selected$DEPENDENCY)
+
+outlier_vals <- stats$out
+
+outlier_sf <- mpsz_selected[mpsz_selected$DEPENDENCY %in% outlier_vals, ]
+
+tm_shape(mpsz_selected) +
+  tm_polygons(fill = "DEPENDENCY",
+          fill.scale = tm_scale_intervals(
+            style = "quantile", 
+            values = "brewer.blues"),
+          fill.legend = tm_legend(),
+          fill.chart = tm_chart_box()) +
+  tm_borders(fill_alpha = 0.5) +
+tm_shape(outlier_sf) +
+  tm_borders(col = "red", lwd = 2) +
+  tm_text("SUBZONE_N", col = "red", size = 0.7) +
+  tm_layout(asp = 0.8)
 ```
 
-### 2.12 Interactive map
+### 2.13 Interactive maps
 
-Plot mode is switched to view mode for an interactive map. Hovering and clicking reveal the subzone name and dependency ratio.
+The first interactive map focuses on the Central Region and highlights the same outliers.
 
 ```{r}
-#| label: interactive-map
-#| column: screen-inset-shaded
+region_selected <- mpsz_pop2024 %>%
+  filter(REGION_N == "CENTRAL REGION")
+region_bbox <- st_bbox(region_selected)
+
+stats <- boxplot.stats(region_selected$DEPENDENCY)
+outlier_vals <- stats$out
+outlier_sf <- region_selected[region_selected$DEPENDENCY %in% outlier_vals, ]
+
+tmap_mode("view")
+tm_shape(region_selected, 
+         bbox = region_bbox) +
+  tm_fill("DEPENDENCY",
+          id = "SUBZONE_N",
+          popup.vars = c(
+            "Name" = "SUBZONE_N", 
+            "Dependency" = "DEPENDENCY")) +
+  tm_borders() +
+  tm_shape(outlier_sf) +
+  tm_borders(col = "red", lwd = 2)
+tmap_mode("plot")
+```
+
+The final map limits the available zoom levels.
+
+```{r}
+region_selected <- mpsz_pop2024 %>%
+  filter(REGION_N == "CENTRAL REGION")
+region_bbox <- st_bbox(region_selected)
+
+stats <- boxplot.stats(region_selected$DEPENDENCY)
+outlier_vals <- stats$out
+outlier_sf <- region_selected[region_selected$DEPENDENCY %in% outlier_vals, ]
+
 tmap_mode("view")
 
-tm_shape(mpsz_pop2024) +
-  tm_polygons(
-    fill = "DEPENDENCY",
-    fill.scale = tm_scale_intervals(
-      style = "quantile", n = 6, values = "brewer.greens"
-    ),
-    fill.legend = tm_legend(title = "Dependency ratio"),
-    id = "SUBZONE_N",
-    popup.vars = c(
-      "Subzone" = "SUBZONE_N",
-      "Planning area" = "PLN_AREA_N",
-      "Dependency ratio" = "DEPENDENCY"
-    )
-  ) +
-  tm_borders(col = "white", lwd = 0.5) +
-  tm_view(set_zoom_limits = c(10, 14))
-
+tm_shape(region_selected, 
+         bbox = region_bbox) +
+  tm_fill("DEPENDENCY",
+          id = "SUBZONE_N",
+          popup.vars = c(
+            "Name" = "SUBZONE_N", 
+            "Dependency" = "DEPENDENCY")) +
+  tm_borders() +
+  tm_shape(outlier_sf) +
+  tm_borders(col = "red", lwd = 2) +
+  tm_view(set_zoom_limits = c(12,14))
 tmap_mode("plot")
+```
+
+As in Chapter 1, the tutorial's optional PDF-export cell is retained but not executed because its destination is the instructor's local drive.
+
+```{r}
+#| eval: false
+renderthis::to_pdf(from = "https://r4gdsa.netlify.app/chap02.html",
+                   to = "D://IS415_AY2022-23T2/03-Hands-on_Exercise/Hands-on_Ex1b.pdf")
+
 ```
 
 ## Conclusion
 
-The exercise shows that geospatial analysis depends on preparation before mapping. All layers must use a suitable CRS, spatial joins must be checked, and classification choices must be explained. The final map is therefore supported by the import checks, transformations and calculations shown above rather than presented as an isolated graphic.
+The two chapters show the full path from raw spatial data to a finished map. The main checks are using a suitable coordinate system, joining records with the correct place name, and choosing a classification method that supports the intended comparison.
+
+## References
+
+- [Chapter 1: Geospatial data wrangling](https://r4gdsa.netlify.app/chap01.html)
+- [Chapter 2: Thematic mapping and geovisualisation](https://r4gdsa.netlify.app/chap02.html)
 
 [← Back to Hands-on exercise](hands-on-exercise.qmd){.back-link}
