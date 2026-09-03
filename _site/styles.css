@@ -368,6 +368,69 @@ a {
   color: var(--muted);
 }
 
+.exercise-list {
+  margin: clamp(3rem, 7vw, 5rem) 0 2rem;
+  border-top: 1px solid var(--line);
+}
+
+.exercise-entry {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  gap: 1.25rem;
+  align-items: center;
+  padding: 1.75rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.exercise-entry > span {
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.exercise-entry h2 {
+  margin: 0 0 0.45rem;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: clamp(1.45rem, 3vw, 2rem);
+  font-weight: 500;
+}
+
+.exercise-entry p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.exercise-entry .section-link {
+  white-space: nowrap;
+}
+
+.exercise-lead {
+  margin: 0 0 2rem;
+  padding: 1.25rem 1.5rem;
+  color: var(--ink);
+  background: var(--white);
+  border-left: 4px solid var(--accent);
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  line-height: 1.6;
+}
+
+.exercise-lead p {
+  margin: 0;
+}
+
+.quarto-title-block .quarto-title-banner {
+  background: var(--ink);
+}
+
+.quarto-title-block .quarto-title-banner .title,
+.quarto-title-block .quarto-title-banner .subtitle,
+.quarto-title-block .quarto-title-banner .quarto-title-meta {
+  color: var(--white);
+}
+
 .nav-footer {
   min-height: 72px;
   padding: 1.5rem;
@@ -417,5 +480,13 @@ a {
   .home-intro h1,
   .section-page > h1 {
     font-size: clamp(2.8rem, 15vw, 4.2rem);
+  }
+
+  .exercise-entry {
+    grid-template-columns: 40px 1fr;
+  }
+
+  .exercise-entry .section-link {
+    grid-column: 2;
   }
 }

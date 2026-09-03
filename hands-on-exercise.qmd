@@ -10,12 +10,18 @@ toc: false
 
 # Hands-on exercise
 
-Practical coursework and geospatial workflows completed during ISSS626.
+Practical GIS workflows completed during ISSS626.
 
-::: {.empty-section}
-<span>NO ENTRIES YET</span>
+::: {.exercise-list}
+::: {.exercise-entry}
+<span>01</span>
 
-Exercises will be added here during the course.
+## Geospatial data wrangling and choropleth mapping
+
+Working with Singapore planning boundaries, public facilities, transport lines and population data in R.
+
+[View exercise →](hands-on-exercise-01.qmd){.section-link}
+:::
 :::
 
 [← Back to home](index.qmd){.back-link}

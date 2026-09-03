@@ -1,0 +1,362 @@
+---
+title: "Hands-on Exercise 1"
+subtitle: "Geospatial data wrangling and choropleth mapping"
+author: "Le Truong Chinh"
+date: "3 September 2026"
+description: "An ISSS626 exercise using sf, tidyverse and tmap to work with Singapore geospatial data."
+title-block-banner: true
+page-layout: article
+toc: true
+toc-depth: 3
+code-overflow: wrap
+---
+
+::: {.exercise-lead}
+This exercise brings together two foundations of geospatial analysis in R: preparing spatial data correctly and communicating a demographic pattern with a choropleth map.
+:::
+
+The workflow is based on the assigned [geospatial data wrangling](https://r4gdsa.netlify.app/chap01.html) and [choropleth mapping](https://r4gdsa.netlify.app/chap02.html) chapters. The code below is written as my own working template and will be updated with outputs after the data has been downloaded and run in RStudio.
+
+## Learning objectives
+
+By the end of this exercise, I should be able to:
+
+- import vector and tabular data into R;
+- inspect geometry types and coordinate reference systems;
+- transform data to Singapore SVY21 (EPSG:3414);
+- perform buffer, intersection and spatial-count operations; and
+- design and compare choropleth maps with `tmap`.
+
+## Data and project setup
+
+I use authoritative public data where possible and keep raw files separate from analysis-ready files.
+
+| Dataset | Role in the exercise | Source |
+|---|---|---|
+| Master Plan 2014 Subzone Boundary (No Sea) | Analysis zones for Part 1 | [URA via data.gov.sg](https://data.gov.sg/datasets/d_226cacceceff94f0c8b814962a5307c9/view) |
+| Pre-Schools Location | Point features | [ECDA via data.gov.sg](https://data.gov.sg/datasets/d_61eefab99958fd70e6aab17320a71f1c/view) |
+| Cycling Path Network | Line features | [LTA via data.gov.sg](https://data.gov.sg/datasets/d_8f468b25193f64be8a16fa7d8f60f553/view) |
+| Singapore Airbnb listings | Aspatial records with coordinates | [Inside Airbnb](https://insideairbnb.com/get-the-data/) |
+| Master Plan 2019 Subzone Boundary (No Sea) | Mapping zones for Part 2 | [URA via data.gov.sg](https://data.gov.sg/datasets/d_8594ae9ff96d0c708bc2af633048edfb/view) |
+| Resident population by subzone, age and sex | Dependency ratio | [Singapore Department of Statistics](https://www.singstat.gov.sg/find-data/search-by-theme/population/geographic-distribution/latest-data) |
+
+The files are organised before analysis:
+
+```text
+data/
+├── geospatial/
+│   ├── MasterPlan2014SubzoneBoundaryNoSea.geojson
+│   ├── MasterPlan2019SubzoneBoundaryNoSea.geojson
+│   ├── PreSchoolsLocation.geojson
+│   └── CyclingPathNetwork.geojson
+└── aspatial/
+    ├── listings.csv
+    └── respopagesextod2024.csv
+```
+
+::: {.callout-important title="Before running the code"}
+The filenames above are short local names. If the downloaded files use different names, update the paths in the import code. Raw data is not stored in this website repository.
+:::
+
+## Getting started
+
+The analysis uses `sf` for vector operations, `tidyverse` for data wrangling and charts, and `tmap` for thematic mapping.
+
+```r
+pacman::p_load(
+  sf,
+  tidyverse,
+  tmap,
+  units
+)
+
+tmap_mode("plot")
+```
+
+## Part 1: Geospatial data wrangling
+
+### Import the spatial layers
+
+GeoJSON can be read directly with `st_read()`. I standardise the three layers to SVY21 so that distances and areas are measured in metres.
+
+```r
+mpsz14 <- st_read(
+  "data/geospatial/MasterPlan2014SubzoneBoundaryNoSea.geojson",
+  quiet = TRUE
+) |>
+  st_transform(3414)
+
+preschools <- st_read(
+  "data/geospatial/PreSchoolsLocation.geojson",
+  quiet = TRUE
+) |>
+  st_transform(3414)
+
+cycling_paths <- st_read(
+  "data/geospatial/CyclingPathNetwork.geojson",
+  quiet = TRUE
+) |>
+  st_transform(3414)
+```
+
+### Inspect before analysing
+
+I check the feature count, geometry type and CRS immediately after import. This catches missing projections and unexpected geometry before they affect later calculations.
+
+```r
+spatial_check <- tibble(
+  layer = c("Subzones", "Pre-schools", "Cycling paths"),
+  features = c(nrow(mpsz14), nrow(preschools), nrow(cycling_paths)),
+  geometry = c(
+    paste(unique(st_geometry_type(mpsz14)), collapse = ", "),
+    paste(unique(st_geometry_type(preschools)), collapse = ", "),
+    paste(unique(st_geometry_type(cycling_paths)), collapse = ", ")
+  ),
+  epsg = c(st_crs(mpsz14)$epsg, st_crs(preschools)$epsg, st_crs(cycling_paths)$epsg)
+)
+
+spatial_check
+```
+
+```r
+plot(st_geometry(mpsz14), col = "grey95", border = "white")
+plot(st_geometry(cycling_paths), col = "#39735f", add = TRUE)
+plot(st_geometry(preschools), col = "#d85b3f", pch = 16, cex = 0.25, add = TRUE)
+```
+
+::: {.callout-note title="CRS check"}
+`st_set_crs()` labels coordinates when the existing label is missing or wrong; it does not move the features. `st_transform()` recalculates coordinates in another reference system. For distance and area work in Singapore, I use EPSG:3414.
+:::
+
+### Convert Airbnb records to spatial points
+
+The Airbnb file is tabular, but its longitude and latitude columns allow it to be converted to an `sf` object. The coordinates begin in WGS84 (EPSG:4326) and are then transformed to SVY21.
+
+```r
+listings <- read_csv(
+  "data/aspatial/listings.csv",
+  show_col_types = FALSE
+)
+
+listings_sf <- listings |>
+  drop_na(longitude, latitude) |>
+  st_as_sf(
+    coords = c("longitude", "latitude"),
+    crs = 4326,
+    remove = FALSE
+  ) |>
+  st_transform(3414)
+```
+
+```r
+ggplot() +
+  geom_sf(data = mpsz14, fill = "grey96", colour = "white") +
+  geom_sf(data = listings_sf, colour = "#d85b3f", size = 0.25, alpha = 0.45) +
+  coord_sf(datum = NA) +
+  labs(
+    title = "Airbnb listings in Singapore",
+    subtitle = "Point locations over Master Plan 2014 subzones"
+  ) +
+  theme_minimal()
+```
+
+### Estimate land around cycling paths
+
+A five-metre buffer represents the reserved strip on both sides of each path. I dissolve the lines before buffering so overlapping segments are not counted more than once.
+
+```r
+cycling_buffer <- cycling_paths |>
+  st_geometry() |>
+  st_union() |>
+  st_buffer(dist = 5)
+
+cycling_buffer_area <- cycling_buffer |>
+  st_area() |>
+  set_units(ha)
+
+cycling_buffer_area
+```
+
+The result should be interpreted as an indicative planimetric area. It does not account for parcel ownership, terrain or construction constraints.
+
+### Count pre-schools by subzone
+
+For each subzone, `st_intersects()` returns the pre-school points that fall within it. I convert the list of matches to a count and divide by area to obtain a comparable density.
+
+```r
+mpsz14_summary <- mpsz14 |>
+  mutate(
+    preschool_count = lengths(st_intersects(mpsz14, preschools)),
+    area_km2 = as.numeric(set_units(st_area(geometry), km^2)),
+    preschool_density = preschool_count / area_km2
+  )
+```
+
+```r
+mpsz14_summary |>
+  st_drop_geometry() |>
+  arrange(desc(preschool_count)) |>
+  select(SUBZONE_N, PLN_AREA_N, preschool_count, area_km2, preschool_density) |>
+  slice_head(n = 10)
+```
+
+### Explore the distribution
+
+```r
+ggplot(mpsz14_summary, aes(x = preschool_count)) +
+  geom_histogram(binwidth = 5, boundary = 0, colour = "white", fill = "#39735f") +
+  labs(
+    title = "Distribution of pre-schools across subzones",
+    x = "Number of pre-schools",
+    y = "Number of subzones"
+  ) +
+  theme_minimal()
+```
+
+```r
+ggplot(mpsz14_summary, aes(x = area_km2, y = preschool_count)) +
+  geom_point(colour = "#d85b3f", alpha = 0.7) +
+  geom_smooth(method = "lm", se = FALSE, colour = "#17333d") +
+  labs(
+    title = "Subzone area and number of pre-schools",
+    x = "Subzone area (km²)",
+    y = "Number of pre-schools"
+  ) +
+  theme_minimal()
+```
+
+When the code is run, I will comment on the skewness of the count distribution, any unusually high values and whether larger subzones consistently contain more pre-schools. The density measure should be read alongside counts because a small subzone can have a high density without having many facilities.
+
+## Part 2: Choropleth mapping
+
+### Prepare population data
+
+The goal is to map the dependency ratio by planning subzone:
+
+$$
+\text{Dependency ratio} = \frac{\text{young population} + \text{aged population}}{\text{economically active population}}
+$$
+
+I extract the starting age from each label, classify the rows into three population bands, and then aggregate male and female records. This avoids relying on the position of columns after reshaping.
+
+```r
+popdata <- read_csv(
+  "data/aspatial/respopagesextod2024.csv",
+  show_col_types = FALSE
+)
+
+popdata2024 <- popdata |>
+  mutate(
+    age_start = parse_number(AG),
+    age_band = case_when(
+      between(age_start, 0, 24) ~ "YOUNG",
+      between(age_start, 25, 64) ~ "ECONOMY ACTIVE",
+      age_start >= 65 ~ "AGED",
+      TRUE ~ NA_character_
+    )
+  ) |>
+  filter(!is.na(age_band)) |>
+  group_by(PA, SZ, age_band) |>
+  summarise(POP = sum(Pop, na.rm = TRUE), .groups = "drop") |>
+  pivot_wider(names_from = age_band, values_from = POP, values_fill = 0) |>
+  mutate(
+    TOTAL = YOUNG + `ECONOMY ACTIVE` + AGED,
+    DEPENDENCY = (YOUNG + AGED) / `ECONOMY ACTIVE`,
+    PA = str_to_upper(PA),
+    SZ = str_to_upper(SZ)
+  ) |>
+  filter(`ECONOMY ACTIVE` > 0) |>
+  select(PA, SZ, YOUNG, `ECONOMY ACTIVE`, AGED, TOTAL, DEPENDENCY)
+```
+
+::: {.callout-warning title="Check the age labels"}
+Run `unique(popdata$AG)` before aggregation. The code assumes each age label begins with its lower bound, such as `0-4` or `65-69`; any total row is excluded because it has no starting age.
+:::
+
+### Join population to subzones
+
+```r
+mpsz19 <- st_read(
+  "data/geospatial/MasterPlan2019SubzoneBoundaryNoSea.geojson",
+  quiet = TRUE
+) |>
+  st_transform(3414)
+
+mpsz_pop2024 <- mpsz19 |>
+  mutate(SUBZONE_N = str_to_upper(SUBZONE_N)) |>
+  left_join(popdata2024, by = c("SUBZONE_N" = "SZ"))
+
+join_check <- mpsz_pop2024 |>
+  st_drop_geometry() |>
+  summarise(
+    subzones = n(),
+    matched = sum(!is.na(DEPENDENCY)),
+    unmatched = sum(is.na(DEPENDENCY))
+  )
+
+join_check
+```
+
+The join check is important: unmatched subzones may be non-residential, but they can also reveal spelling or naming differences that require investigation.
+
+### Compare classification methods
+
+A choropleth is shaped by its class boundaries. The following small multiples keep the number of classes fixed while comparing equal intervals, quantiles and Jenks natural breaks.
+
+```r
+map_equal <- tm_shape(mpsz_pop2024) +
+  tm_polygons(
+    fill = "DEPENDENCY",
+    fill.scale = tm_scale_intervals(style = "equal", n = 5, values = "brewer.greens"),
+    fill.legend = tm_legend(title = "Equal interval")
+  )
+
+map_quantile <- tm_shape(mpsz_pop2024) +
+  tm_polygons(
+    fill = "DEPENDENCY",
+    fill.scale = tm_scale_intervals(style = "quantile", n = 5, values = "brewer.greens"),
+    fill.legend = tm_legend(title = "Quantile")
+  )
+
+map_jenks <- tm_shape(mpsz_pop2024) +
+  tm_polygons(
+    fill = "DEPENDENCY",
+    fill.scale = tm_scale_intervals(style = "jenks", n = 5, values = "brewer.greens"),
+    fill.legend = tm_legend(title = "Jenks")
+  )
+
+tmap_arrange(map_equal, map_quantile, map_jenks, ncol = 3)
+```
+
+Equal intervals make the legend easy to compare, quantiles balance the number of subzones in each class, and Jenks emphasises clusters in the observed distribution. I will choose the method that best supports comparison without hiding unusually high or low ratios.
+
+### Final map
+
+```r
+tm_shape(mpsz_pop2024) +
+  tm_polygons(
+    fill = "DEPENDENCY",
+    fill.scale = tm_scale_intervals(
+      style = "jenks",
+      n = 5,
+      values = "brewer.greens"
+    ),
+    fill.legend = tm_legend(title = "Dependency ratio"),
+    col = "white",
+    lwd = 0.4
+  ) +
+  tm_title("Dependency ratio by Singapore planning subzone, 2024") +
+  tm_compass(type = "8star", position = c("right", "top")) +
+  tm_scalebar(position = c("right", "bottom")) +
+  tm_credits(
+    "Sources: URA Master Plan 2019 and Singapore Department of Statistics",
+    position = c("left", "bottom")
+  ) +
+  tm_layout(frame = FALSE)
+```
+
+## Reflection
+
+The main lesson is that a map is only the final stage of a longer workflow. Geometry validity, CRS choice, grouping rules and join quality all affect the result before colours are assigned. I should therefore report these checks together with the map and avoid treating a high dependency ratio as a complete explanation of local needs.
+
+[← Back to Hands-on exercise](hands-on-exercise.qmd){.back-link}
