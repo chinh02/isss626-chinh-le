@@ -291,12 +291,13 @@ ggplot(data=mpsz,
       y = "Pre-school count")
 ```
 
-The chapter ends with an optional PDF-export cell. It remains disabled exactly as it is in the tutorial because it contains the instructor's local drive path.
+The chapter page is also exported to the `output/pdf` folder in this project.
 
 ```{r}
-#| eval: false
+pdf_dir <- file.path("output", "pdf")
+dir.create(pdf_dir, recursive = TRUE, showWarnings = FALSE)
 renderthis::to_pdf(from = "https://r4gdsa.netlify.app/chap01.html",
-                   to = "D://IS415_AY2022-23T2/03-Hands-on_Exercise/Hands-on_Ex1a.pdf")
+                   to = file.path(pdf_dir, "Hands-on_Ex1a.pdf"))
 ```
 
 ## Part 2: Choropleth mapping
@@ -759,12 +760,13 @@ tm_shape(region_selected,
 tmap_mode("plot")
 ```
 
-As in Chapter 1, the tutorial's optional PDF-export cell is retained but not executed because its destination is the instructor's local drive.
+The Chapter 2 page is saved beside the first PDF in the project's `output/pdf` folder.
 
 ```{r}
-#| eval: false
+pdf_dir <- file.path("output", "pdf")
+dir.create(pdf_dir, recursive = TRUE, showWarnings = FALSE)
 renderthis::to_pdf(from = "https://r4gdsa.netlify.app/chap02.html",
-                   to = "D://IS415_AY2022-23T2/03-Hands-on_Exercise/Hands-on_Ex1b.pdf")
+                   to = file.path(pdf_dir, "Hands-on_Ex1b.pdf"))
 
 ```
 
