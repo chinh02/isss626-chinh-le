@@ -32,6 +32,16 @@ Analysing childcare centre locations with nearest-neighbour tests, kernel densit
 
 [View exercise →](hands-on-exercise-02.qmd){.section-link}
 :::
+
+::: {.exercise-entry}
+<span>03</span>
+
+## Spatio-temporal point pattern analysis
+
+Mapping 2023 forest fire events in Kepulauan Bangka Belitung and estimating how their density changes by month.
+
+[View exercise →](hands-on-exercise-03.qmd){.section-link}
+:::
 :::
 
 [← Back to home](index.qmd){.back-link}

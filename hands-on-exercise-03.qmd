@@ -1,0 +1,231 @@
+---
+title: "Hands-on Exercise 3"
+subtitle: "Spatio-temporal point pattern analysis"
+author: "Le Truong Chinh"
+date: "7 September 2026"
+description: "An executed ISSS626 exercise exploring the location and timing of forest fire events in Kepulauan Bangka Belitung."
+title-block-banner: true
+page-layout: article
+toc: true
+toc-depth: 3
+code-overflow: wrap
+format:
+  html:
+    code-fold: false
+execute:
+  echo: true
+  eval: true
+  warning: false
+  message: false
+  fig-align: center
+  fig-width: 8
+  fig-height: 5.5
+---
+
+::: {.exercise-lead}
+This exercise examines forest fire events recorded in Kepulauan Bangka Belitung during 2023. I map the events by month and estimate how their spatial density changes over time.
+:::
+
+## 1. What I am looking at
+
+A spatio-temporal point pattern records both where and when events happen. Here, each point is a forest fire detected by the MODIS sensor. I want to see whether the fire locations are spread evenly or whether they form concentrations that change over the year.
+
+Two datasets are used:
+
+- `forestfires.csv`, containing the locations and dates of 741 detected fire events; and
+- `Kepulauan_Bangka_Belitung`, containing the administrative boundaries of the study area.
+
+## 2. Loading the R packages
+
+```{r}
+pacman::p_load(sf, spatstat, sparr, 
+               tmap, stpp, tidyverse,
+               animation)
+```
+
+## 3. Preparing the study area
+
+### 3.1 Importing the boundary
+
+First, I import the original boundary layer.
+
+```{r}
+kbb <- st_read(dsn="chap06/data/rawdata",
+               layer = "Kepulauan_Bangka_Belitung") 
+```
+
+The revised code combines the individual administrative areas into one study boundary, removes any extra Z or M coordinates, and changes the coordinate system to UTM Zone 48S. A projected coordinate system is needed because the following analysis uses distance.
+
+```{r}
+kbb_sf <- st_read(dsn="chap06/data/rawdata",
+               layer = "Kepulauan_Bangka_Belitung") %>%
+  st_union() %>%
+  st_zm(drop = TRUE, what = "ZM") %>%
+  st_transform(crs = 32748)
+```
+
+### 3.2 Creating the observation window
+
+`as.owin()` changes the study boundary into the window format used by `spatstat`.
+
+```{r}
+kbb_owin <- as.owin(kbb_sf)
+kbb_owin
+```
+
+The class check confirms that the conversion worked.
+
+```{r}
+class(kbb_owin)
+```
+
+## 4. Preparing the forest fire data
+
+The CSV is imported, converted from longitude and latitude into an `sf` point layer, and projected to the same coordinate system as the study area.
+
+```{r}
+fire_sf <- read_csv("chap06/data/rawdata/forestfires.csv") %>%
+  st_as_sf(coords = c("longitude", "latitude"),
+                       crs = 4326) %>%
+  st_transform(crs = 32748)
+```
+
+I then create three simple time fields: day of year, month number, and month name. The month fields are used to compare the fire pattern over the year.
+
+```{r}
+fire_sf <- fire_sf %>% 
+  mutate(DayofYear = yday(acq_date)) %>%
+  mutate(Month_num = month(acq_date)) %>%
+  mutate(Month_fac = month(acq_date, 
+                           label = TRUE, 
+                           abbr = FALSE))
+```
+
+## 5. Visualising the fire points
+
+### 5.1 Overall distribution
+
+I first map all recorded fire locations together.
+
+```{r}
+tm_shape(kbb_sf)+
+  tm_polygons() +
+tm_shape(fire_sf) +
+  tm_dots()
+```
+
+I run the completed map using the same code.
+
+```{r}
+tm_shape(kbb_sf)+
+  tm_polygons() +
+tm_shape(fire_sf) +
+  tm_dots()
+```
+
+The point map shows where fires were detected during the whole year, but it does not show whether the pattern changed over time.
+
+### 5.2 Distribution by month
+
+Next, I separate the fire events into monthly panels.
+
+```{r}
+tm_shape(kbb_sf)+
+  tm_polygons() +
+tm_shape(fire_sf) +
+  tm_dots(size = 0.1) +
+tm_facets(by="Month_fac", 
+            free.coords=FALSE, 
+            drop.units = TRUE)
+```
+
+I run the completed monthly map using the same code.
+
+```{r}
+tm_shape(kbb_sf)+
+  tm_polygons() +
+tm_shape(fire_sf) +
+  tm_dots(size = 0.1) +
+tm_facets(by="Month_fac", 
+            free.coords=FALSE, 
+            drop.units = TRUE)
+```
+
+The monthly panels make the change much clearer. There are relatively few detections from January to June, activity rises from July, and the largest numbers occur from August to October. October has the most events, with 185 detections.
+
+## 6. Computing space-time KDE by month
+
+Kernel density estimation turns the points into a smooth surface. Adding month as the time value lets me compare how the areas of higher fire activity shift during the year.
+
+### 6.1 Keeping the monthly mark
+
+Only the month number and geometry are needed to create the point pattern object.
+
+```{r}
+fire_month <- fire_sf %>% 
+  select(Month_num)
+```
+
+### 6.2 Creating the point pattern
+
+```{r}
+fire_month_ppp <- as.ppp(fire_month)
+fire_month_ppp
+```
+
+The summary shows the number of points, their spatial window, and the range of month values.
+
+```{r}
+summary(fire_month_ppp)
+```
+
+I also check whether any fire records share the same coordinates.
+
+```{r}
+any(duplicated(fire_month_ppp))
+```
+
+### 6.3 Adding the study window
+
+The boundary is applied so that the analysis is limited to Kepulauan Bangka Belitung.
+
+```{r}
+fire_month_owin <- fire_month_ppp[kbb_owin]
+summary(fire_month_owin)
+```
+
+Plotting the result is a quick check that the points and boundary line up correctly.
+
+```{r}
+plot(fire_month_owin)
+```
+
+### 6.4 Estimating monthly density
+
+`spattemp.density()` estimates one smooth space-time density object from the point locations and their month values.
+
+```{r}
+st_kde <- spattemp.density(fire_month_owin)
+summary(st_kde)
+```
+
+### 6.5 Comparing July to December
+
+I plot the monthly density from July to December using the same colour range, so the panels can be compared directly.
+
+```{r}
+#| fig-width: 12
+#| fig-height: 10
+tims <- c(7,8,9,10,11,12)
+par(mfcol=c(2,3))
+for(i in tims){ 
+  plot(st_kde, i, 
+       override.par=FALSE, 
+       fix.range=TRUE, 
+       main=paste("KDE at month",i))
+}
+```
+
+The density surfaces help distinguish a real concentration from a pile of overlapping dots. In July and August, the stronger concentration is mainly in the west and north. It then shifts towards the south and east from September to November, with the widest and strongest surface in October. By December, the density falls sharply.
+
+[← Back to hands-on exercises](hands-on-exercise.qmd){.back-link}
