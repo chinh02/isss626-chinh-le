@@ -8,7 +8,7 @@
 
 <meta name="author" content="Le Truong Chinh">
 <meta name="dcterms.date" content="2026-09-07">
-<meta name="description" content="An executed ISSS626 exercise exploring the location and timing of forest fire events in Kepulauan Bangka Belitung.">
+<meta name="description" content="An executed ISSS626 exercise analysing the location and timing of forest fire events in Kepulauan Bangka Belitung.">
 
 <title>Hands-on Exercise 3 – Le Truong Chinh · ISSS626</title>
 <style>
@@ -115,7 +115,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <link rel="stylesheet" href="styles.css">
 <meta property="og:title" content="Hands-on Exercise 3 – Le Truong Chinh · ISSS626">
-<meta property="og:description" content="An executed ISSS626 exercise exploring the location and timing of forest fire events in Kepulauan Bangka Belitung.">
+<meta property="og:description" content="An executed ISSS626 exercise analysing the location and timing of forest fire events in Kepulauan Bangka Belitung.">
 <meta property="og:image" content="hands-on-exercise-03_files/figure-html/unnamed-chunk-8-1.png">
 <meta property="og:site_name" content="Le Truong Chinh · ISSS626">
 </head>
@@ -168,7 +168,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
             <p class="subtitle lead">Spatio-temporal point pattern analysis</p>
                   <div>
         <div class="description">
-          An executed ISSS626 exercise exploring the location and timing of forest fire events in Kepulauan Bangka Belitung.
+          An executed ISSS626 exercise analysing the location and timing of forest fire events in Kepulauan Bangka Belitung.
         </div>
       </div>
                 </div>
@@ -224,6 +224,22 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#estimating-monthly-density" id="toc-estimating-monthly-density" class="nav-link" data-scroll-target="#estimating-monthly-density">6.4 Estimating monthly density</a></li>
   <li><a href="#comparing-july-to-december" id="toc-comparing-july-to-december" class="nav-link" data-scroll-target="#comparing-july-to-december">6.5 Comparing July to December</a></li>
   </ul></li>
+  <li><a href="#computing-space-time-kde-by-day-of-year" id="toc-computing-space-time-kde-by-day-of-year" class="nav-link" data-scroll-target="#computing-space-time-kde-by-day-of-year">7. Computing space-time KDE by day of year</a>
+  <ul class="collapse">
+  <li><a href="#creating-the-point-pattern-1" id="toc-creating-the-point-pattern-1" class="nav-link" data-scroll-target="#creating-the-point-pattern-1">7.1 Creating the point pattern</a></li>
+  <li><a href="#estimating-daily-density" id="toc-estimating-daily-density" class="nav-link" data-scroll-target="#estimating-daily-density">7.2 Estimating daily density</a></li>
+  </ul></li>
+  <li><a href="#improving-the-bandwidths" id="toc-improving-the-bandwidths" class="nav-link" data-scroll-target="#improving-the-bandwidths">8. Improving the bandwidths</a>
+  <ul class="collapse">
+  <li><a href="#recomputing-the-daily-density" id="toc-recomputing-the-daily-density" class="nav-link" data-scroll-target="#recomputing-the-daily-density">8.1 Recomputing the daily density</a></li>
+  <li><a href="#animating-the-daily-pattern" id="toc-animating-the-daily-pattern" class="nav-link" data-scroll-target="#animating-the-daily-pattern">8.2 Animating the daily pattern</a></li>
+  </ul></li>
+  <li><a href="#checking-clustering-across-space-and-time" id="toc-checking-clustering-across-space-and-time" class="nav-link" data-scroll-target="#checking-clustering-across-space-and-time">9. Checking clustering across space and time</a>
+  <ul class="collapse">
+  <li><a href="#creating-the-space-time-point-object" id="toc-creating-the-space-time-point-object" class="nav-link" data-scroll-target="#creating-the-space-time-point-object">9.1 Creating the space-time point object</a></li>
+  <li><a href="#computing-the-space-time-k-function" id="toc-computing-the-space-time-k-function" class="nav-link" data-scroll-target="#computing-the-space-time-k-function">9.2 Computing the space-time K-function</a></li>
+  </ul></li>
+  <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion">10. Discussion</a></li>
   </ul>
 </nav>
     </div>
@@ -235,7 +251,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <div class="exercise-lead">
-<p>This exercise examines forest fire events recorded in Kepulauan Bangka Belitung during 2023. I map the events by month and estimate how their spatial density changes over time.</p>
+<p>This exercise examines forest fire events recorded in Kepulauan Bangka Belitung during 2023. I map the events over time, estimate their changing density, and check whether they cluster across both space and time.</p>
 </div>
 <section id="what-i-am-looking-at" class="level2">
 <h2 class="anchored" data-anchor-id="what-i-am-looking-at">1. What I am looking at</h2>
@@ -543,10 +559,301 @@ Evaluation
 </div>
 </div>
 <p>The density surfaces help distinguish a real concentration from a pile of overlapping dots. In July and August, the stronger concentration is mainly in the west and north. It then shifts towards the south and east from September to November, with the widest and strongest surface in October. By December, the density falls sharply.</p>
+</section>
+</section>
+<section id="computing-space-time-kde-by-day-of-year" class="level2">
+<h2 class="anchored" data-anchor-id="computing-space-time-kde-by-day-of-year">7. Computing space-time KDE by day of year</h2>
+<p>Using the day of year gives a more detailed view than grouping everything into months. Each event is now marked with a number from 1 to 365.</p>
+<section id="creating-the-point-pattern-1" class="level3">
+<h3 class="anchored" data-anchor-id="creating-the-point-pattern-1">7.1 Creating the point pattern</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>fire_yday_ppp <span class="ot">&lt;-</span> fire_sf <span class="sc">%&gt;%</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(DayofYear) <span class="sc">%&gt;%</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.ppp</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>I apply the same study boundary and check the result.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>fire_yday_owin <span class="ot">&lt;-</span> fire_yday_ppp[kbb_owin]</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fire_yday_owin)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Marked planar point pattern:  741 points
+Average intensity 6.424519e-08 points per square unit
+
+Coordinates are given to 10 decimal places
+
+marks are numeric, of type 'double'
+Summary:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   10.0   213.0   258.0   245.9   287.0   352.0 
+
+Window: polygonal boundary
+2 separate polygons (no holes)
+           vertices        area relative.area
+polygon 1     47493 11533600000      1.00e+00
+polygon 2       256      306427      2.66e-05
+enclosing rectangle: [512066.8, 705559.4] x [9655398, 9834006] units
+                     (193500 x 178600 units)
+Window area = 11533900000 square units
+Fraction of frame area: 0.334</code></pre>
+</div>
+</div>
+<p>The 741 fire events run from day 10 to day 352. Most occur later in the year, which agrees with the monthly maps.</p>
+</section>
+<section id="estimating-daily-density" class="level3">
+<h3 class="anchored" data-anchor-id="estimating-daily-density">7.2 Estimating daily density</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>kde_yday <span class="ot">&lt;-</span> <span class="fu">spattemp.density</span>(</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  fire_yday_owin)</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(kde_yday)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Spatiotemporal Kernel Density Estimate
+
+Bandwidths
+  h = 15102.47 (spatial)
+  lambda = 6.3198 (temporal)
+
+No. of observations
+  741 
+
+Spatial bound
+  Type: polygonal
+  2D enclosure: [512066.8, 705559.4] x [9655398, 9834006]
+
+Temporal bound
+  [10, 352]
+
+Evaluation
+  128 x 128 x 343 trivariate lattice
+  Density range: [3.959516e-27, 2.751287e-12]</code></pre>
+</div>
+</div>
+<p>The automatic estimate uses a spatial bandwidth of about 15 kilometres and a temporal bandwidth of about 6 days. This gives a detailed view of short-term changes, although neighbouring days can look quite different.</p>
+<p>Plotting all 343 daily surfaces would make the page difficult to read, so I compare six dates spread across the year.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>days_to_plot <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">30</span>, <span class="dv">120</span>, <span class="dv">210</span>, <span class="dv">240</span>, <span class="dv">270</span>, <span class="dv">330</span>)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfcol =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>))</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (day <span class="cf">in</span> days_to_plot) {</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(kde_yday, <span class="at">tselect =</span> day,</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">override.par =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">fix.range =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">main =</span> <span class="fu">paste</span>(<span class="st">"KDE at day"</span>, day))</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="hands-on-exercise-03_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The early-year surfaces remain weak because there are few recorded fires. Activity becomes much clearer after day 210, with concentrations shifting across the province rather than staying in one place.</p>
+</section>
+</section>
+<section id="improving-the-bandwidths" class="level2">
+<h2 class="anchored" data-anchor-id="improving-the-bandwidths">8. Improving the bandwidths</h2>
+<p>The bandwidth controls how much nearby events are blended together. A very small value produces a patchy surface, while a very large value can hide local differences. <code>BOOT.spattemp()</code> searches for a more balanced pair of spatial and temporal bandwidths.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="fu">BOOT.spattemp</span>(fire_yday_owin)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Initialising...Done.
+Optimising...
+h = 15102.47 ; lambda = 16.84806 
+h = 16612.72 ; lambda = 16.84806 
+h = 15102.47 ; lambda = 1527.095 
+h = 15480.03 ; lambda = 771.9715 
+h = 15668.81 ; lambda = 394.4098 
+h = 15763.2 ; lambda = 205.6289 
+h = 15810.4 ; lambda = 111.2385 
+h = 15833.99 ; lambda = 64.04328 
+h = 15845.79 ; lambda = 40.44567 
+h = 15851.69 ; lambda = 28.64687 
+h = 15863.49 ; lambda = 5.049258 
+h = 15854.64 ; lambda = 22.74746 
+h = 15860.54 ; lambda = 10.94866 
+h = 15859.07 ; lambda = 13.89836 
+h = 14348.82 ; lambda = 13.89836 
+h = 13216.87 ; lambda = 12.42351 
+h = 12460.27 ; lambda = 15.37321 
+h = 10760.88 ; lambda = 16.11064 
+h = 8875.282 ; lambda = 11.68608 
+h = 10432.08 ; lambda = 12.97658 
+h = 7976.084 ; lambda = 16.66371 
+h = 9286.281 ; lambda = 15.60366 
+h = 9615.08 ; lambda = 18.73771 
+h = 9206.581 ; lambda = 21.61828 
+h = 8140.483 ; lambda = 18.23073 
+h = 8795.582 ; lambda = 17.70071 
+h = 9124.381 ; lambda = 20.83477 
+h = 9164.856 ; lambda = 19.52699 
+h = 8345.358 ; lambda = 18.48998 
+h = 9297.65 ; lambda = 18.67578 
+h = 8928.375 ; lambda = 16.8495 
+h = 9105.736 ; lambda = 18.85762 
+Done.</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         h     lambda 
+9105.73611   18.85762 </code></pre>
+</div>
+</div>
+<p>The selected values are about 9,106 metres and 18.9 days. Rounding them to 9,000 metres and 19 days keeps the next step simple.</p>
+<section id="recomputing-the-daily-density" class="level3">
+<h3 class="anchored" data-anchor-id="recomputing-the-daily-density">8.1 Recomputing the daily density</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>kde_yday <span class="ot">&lt;-</span> <span class="fu">spattemp.density</span>(fire_yday_owin,</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>                             <span class="at">h =</span> <span class="dv">9000</span>,</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>                             <span class="at">lambda =</span> <span class="dv">19</span>)</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(kde_yday)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Spatiotemporal Kernel Density Estimate
+
+Bandwidths
+  h = 9000 (spatial)
+  lambda = 19 (temporal)
+
+No. of observations
+  741 
+
+Spatial bound
+  Type: polygonal
+  2D enclosure: [512066.8, 705559.4] x [9655398, 9834006]
+
+Temporal bound
+  [10, 352]
+
+Evaluation
+  128 x 128 x 343 trivariate lattice
+  Density range: [2.001642e-19, 2.445724e-12]</code></pre>
+</div>
+</div>
+<p>Compared with the automatic estimate, this version uses a smaller area around each fire but a longer time window. In simple terms, it keeps more local spatial detail while reducing sudden jumps from one day to the next.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfcol =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>))</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (day <span class="cf">in</span> days_to_plot) {</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(kde_yday, <span class="at">tselect =</span> day,</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">override.par =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">fix.range =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">main =</span> <span class="fu">paste</span>(<span class="st">"Improved KDE at day"</span>, day))</span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="hands-on-exercise-03_files/figure-html/unnamed-chunk-26-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The main seasonal story stays the same, but the later surfaces are easier to follow. The concentrations build through the middle of the year, become strongest around August to October, and then weaken towards December.</p>
+</section>
+<section id="animating-the-daily-pattern" class="level3">
+<h3 class="anchored" data-anchor-id="animating-the-daily-pattern">8.2 Animating the daily pattern</h3>
+<p>I use one frame every 30 days so the movement is clear without producing hundreds of nearly identical images.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>animation_days <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">15</span>, <span class="dv">345</span>, <span class="at">by =</span> <span class="dv">30</span>)</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>frame_dir <span class="ot">&lt;-</span> <span class="fu">tempfile</span>(<span class="st">"kde_frames_"</span>)</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a><span class="fu">dir.create</span>(frame_dir)</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_along</span>(animation_days)) {</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">png</span>(<span class="fu">file.path</span>(frame_dir, <span class="fu">sprintf</span>(<span class="st">"frame_%02d.png"</span>, i)),</span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>      <span class="at">width =</span> <span class="dv">900</span>, <span class="at">height =</span> <span class="dv">700</span>, <span class="at">res =</span> <span class="dv">110</span>)</span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(kde_yday, <span class="at">tselect =</span> animation_days[i],</span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">main =</span> <span class="fu">paste</span>(<span class="st">"KDE - Day"</span>, animation_days[i]))</span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dev.off</span>()</span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a>frames <span class="ot">&lt;-</span> magick<span class="sc">::</span><span class="fu">image_read</span>(</span>
+<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list.files</span>(frame_dir, <span class="at">pattern =</span> <span class="st">"png$"</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb41-15"><a href="#cb41-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb41-16"><a href="#cb41-16" aria-hidden="true" tabindex="-1"></a>kde_animation <span class="ot">&lt;-</span> magick<span class="sc">::</span><span class="fu">image_animate</span>(frames, <span class="at">fps =</span> <span class="dv">2</span>)</span>
+<span id="cb41-17"><a href="#cb41-17" aria-hidden="true" tabindex="-1"></a>magick<span class="sc">::</span><span class="fu">image_write</span>(kde_animation,</span>
+<span id="cb41-18"><a href="#cb41-18" aria-hidden="true" tabindex="-1"></a>                    <span class="at">path =</span> <span class="st">"chap06/kde_animation.gif"</span>)</span>
+<span id="cb41-19"><a href="#cb41-19" aria-hidden="true" tabindex="-1"></a><span class="fu">unlink</span>(frame_dir, <span class="at">recursive =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="chap06/kde_animation.gif" class="img-fluid figure-img" alt="Animated space-time kernel density surfaces showing the forest fire pattern changing across Kepulauan Bangka Belitung during 2023."></p>
+<figcaption>Daily forest fire density across 2023</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="checking-clustering-across-space-and-time" class="level2">
+<h2 class="anchored" data-anchor-id="checking-clustering-across-space-and-time">9. Checking clustering across space and time</h2>
+<p>The density maps show where activity is stronger. I now use a space-time K-function to check whether pairs of fires occur closer together than expected under spatial and temporal independence.</p>
+<section id="creating-the-space-time-point-object" class="level3">
+<h3 class="anchored" data-anchor-id="creating-the-space-time-point-object">9.1 Creating the space-time point object</h3>
+<p>First, I extract the projected coordinates.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>coords <span class="ot">&lt;-</span> <span class="fu">st_coordinates</span>(fire_sf)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>I combine the coordinates with the day of year.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>fire_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> coords[, <span class="dv">1</span>],</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">y =</span> coords[, <span class="dv">2</span>],</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">t =</span> fire_sf<span class="sc">$</span><span class="st">`</span><span class="at">DayofYear</span><span class="st">`</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The data frame is then converted to the format used by <code>stpp</code>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>fire_stpp <span class="ot">&lt;-</span> <span class="fu">as.3dpoints</span>(fire_df)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(fire_stpp)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "stpp"</code></pre>
+</div>
+</div>
+<p>The 3D plot uses the two horizontal axes for location and the vertical axis for day of year.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fire_stpp)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="hands-on-exercise-03_files/figure-html/unnamed-chunk-32-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The left panel shows the spatial pattern. On the right, the cumulative line rises slowly early in the year and much faster after about day 200, confirming that most detections occurred later in 2023.</p>
+</section>
+<section id="computing-the-space-time-k-function" class="level3">
+<h3 class="anchored" data-anchor-id="computing-the-space-time-k-function">9.2 Computing the space-time K-function</h3>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>kbb_stik <span class="ot">&lt;-</span> <span class="fu">STIKhat</span>(fire_stpp)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>To make the result easier to interpret, I subtract the value expected under independence from the observed K-function. Positive values mean there are more nearby event pairs than expected.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>k_difference <span class="ot">&lt;-</span> kbb_stik<span class="sc">$</span>Khat <span class="sc">-</span> kbb_stik<span class="sc">$</span>Ktheo</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a><span class="fu">filled.contour</span>(</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> kbb_stik<span class="sc">$</span>dist <span class="sc">/</span> <span class="dv">1000</span>,</span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">y =</span> kbb_stik<span class="sc">$</span>times,</span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">z =</span> k_difference,</span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">color.palette =</span> hcl.colors,</span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Spatial distance (km)"</span>,</span>
+<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">"Time difference (days)"</span>,</span>
+<span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"Observed K-function minus expected value"</span></span>
+<span id="cb49-11"><a href="#cb49-11" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="hands-on-exercise-03_files/figure-html/unnamed-chunk-34-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The difference is positive across the distances and time gaps shown, from about 2.9 to 43.5 kilometres and 6 to 87 days. This means the data contain more nearby fire pairs than an independent pattern would produce. Together with the density maps, it supports the view that the fires are clustered in both place and time.</p>
+<p>This is still a descriptive comparison rather than a formal significance test. Simulation envelopes would be needed before making a stronger statistical claim.</p>
+</section>
+</section>
+<section id="discussion" class="level2">
+<h2 class="anchored" data-anchor-id="discussion">10. Discussion</h2>
+<p>The monthly and daily views tell a consistent story. Fire activity is limited early in 2023, begins to rise around July, and is strongest from August to October. The main concentration also moves: it is more visible in the west and north during July and August, before becoming stronger in the south and east from September to November.</p>
+<p>The improved daily KDE makes that change easier to follow because it smooths over about 19 days while retaining more local spatial detail. The K-function comparison points in the same direction, showing more nearby fire pairs than expected under independence. The analysis can show when and where concentrations appear, but it does not identify their cause; weather, land cover, land management, and detection conditions would need separate data.</p>
 <p><a href="./hands-on-exercise.html" class="back-link">← Back to hands-on exercises</a></p>
 
 
-</section>
 </section>
 
 </main> <!-- /main -->
