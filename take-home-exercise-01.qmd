@@ -1,0 +1,414 @@
+---
+title: "Take-home Exercise 1"
+subtitle: "Road accidents in Greater Bangkok, 2022"
+author: "Le Truong Chinh"
+date: "11 September 2026"
+description: "Looking at where and when road accidents were recorded in Greater Bangkok during 2022."
+title-block-banner: true
+page-layout: article
+toc: true
+toc-depth: 3
+execute:
+  echo: false
+  warning: false
+  message: false
+  fig-align: center
+  fig-width: 9
+  fig-height: 5.5
+---
+
+::: {.exercise-lead}
+Where were road accidents recorded in Greater Bangkok, and were there more at certain times of the year? I use the 2022 accident records to look at these patterns, starting with a check of the data.
+:::
+
+## 1. What I want to find out
+
+I chose Greater Bangkok because it lets me look at the city together with its surrounding provinces. The 2022 data cover a full calendar year, so I can compare different months within the same period.
+
+There are three questions I want to explore:
+
+- Where were most accidents recorded?
+- Which months had more accidents?
+- Could missing locations change what the maps and charts show?
+
+I start by checking which records can be used, then look at the locations and timing. A high accident count is a reason to look more closely at an area, but it does not tell us how dangerous it is without knowing how many people travel there.
+
+## 2. The data
+
+| Data | What I use it for |
+|---|---|
+| [Thailand Road Accident 2019–2022](https://www.kaggle.com/datasets/thaweewatboy/thailand-road-accident-2019-2022) | Accident locations and dates. I use only the records from 2022. Each record describes a reported accident, rather than an individual vehicle or casualty. |
+| [Thailand provincial boundaries](https://www.geoboundaries.org/api/current/gbOpen/THA/ADM1/) | Defining the study area and placing accidents within its provinces. These boundaries represent 2017. |
+
+Both datasets were downloaded on 11 September 2026. The accident data come from a compilation of Ministry of Transport records covering **highways, rural roads and expressways**. They do not cover every accident on every local street. [Source: Ministry of Transport](https://datagov.mot.go.th/dataset/roadaccident).
+
+Here, Greater Bangkok means **Bangkok, Nonthaburi, Pathum Thani, Nakhon Pathom, Samut Prakan and Samut Sakhon**, following the National Statistical Office's [Bangkok and Vicinities grouping](https://www.nso.go.th/public/e-book/Statistical-Yearbook/SYB-2025/110/).
+
+I use the date the accident happened, from **1 January to 31 December 2022**, rather than the date the report was submitted. I treat the recorded times as local Thai time, although the source does not state the time zone.
+
+```{r}
+#| label: th01-packages
+#| include: false
+library(sf)
+library(tidyverse)
+library(spatstat.geom)
+library(digest)
+
+theme_set(theme_minimal(base_size = 12))
+theme_update(panel.grid.minor = element_blank(),
+             plot.title.position = "plot",
+             plot.caption = element_text(hjust = 0, colour = "grey35"))
+ink <- "#17333d"
+accent <- "#d85b3f"
+
+raw_dir <- "data/take-home-01/raw"
+derived_dir <- "data/take-home-01/derived"
+dir.create(derived_dir, recursive = TRUE, showWarnings = FALSE)
+
+manifest <- read_csv("take-home-01/source-manifest.csv", show_col_types = FALSE)
+stopifnot(all(vapply(file.path(raw_dir, manifest$filename), function(path) {
+  digest(path, algo = "sha256", file = TRUE)
+}, character(1)) == manifest$sha256))
+```
+
+```{r}
+#| label: th01-import
+#| include: false
+raw <- read_csv(
+  file.path(raw_dir, "thai_road_accident_2019_2022.csv"),
+  col_types = cols(
+    .default = col_character(),
+    latitude = col_double(), longitude = col_double(),
+    number_of_vehicles_involved = col_double(),
+    number_of_fatalities = col_double(), number_of_injuries = col_double()
+  )
+)
+stopifnot(nrow(problems(raw)) == 0L)
+exact_duplicates <- sum(duplicated(raw))
+
+records <- raw %>%
+  distinct() %>%
+  mutate(
+    source_row = match(acc_code, raw$acc_code),
+    incident_time = ymd_hms(incident_datetime, tz = "Asia/Bangkok", quiet = TRUE),
+    report_time = ymd_hms(report_datetime, tz = "Asia/Bangkok", quiet = TRUE)
+  )
+stopifnot(!anyNA(records$acc_code), anyDuplicated(records$acc_code) == 0L)
+
+window_start <- ymd_hms("2022-01-01 00:00:00", tz = "Asia/Bangkok")
+window_end <- ymd_hms("2023-01-01 00:00:00", tz = "Asia/Bangkok")
+
+records_2022 <- records %>%
+  filter(incident_time >= window_start, incident_time < window_end) %>%
+  mutate(coord_status = case_when(
+    is.na(latitude) | is.na(longitude) ~ "Missing coordinate",
+    !between(latitude, -90, 90) | !between(longitude, -180, 180) ~ "Invalid range",
+    latitude == 0 & longitude == 0 ~ "Zero coordinate pair",
+    TRUE ~ "Usable"
+  ))
+
+tibble(
+  Check = c("Downloaded rows", "Exact duplicate rows", "Unparsed incident times",
+            "Earliest incident in the full file", "Latest incident in the full file",
+            "Records in 2022"),
+  Result = c(nrow(raw), exact_duplicates, sum(is.na(records$incident_time)),
+             format(min(records$incident_time, na.rm = TRUE)),
+             format(max(records$incident_time, na.rm = TRUE)), nrow(records_2022))
+) %>% knitr::kable()
+```
+
+```{r}
+#| label: th01-study-window
+#| include: false
+region_names <- c("Bangkok", "Nonthaburi", "Pathum Thani",
+                  "Nakhon Pathom", "Samut Prakan", "Samut Sakhon")
+
+boundaries <- st_read(file.path(raw_dir, "geoBoundaries-THA-ADM1.geojson"),
+                      quiet = TRUE)
+provinces <- boundaries %>%
+  mutate(province_geom = str_remove(shapeName, " Province$")) %>%
+  filter(province_geom %in% region_names) %>%
+  st_transform(32647)
+
+stopifnot(nrow(provinces) == 6L, setequal(provinces$province_geom, region_names))
+invalid_boundary_count <- sum(!st_is_valid(provinces))
+provinces <- st_make_valid(provinces)
+study_window <- st_union(provinces)
+stopifnot(all(st_is_valid(provinces)), !any(st_is_empty(provinces)))
+
+tibble(
+  Check = c("Selected provinces", "Invalid geometries before repair",
+            "Area of downloaded study window (square kilometres)", "Projected CRS"),
+  Result = c(nrow(provinces), invalid_boundary_count,
+             round(as.numeric(st_area(study_window)) / 1e6, 1),
+             st_crs(study_window)$input)
+) %>% knitr::kable()
+```
+
+```{r}
+#| label: th01-spatial-filter
+#| include: false
+located <- records_2022 %>%
+  filter(coord_status == "Usable") %>%
+  st_as_sf(coords = c("longitude", "latitude"), crs = 4326, remove = FALSE) %>%
+  st_transform(32647)
+
+province_matches <- st_intersects(located, provinces)
+located$province_matches <- lengths(province_matches)
+located$province_geom <- vapply(province_matches, function(i) {
+  if (length(i) == 1L) provinces$province_geom[i] else NA_character_
+}, character(1))
+located$inside_window <- lengths(st_intersects(located, study_window)) > 0L
+
+accidents <- located %>%
+  filter(inside_window) %>%
+  mutate(
+    incident_date = as.Date(incident_time, tz = "Asia/Bangkok"),
+    month_start = floor_date(incident_date, "month"),
+    hour = hour(incident_time),
+    province_label_disagrees = is.na(province_geom) | province_en != province_geom
+  ) %>%
+  group_by(longitude, latitude, incident_time) %>%
+  mutate(same_location_time_n = n()) %>%
+  ungroup()
+
+unlocated_region <- records_2022 %>%
+  filter(coord_status != "Usable", province_en %in% region_names)
+
+audit <- tibble(
+  Step = c("Downloaded national file", "Remove exact duplicate rows",
+           "Exclude missing or unparsed incident times", "Keep incidents in 2022",
+           "Exclude unusable coordinates", "Keep locations inside the six-province window"),
+  Removed = c(NA, exact_duplicates, sum(is.na(records$incident_time)),
+              sum(!is.na(records$incident_time)) - nrow(records_2022),
+              sum(records_2022$coord_status != "Usable"),
+              sum(!located$inside_window)),
+  Remaining = c(nrow(raw), nrow(records), sum(!is.na(records$incident_time)),
+                nrow(records_2022), nrow(located), nrow(accidents))
+)
+audit %>% knitr::kable(format.args = list(big.mark = ","))
+```
+
+```{r}
+#| label: th01-location-checks
+#| include: false
+location_checks <- tibble(
+  Check = c("Missing coordinates in 2022, nationally",
+            "Out-of-range or zero-pair coordinates in 2022",
+            "Unlocated records labelled within the six-province region",
+            "Located outside the window but labelled within the region",
+            "Located inside the window but labelled outside the region",
+            "Retained records whose province label disagrees with the geometry",
+            "Retained records matching multiple provinces",
+            "Records beyond the first at a shared coordinate",
+            "Records belonging to a same-location, same-time group"),
+  Records = c(sum(records_2022$coord_status == "Missing coordinate"),
+              sum(records_2022$coord_status %in% c("Invalid range", "Zero coordinate pair")),
+              nrow(unlocated_region),
+              sum(!located$inside_window & located$province_en %in% region_names),
+              sum(!accidents$province_en %in% region_names),
+              sum(accidents$province_label_disagrees),
+              sum(accidents$province_matches > 1),
+              sum(duplicated(st_coordinates(accidents))),
+              sum(accidents$same_location_time_n > 1))
+)
+location_checks %>% knitr::kable()
+```
+
+## 3. Checking the records
+
+First, I kept the 2022 records. I then checked their dates and locations, removed records that could not be placed on a map, and kept those inside the six provinces.
+
+```{r}
+#| label: th01-record-summary
+tibble(
+  Records = c("All years in the downloaded file", "From 2022",
+              "From 2022, with usable locations", "Inside Greater Bangkok"),
+  Number = c(nrow(raw), nrow(records_2022), nrow(located), nrow(accidents))
+) %>% knitr::kable(format.args = list(big.mark = ","))
+```
+
+This leaves **`r format(nrow(accidents), big.mark = ",")` accident records** for the map. All the dates could be read, and there were no completely duplicated records.
+
+### 3.1 Missing locations
+
+There are **189 records without coordinates**. All are listed as accidents in Bangkok. I checked which agency reported them to see whether the missing locations were spread across the data.
+
+```{r}
+#| label: th01-missingness
+missingness <- records_2022 %>%
+  filter(province_en == "Bangkok") %>%
+  count(agency, usable = coord_status == "Usable") %>%
+  pivot_wider(names_from = usable, values_from = n, values_fill = 0,
+              names_prefix = "usable_") %>%
+  mutate(total = usable_TRUE + usable_FALSE,
+         missing_pct = 100 * usable_FALSE / total,
+         agency_label = recode(agency,
+           "department of highways" = "Department of Highways",
+           "department of rural roads" = "Department of Rural Roads",
+           "expressway authority of thailand" = "Expressway Authority"))
+
+ggplot(missingness, aes(x = missing_pct, y = reorder(agency_label, missing_pct))) +
+  geom_col(fill = accent, width = 0.55) +
+  geom_text(aes(label = paste0(usable_FALSE, " / ", total)),
+            hjust = -0.15, size = 3.7, colour = ink) +
+  scale_x_continuous(limits = c(0, 55), breaks = seq(0, 50, 10),
+                     labels = function(x) paste0(x, "%")) +
+  labs(title = "Some Bangkok reports have no recorded location",
+       subtitle = "Bangkok, 2022 | Labels show missing locations / total reports",
+       x = "Reports with missing locations", y = NULL,
+       caption = "Source: Ministry of Transport compilation via Kaggle, version 1.")
+```
+
+All 189 came from the Expressway Authority. They make up **43.1% of its 439 Bangkok reports**, compared with no missing locations in the other two agencies' Bangkok records. This means the map leaves out a substantial part of the Expressway Authority's reports. I keep these records for the monthly comparison because their dates are still available, but cannot place them on the map.
+
+### 3.2 Repeated or conflicting locations
+
+Some records share the same location. This can happen when several accidents occur at the same place, so I keep them. Two pairs also share the same accident time but have different record numbers. They may be duplicate reports; the available information is not enough to decide, so they remain in the data.
+
+A few records have coordinates that disagree with their province names. I use their plotted locations to decide whether they belong in the study area. This excludes four records listed under the six provinces and includes ten listed elsewhere. The boundary data are older than the accident records, so I cannot assume every disagreement is a recording error.
+
+## 4. Where were accidents recorded?
+
+With the records checked, I can look at their locations. Each dot below represents an accident record. Records at the same location overlap, so the dots alone do not show every repeated accident.
+
+```{r}
+#| label: th01-location-map
+#| fig-height: 7
+#| fig-alt: "Map of six Greater Bangkok provinces with 3,599 recorded accident locations in 2022, showing linear concentrations and uneven spatial coverage."
+province_labels <- st_point_on_surface(provinces)
+
+ggplot() +
+  geom_sf(data = provinces, fill = "#f0f1ee", colour = "#778489", linewidth = 0.35) +
+  geom_sf(data = accidents, colour = accent, size = 0.55, alpha = 0.4) +
+  geom_sf_label(data = province_labels, aes(label = province_geom),
+                size = 3.2, colour = ink, fill = "white", linewidth = 0.15) +
+  coord_sf(crs = st_crs(32647), datum = st_crs(4326), expand = FALSE) +
+  labs(title = "Where were accidents recorded in 2022?",
+       subtitle = "3,599 accident records across Greater Bangkok",
+       x = NULL, y = NULL,
+       caption = paste("Sources: Ministry of Transport via Kaggle; geoBoundaries (2017 boundaries).",
+                       "The 189 Bangkok reports without locations are not shown.",
+                       sep = "\n")) +
+  theme(panel.grid.major = element_line(colour = "#dce1e2", linewidth = 0.25))
+```
+
+The dots follow several long routes through Bangkok and towards the surrounding provinces. This fits the dataset's focus on highways, rural roads and expressways. Bangkok has the largest number of mapped records, followed by Samut Prakan. Areas with fewer dots should not automatically be seen as safer: some roads may be outside this reporting system, and we do not know how much traffic each road carries.
+
+```{r}
+#| label: th01-province-counts
+province_counts <- accidents %>%
+  st_drop_geometry() %>%
+  count(province_geom, name = "located_records", sort = TRUE) %>%
+  mutate(share_pct = round(100 * located_records / sum(located_records), 1))
+
+province_counts %>%
+  rename(Province = province_geom, `Accident records` = located_records,
+         `Share (%)` = share_pct) %>%
+  knitr::kable()
+```
+
+Bangkok accounts for **1,802 records**, about half of those on the map. Samut Prakan follows with **671**. These counts use the recorded coordinates to assign each accident to a province.
+
+## 5. When were more accidents recorded?
+
+After looking at where accidents happened, I compare their timing. Simply comparing monthly totals would give longer months more days to accumulate accidents. I therefore divide each month's total by its number of days.
+
+The solid line uses the records shown on the map. The dashed line adds the 189 reports with missing locations. Their province names place them in Bangkok, although I cannot check their exact positions.
+
+```{r}
+#| label: th01-monthly-summary
+#| include: false
+month_calendar <- tibble(month_start = seq(as.Date("2022-01-01"),
+                                          as.Date("2022-12-01"), by = "month"))
+
+monthly <- accidents %>%
+  st_drop_geometry() %>%
+  count(month_start, name = "located_n") %>%
+  right_join(month_calendar, by = "month_start") %>%
+  left_join(
+    unlocated_region %>%
+      mutate(month_start = as.Date(floor_date(incident_time, "month"),
+                                   tz = "Asia/Bangkok")) %>%
+      count(month_start, name = "unlocated_n"),
+    by = "month_start"
+  ) %>%
+  mutate(
+    across(c(located_n, unlocated_n), ~ replace_na(.x, 0L)),
+    days = days_in_month(month_start),
+    located_per_day = located_n / days,
+    including_unlocated_per_day = (located_n + unlocated_n) / days
+  ) %>%
+  arrange(month_start)
+
+stopifnot(sum(monthly$located_n) == nrow(accidents),
+          sum(monthly$unlocated_n) == nrow(unlocated_region), sum(monthly$days) == 365)
+
+monthly %>%
+  transmute(Month = month.abb[month(month_start)],
+            `Located records` = located_n,
+            `Unlocated Bangkok reports` = unlocated_n,
+            `Located records per day` = round(located_per_day, 2)) %>%
+  knitr::kable()
+```
+
+```{r}
+#| label: th01-monthly-pattern
+#| fig-alt: "Monthly accident records per day. Both the mapped records and the comparison including reports with missing locations peak in October."
+monthly_long <- monthly %>%
+  select(month_start, located_per_day, including_unlocated_per_day) %>%
+  pivot_longer(-month_start, names_to = "sample", values_to = "records_per_day") %>%
+  mutate(sample = recode(sample,
+    located_per_day = "Records shown on the map",
+    including_unlocated_per_day = "Including reports with missing locations"))
+
+ggplot(monthly_long, aes(x = month_start, y = records_per_day,
+                         colour = sample, linetype = sample)) +
+  geom_line(linewidth = 0.9) +
+  geom_point(size = 2) +
+  scale_colour_manual(values = c("Including reports with missing locations" = accent,
+                                 "Records shown on the map" = ink)) +
+  scale_linetype_manual(values = c("Including reports with missing locations" = "dashed",
+                                   "Records shown on the map" = "solid")) +
+  scale_x_date(breaks = monthly$month_start,
+               labels = month.abb[month(monthly$month_start)]) +
+  scale_y_continuous(limits = c(0, NA), expand = expansion(mult = c(0, 0.08))) +
+  labs(title = "More accidents were recorded towards the end of 2022",
+       subtitle = "Monthly averages, allowing for different month lengths",
+       x = NULL, y = "Accident records per day", colour = NULL, linetype = NULL,
+       caption = "The dashed line also includes 189 Bangkok reports without coordinates.") +
+  theme(legend.position = "bottom", legend.text = element_text(size = 10))
+```
+
+**October has the highest count: 394 mapped records, or about 12.7 per day.** November has fewer records than December, but more per day because it is a shorter month. April also stands out compared with March and May.
+
+Adding the reports with missing locations raises the figures slightly but leaves the same broad pattern: more accidents were recorded towards the end of the year. The location gaps therefore do not explain that increase on their own. The chart does not tell us whether changes in traffic, road conditions or reporting caused it.
+
+```{r}
+#| label: th01-save-objects
+#| include: false
+study_owin <- as.owin(study_window)
+xy <- st_coordinates(accidents)
+accident_ppp <- ppp(xy[, 1], xy[, 2], window = study_owin,
+                    marks = accidents$acc_code, unitname = c("metre", "metres"))
+
+stopifnot(npoints(accident_ppp) == nrow(accidents),
+          all(st_is_valid(accidents)), !any(st_is_empty(accidents)),
+          all(accidents$incident_time >= window_start & accidents$incident_time < window_end),
+          nrow(located) == nrow(accidents) + sum(!located$inside_window))
+
+saveRDS(accidents, file.path(derived_dir, "accidents_2022_bmr.rds"))
+saveRDS(provinces, file.path(derived_dir, "bmr_provinces.rds"))
+saveRDS(study_window, file.path(derived_dir, "bmr_window.rds"))
+saveRDS(accident_ppp, file.path(derived_dir, "accidents_2022_bmr_ppp.rds"))
+write_csv(unlocated_region, file.path(derived_dir, "unlocated_region_2022.csv"))
+write_csv(audit, file.path(derived_dir, "sample_audit.csv"))
+write_csv(location_checks, file.path(derived_dir, "location_checks.csv"))
+write_csv(monthly, file.path(derived_dir, "monthly_summary.csv"))
+write_csv(accidents %>% st_drop_geometry() %>% filter(province_label_disagrees),
+          file.path(derived_dir, "province_disagreements.csv"))
+write_csv(accidents %>% st_drop_geometry() %>% filter(same_location_time_n > 1),
+          file.path(derived_dir, "possible_duplicate_reports.csv"))
+```
+
+[← Back to take-home exercises](take-home-exercise.qmd){.back-link}

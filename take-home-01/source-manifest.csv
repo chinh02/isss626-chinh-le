@@ -1,0 +1,3 @@
+"dataset","filename","url","licence","sha256","bytes","accessed_utc"
+"Accidents: Kaggle version 1","thailand-road-accident-v1.zip","https://www.kaggle.com/api/v1/datasets/download/thaweewatboy/thailand-road-accident-2019-2022?datasetVersionNumber=1","CC0: Public Domain (Kaggle listing)","225158d012a604bdf14497bbe6edc3b75ff38893a30e42e9136290598cf7b9ce",7724573,"2026-09-10 17:11:32 UTC"
+"Thailand ADM1: geoBoundaries 9469f09","geoBoundaries-THA-ADM1.geojson","https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/THA/ADM1/geoBoundaries-THA-ADM1.geojson","Open Database License 1.0","145beb11e52785a42e16997c92a65426b3df8d009941db6b012ec8e411f3e33c",4032763,"2026-09-10 17:11:32 UTC"

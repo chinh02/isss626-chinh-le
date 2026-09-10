@@ -12,10 +12,16 @@ toc: false
 
 Extended assignments and spatial analysis completed during ISSS626.
 
-::: {.empty-section}
-<span>NO ENTRIES YET</span>
+::: {.exercise-list}
+::: {.exercise-entry}
+<span>01</span>
 
-Exercises will be added here during the course.
+## Road accidents in Greater Bangkok
+
+Looking at where and when accidents were recorded in 2022, and how missing locations affect the picture.
+
+[Read the technical report →](take-home-exercise-01.qmd){.section-link}
+:::
 :::
 
 [← Back to home](index.qmd){.back-link}

@@ -6,9 +6,11 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="description" content="Take-home geospatial exercises by Le Truong Chinh for ISSS626.">
+<meta name="author" content="Le Truong Chinh">
+<meta name="dcterms.date" content="2026-09-11">
+<meta name="description" content="Looking at where and when road accidents were recorded in Greater Bangkok during 2022.">
 
-<title>Take-home exercise – Le Truong Chinh · ISSS626</title>
+<title>Take-home Exercise 1 – Le Truong Chinh · ISSS626</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -77,15 +79,16 @@ ul.task-list li input[type="checkbox"] {
 
 
 <link rel="stylesheet" href="styles.css">
-<meta property="og:title" content="Take-home exercise – Le Truong Chinh · ISSS626">
-<meta property="og:description" content="Take-home geospatial exercises by Le Truong Chinh for ISSS626.">
+<meta property="og:title" content="Take-home Exercise 1 – Le Truong Chinh · ISSS626">
+<meta property="og:description" content="Looking at where and when road accidents were recorded in Greater Bangkok during 2022.">
+<meta property="og:image" content="take-home-exercise-01_files/figure-html/th01-missingness-1.png">
 <meta property="og:site_name" content="Le Truong Chinh · ISSS626">
 </head>
 
 <body class="nav-fixed quarto-light">
 
 <div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top">
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
@@ -108,7 +111,7 @@ ul.task-list li input[type="checkbox"] {
 <span class="menu-text">Hands-on exercise</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="./take-home-exercise.html" aria-current="page"> 
+    <a class="nav-link" href="./take-home-exercise.html"> 
 <span class="menu-text">Take-home exercise</span></a>
   </li>  
   <li class="nav-item">
@@ -123,59 +126,238 @@ ul.task-list li input[type="checkbox"] {
     </nav>
 </header>
 <!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Take-home Exercise 1</h1>
+            <p class="subtitle lead">Road accidents in Greater Bangkok, 2022</p>
+                  <div>
+        <div class="description">
+          Looking at where and when road accidents were recorded in Greater Bangkok during 2022.
+        </div>
+      </div>
+                </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Le Truong Chinh </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">September 11, 2026</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#what-i-want-to-find-out" id="toc-what-i-want-to-find-out" class="nav-link active" data-scroll-target="#what-i-want-to-find-out">1. What I want to find out</a></li>
+  <li><a href="#the-data" id="toc-the-data" class="nav-link" data-scroll-target="#the-data">2. The data</a></li>
+  <li><a href="#checking-the-records" id="toc-checking-the-records" class="nav-link" data-scroll-target="#checking-the-records">3. Checking the records</a>
+  <ul class="collapse">
+  <li><a href="#missing-locations" id="toc-missing-locations" class="nav-link" data-scroll-target="#missing-locations">3.1 Missing locations</a></li>
+  <li><a href="#repeated-or-conflicting-locations" id="toc-repeated-or-conflicting-locations" class="nav-link" data-scroll-target="#repeated-or-conflicting-locations">3.2 Repeated or conflicting locations</a></li>
+  </ul></li>
+  <li><a href="#where-were-accidents-recorded" id="toc-where-were-accidents-recorded" class="nav-link" data-scroll-target="#where-were-accidents-recorded">4. Where were accidents recorded?</a></li>
+  <li><a href="#when-were-more-accidents-recorded" id="toc-when-were-more-accidents-recorded" class="nav-link" data-scroll-target="#when-were-more-accidents-recorded">5. When were more accidents recorded?</a></li>
+  </ul>
+</nav>
+    </div>
 <!-- main -->
-<main class="content column-page" id="quarto-document-content">
+<main class="content quarto-banner-title-block" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title">Take-home exercise</h1>
+
+
+
+
+<div class="exercise-lead">
+<p>Where were road accidents recorded in Greater Bangkok, and were there more at certain times of the year? I use the 2022 accident records to look at these patterns, starting with a check of the data.</p>
 </div>
-
+<section id="what-i-want-to-find-out" class="level2">
+<h2 class="anchored" data-anchor-id="what-i-want-to-find-out">1. What I want to find out</h2>
+<p>I chose Greater Bangkok because it lets me look at the city together with its surrounding provinces. The 2022 data cover a full calendar year, so I can compare different months within the same period.</p>
+<p>There are three questions I want to explore:</p>
+<ul>
+<li>Where were most accidents recorded?</li>
+<li>Which months had more accidents?</li>
+<li>Could missing locations change what the maps and charts show?</li>
+</ul>
+<p>I start by checking which records can be used, then look at the locations and timing. A high accident count is a reason to look more closely at an area, but it does not tell us how dangerous it is without knowing how many people travel there.</p>
+</section>
+<section id="the-data" class="level2">
+<h2 class="anchored" data-anchor-id="the-data">2. The data</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Data</th>
+<th>What I use it for</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="https://www.kaggle.com/datasets/thaweewatboy/thailand-road-accident-2019-2022">Thailand Road Accident 2019–2022</a></td>
+<td>Accident locations and dates. I use only the records from 2022. Each record describes a reported accident, rather than an individual vehicle or casualty.</td>
+</tr>
+<tr class="even">
+<td><a href="https://www.geoboundaries.org/api/current/gbOpen/THA/ADM1/">Thailand provincial boundaries</a></td>
+<td>Defining the study area and placing accidents within its provinces. These boundaries represent 2017.</td>
+</tr>
+</tbody>
+</table>
+<p>Both datasets were downloaded on 11 September 2026. The accident data come from a compilation of Ministry of Transport records covering <strong>highways, rural roads and expressways</strong>. They do not cover every accident on every local street. <a href="https://datagov.mot.go.th/dataset/roadaccident">Source: Ministry of Transport</a>.</p>
+<p>Here, Greater Bangkok means <strong>Bangkok, Nonthaburi, Pathum Thani, Nakhon Pathom, Samut Prakan and Samut Sakhon</strong>, following the National Statistical Office’s <a href="https://www.nso.go.th/public/e-book/Statistical-Yearbook/SYB-2025/110/">Bangkok and Vicinities grouping</a>.</p>
+<p>I use the date the accident happened, from <strong>1 January to 31 December 2022</strong>, rather than the date the report was submitted. I treat the recorded times as local Thai time, although the source does not state the time zone.</p>
+</section>
+<section id="checking-the-records" class="level2">
+<h2 class="anchored" data-anchor-id="checking-the-records">3. Checking the records</h2>
+<p>First, I kept the 2022 records. I then checked their dates and locations, removed records that could not be placed on a map, and kept those inside the six provinces.</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Records</th>
+<th style="text-align: right;">Number</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">All years in the downloaded file</td>
+<td style="text-align: right;">81,735</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">From 2022</td>
+<td style="text-align: right;">21,032</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">From 2022, with usable locations</td>
+<td style="text-align: right;">20,843</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Inside Greater Bangkok</td>
+<td style="text-align: right;">3,599</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>This leaves <strong>3,599 accident records</strong> for the map. All the dates could be read, and there were no completely duplicated records.</p>
+<section id="missing-locations" class="level3">
+<h3 class="anchored" data-anchor-id="missing-locations">3.1 Missing locations</h3>
+<p>There are <strong>189 records without coordinates</strong>. All are listed as accidents in Bangkok. I checked which agency reported them to see whether the missing locations were spread across the data.</p>
+<div class="cell">
+<div class="cell-output-display">
 <div>
-  <div class="description">
-    Take-home geospatial exercises by Le Truong Chinh for ISSS626.
-  </div>
+<figure class="figure">
+<p><img src="take-home-exercise-01_files/figure-html/th01-missingness-1.png" class="img-fluid figure-img" width="864"></p>
+</figure>
 </div>
-
-
-<div class="quarto-title-meta column-page">
-
-    
-  
-    
-  </div>
-  
-
-
-</header>
-
-
-<div class="section-page">
-<p class="eyebrow">
-SECTION 02
-</p>
-<section id="take-home-exercise" class="level1">
-<h1>Take-home exercise</h1>
-<p>Extended assignments and spatial analysis completed during ISSS626.</p>
-<div class="exercise-list">
-<div class="exercise-entry">
-<p><span>01</span></p>
-<section id="road-accidents-in-greater-bangkok" class="level2">
-<h2 class="anchored" data-anchor-id="road-accidents-in-greater-bangkok">Road accidents in Greater Bangkok</h2>
-<p>Looking at where and when accidents were recorded in 2022, and how missing locations affect the picture.</p>
-<p><a href="./take-home-exercise-01.html" class="section-link">Read the technical report →</a></p>
+</div>
+</div>
+<p>All 189 came from the Expressway Authority. They make up <strong>43.1% of its 439 Bangkok reports</strong>, compared with no missing locations in the other two agencies’ Bangkok records. This means the map leaves out a substantial part of the Expressway Authority’s reports. I keep these records for the monthly comparison because their dates are still available, but cannot place them on the map.</p>
 </section>
-</div>
-</div>
-<p><a href="./index.html" class="back-link">← Back to home</a></p>
+<section id="repeated-or-conflicting-locations" class="level3">
+<h3 class="anchored" data-anchor-id="repeated-or-conflicting-locations">3.2 Repeated or conflicting locations</h3>
+<p>Some records share the same location. This can happen when several accidents occur at the same place, so I keep them. Two pairs also share the same accident time but have different record numbers. They may be duplicate reports; the available information is not enough to decide, so they remain in the data.</p>
+<p>A few records have coordinates that disagree with their province names. I use their plotted locations to decide whether they belong in the study area. This excludes four records listed under the six provinces and includes ten listed elsewhere. The boundary data are older than the accident records, so I cannot assume every disagreement is a recording error.</p>
 </section>
+</section>
+<section id="where-were-accidents-recorded" class="level2">
+<h2 class="anchored" data-anchor-id="where-were-accidents-recorded">4. Where were accidents recorded?</h2>
+<p>With the records checked, I can look at their locations. Each dot below represents an accident record. Records at the same location overlap, so the dots alone do not show every repeated accident.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="take-home-exercise-01_files/figure-html/th01-location-map-1.png" class="img-fluid figure-img" alt="Map of six Greater Bangkok provinces with 3,599 recorded accident locations in 2022, showing linear concentrations and uneven spatial coverage." width="864"></p>
+</figure>
 </div>
+</div>
+</div>
+<p>The dots follow several long routes through Bangkok and towards the surrounding provinces. This fits the dataset’s focus on highways, rural roads and expressways. Bangkok has the largest number of mapped records, followed by Samut Prakan. Areas with fewer dots should not automatically be seen as safer: some roads may be outside this reporting system, and we do not know how much traffic each road carries.</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Province</th>
+<th style="text-align: right;">Accident records</th>
+<th style="text-align: right;">Share (%)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Bangkok</td>
+<td style="text-align: right;">1802</td>
+<td style="text-align: right;">50.1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Samut Prakan</td>
+<td style="text-align: right;">671</td>
+<td style="text-align: right;">18.6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Pathum Thani</td>
+<td style="text-align: right;">491</td>
+<td style="text-align: right;">13.6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Samut Sakhon</td>
+<td style="text-align: right;">323</td>
+<td style="text-align: right;">9.0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Nonthaburi</td>
+<td style="text-align: right;">174</td>
+<td style="text-align: right;">4.8</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Nakhon Pathom</td>
+<td style="text-align: right;">138</td>
+<td style="text-align: right;">3.8</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Bangkok accounts for <strong>1,802 records</strong>, about half of those on the map. Samut Prakan follows with <strong>671</strong>. These counts use the recorded coordinates to assign each accident to a province.</p>
+</section>
+<section id="when-were-more-accidents-recorded" class="level2">
+<h2 class="anchored" data-anchor-id="when-were-more-accidents-recorded">5. When were more accidents recorded?</h2>
+<p>After looking at where accidents happened, I compare their timing. Simply comparing monthly totals would give longer months more days to accumulate accidents. I therefore divide each month’s total by its number of days.</p>
+<p>The solid line uses the records shown on the map. The dashed line adds the 189 reports with missing locations. Their province names place them in Bangkok, although I cannot check their exact positions.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="take-home-exercise-01_files/figure-html/th01-monthly-pattern-1.png" class="img-fluid figure-img" alt="Monthly accident records per day. Both the mapped records and the comparison including reports with missing locations peak in October." width="864"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>October has the highest count: 394 mapped records, or about 12.7 per day.</strong> November has fewer records than December, but more per day because it is a shorter month. April also stands out compared with March and May.</p>
+<p>Adding the reports with missing locations raises the figures slightly but leaves the same broad pattern: more accidents were recorded towards the end of the year. The location gaps therefore do not explain that increase on their own. The chart does not tell us whether changes in traffic, road conditions or reporting caused it.</p>
+<p><a href="./take-home-exercise.html" class="back-link">← Back to take-home exercises</a></p>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
