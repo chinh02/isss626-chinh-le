@@ -26,6 +26,14 @@ execute:
 This exercise examines forest fire events recorded in Kepulauan Bangka Belitung during 2023. I map the events over time, estimate their changing density, and check whether they cluster across both space and time.
 :::
 
+::: {.callout-note title="A few changes from the tutorial 🙂"}
+I follow [Chapter 6](https://r4gdsa.netlify.app/chap06), with a few small changes to explore the results:
+
+- **Six selected days** make the daily maps easier to compare.
+- **A short GIF** helps me follow how the pattern changes over the year.
+- **The final K-function plot** shows observed minus expected values, so the difference is easier to see.
+:::
+
 ## 1. What I am looking at
 
 A spatio-temporal point pattern records both where and when events happen. Here, each point is a forest fire detected by the MODIS sensor. I want to see whether the fire locations are spread evenly or whether they form concentrations that change over the year.
