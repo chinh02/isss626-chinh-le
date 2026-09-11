@@ -3,6 +3,7 @@ title: "Hands-on Exercise 2"
 subtitle: "First- and second-order spatial point pattern analysis"
 author: "Le Truong Chinh"
 date: "3 September 2026"
+date-modified: "3 September 2026"
 description: "An executed ISSS626 exercise analysing Singapore childcare centre locations with spatstat."
 title-block-banner: true
 page-layout: article

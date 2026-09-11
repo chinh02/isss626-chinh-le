@@ -3,6 +3,7 @@ title: "Hands-on Exercise 3"
 subtitle: "Spatio-temporal point pattern analysis"
 author: "Le Truong Chinh"
 date: "7 September 2026"
+date-modified: "11 September 2026"
 description: "An executed ISSS626 exercise analysing the location and timing of forest fire events in Kepulauan Bangka Belitung."
 title-block-banner: true
 page-layout: article

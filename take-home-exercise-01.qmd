@@ -3,6 +3,7 @@ title: "Take-home Exercise 1"
 subtitle: "Road accidents in Greater Bangkok, 2022"
 author: "Le Truong Chinh"
 date: "11 September 2026"
+date-modified: "11 September 2026"
 description: "Looking at where and when road accidents were recorded in Greater Bangkok during 2022."
 title-block-banner: true
 page-layout: article

@@ -3,6 +3,7 @@ title: "Hands-on Exercise 1"
 subtitle: "Geospatial data wrangling and choropleth mapping"
 author: "Le Truong Chinh"
 date: "3 September 2026"
+date-modified: "3 September 2026"
 description: "An executed ISSS626 exercise using sf, tidyverse and tmap with Singapore geospatial data."
 title-block-banner: true
 page-layout: article
