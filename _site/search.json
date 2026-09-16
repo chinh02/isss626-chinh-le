@@ -4,7 +4,7 @@
     "href": "take-home-exercise.html",
     "title": "Take-home exercise",
     "section": "",
-    "text": "SECTION 02\n\n\n\nExtended assignments and spatial analysis completed during ISSS626.\n\n\n01\n\n\nLooking at where and when accidents were recorded in 2022, and how missing locations affect the picture.\nRead the technical report →\n\n\n\n← Back to home"
+    "text": "SECTION 02\n\n\n\nExtended assignments and spatial analysis completed during ISSS626.\n\n\n01\n\n\nWhere accidents concentrate, how the pattern changes through 2022, and whether nearby accidents also happen close together in time.\nRead the technical report →\nView the executive summary →\nGitHub project →\n\n\n\n← Back to home"
   },
   {
     "objectID": "index.html",
@@ -214,7 +214,7 @@
     "href": "take-home-exercise-01.html",
     "title": "Take-home Exercise 1",
     "section": "",
-    "text": "Where were road accidents recorded in Greater Bangkok, and were there more at certain times of the year? I use the 2022 accident records to look at these patterns, starting with a check of the data."
+    "text": "I use the 2022 road accident records to look at where accidents were reported in Greater Bangkok, how this changed over the year, and whether nearby accidents often happened within days of each other.\nView the short presentation"
   },
   {
     "objectID": "take-home-exercise-01.html#choosing-the-direction",
@@ -277,41 +277,167 @@
     "href": "take-home-exercise.html#road-accidents-in-greater-bangkok",
     "title": "Take-home exercise",
     "section": "",
-    "text": "Looking at where and when accidents were recorded in 2022, and how missing locations affect the picture.\nRead the technical report →"
+    "text": "Where accidents concentrate, how the pattern changes through 2022, and whether nearby accidents also happen close together in time.\nRead the technical report →\nView the executive summary →\nGitHub project →"
   },
   {
     "objectID": "take-home-exercise-01.html#what-i-want-to-find-out",
     "href": "take-home-exercise-01.html#what-i-want-to-find-out",
     "title": "Take-home Exercise 1",
     "section": "1. What I want to find out",
-    "text": "1. What I want to find out\nI chose Greater Bangkok because it lets me look at the city together with its surrounding provinces. The 2022 data cover a full calendar year, so I can compare different months within the same period.\nThere are three questions I want to explore:\n\nWhere were most accidents recorded?\nWhich months had more accidents?\nCould missing locations change what the maps and charts show?\n\nI start by checking which records can be used, then look at the locations and timing. A high accident count is a reason to look more closely at an area, but it does not tell us how dangerous it is without knowing how many people travel there."
+    "text": "1. What I want to find out\nI chose Greater Bangkok so I could look at the city and its surrounding provinces together. The 2022 data cover a full year, which makes it possible to compare the months.\nThere are four questions I want to explore:\n\nWhere were most accidents recorded?\nWhich months had more accidents?\nDid nearby accidents happen close together in time more often than expected?\nCould missing locations change what the maps and charts show?\n\nI check the records before making the maps. Then I look for places with many reports and test whether nearby accidents happened close together in time. To judge how dangerous a road is, I would also need to know how much traffic it carries."
   },
   {
     "objectID": "take-home-exercise-01.html#the-data",
     "href": "take-home-exercise-01.html#the-data",
     "title": "Take-home Exercise 1",
     "section": "2. The data",
-    "text": "2. The data\n\n\n\nData\nWhat I use it for\n\n\n\n\nThailand Road Accident 2019–2022\nAccident locations and dates. I use only the records from 2022. Each record describes a reported accident, rather than an individual vehicle or casualty.\n\n\nThailand provincial boundaries\nDefining the study area and placing accidents within its provinces. These boundaries represent 2017.\n\n\n\nBoth datasets were downloaded on 11 September 2026. The accident data come from a compilation of Ministry of Transport records covering highways, rural roads and expressways. They do not cover every accident on every local street. Source: Ministry of Transport.\nHere, Greater Bangkok means Bangkok, Nonthaburi, Pathum Thani, Nakhon Pathom, Samut Prakan and Samut Sakhon, following the National Statistical Office’s Bangkok and Vicinities grouping.\nI use the date the accident happened, from 1 January to 31 December 2022, rather than the date the report was submitted. I treat the recorded times as local Thai time, although the source does not state the time zone."
+    "text": "2. The data\n\n\n\nData\nWhat I use it for\n\n\n\n\nThailand Road Accident 2019–2022\nAccident locations and dates. I use only 2022. Each row is an accident report; it does not count a single vehicle or casualty.\n\n\nThailand provincial boundaries\nDefining the study area and placing accidents within its provinces. These boundaries represent 2017.\n\n\n\nBoth datasets were downloaded on 11 September 2026. The accident data come from a compilation of Ministry of Transport records covering highways, rural roads and expressways. They do not cover every accident on every local street. Source: Ministry of Transport.\nHere, Greater Bangkok means Bangkok, Nonthaburi, Pathum Thani, Nakhon Pathom, Samut Prakan and Samut Sakhon, following the National Statistical Office’s Bangkok and Vicinities grouping.\nThe study runs from 1 January to 31 December 2022, using the date of the accident. A report submitted later still belongs to the day the accident happened. I treat the times as local Thai time, although the source does not state the time zone.\nI combine the six provinces into one study area, so the analysis can cross their internal borders. WGS 84 / UTM zone 47N (EPSG:32647) lets me measure distances in metres. These are straight-line distances, so two nearby points may still be on different roads or opposite sides of a river."
   },
   {
     "objectID": "take-home-exercise-01.html#checking-the-records",
     "href": "take-home-exercise-01.html#checking-the-records",
     "title": "Take-home Exercise 1",
     "section": "3. Checking the records",
-    "text": "3. Checking the records\nFirst, I kept the 2022 records. I then checked their dates and locations, removed records that could not be placed on a map, and kept those inside the six provinces.\n\n\n\n\n\nRecords\nNumber\n\n\n\n\nAll years in the downloaded file\n81,735\n\n\nFrom 2022\n21,032\n\n\nFrom 2022, with usable locations\n20,843\n\n\nInside Greater Bangkok\n3,599\n\n\n\n\n\nThis leaves 3,599 accident records for the map. All the dates could be read, and there were no completely duplicated records.\n\n3.1 Missing locations\nThere are 189 records without coordinates. All are listed as accidents in Bangkok. I checked which agency reported them to see whether the missing locations were spread across the data.\n\n\n\n\n\n\n\n\n\nAll 189 came from the Expressway Authority. They make up 43.1% of its 439 Bangkok reports, compared with no missing locations in the other two agencies’ Bangkok records. This means the map leaves out a substantial part of the Expressway Authority’s reports. I keep these records for the monthly comparison because their dates are still available, but cannot place them on the map.\n\n\n3.2 Repeated or conflicting locations\nSome records share the same location. This can happen when several accidents occur at the same place, so I keep them. Two pairs also share the same accident time but have different record numbers. They may be duplicate reports; the available information is not enough to decide, so they remain in the data.\nA few records have coordinates that disagree with their province names. I use their plotted locations to decide whether they belong in the study area. This excludes four records listed under the six provinces and includes ten listed elsewhere. The boundary data are older than the accident records, so I cannot assume every disagreement is a recording error."
+    "text": "3. Checking the records\nFirst, I kept the 2022 records. I then checked their dates and locations, removed records that could not be placed on a map, and kept those inside the six provinces.\n\n\n\n\n\nRecords\nNumber\n\n\n\n\nAll years in the downloaded file\n81,735\n\n\nFrom 2022\n21,032\n\n\nFrom 2022, with usable locations\n20,843\n\n\nInside Greater Bangkok\n3,599\n\n\n\n\n\nThis leaves 3,599 accident records for the map. All the dates could be read, and there were no completely duplicated records. No coordinates were outside the valid latitude/longitude ranges or recorded as (0, 0). I also checked the boundary shapes for invalid or empty geometry before using them to select the points.\n\n3.1 Missing locations\nThere are 189 records without coordinates. All are listed as accidents in Bangkok. I checked which agency reported them to see whether the missing locations were spread across the data.\n\n\n\n\n\n\n\n\n\nAll 189 came from the Expressway Authority. They make up 43.1% of its 439 Bangkok reports, compared with no missing locations in the other two agencies’ Bangkok records. This means the map leaves out a substantial part of the Expressway Authority’s reports. I keep these records for the monthly comparison because their dates are still available, but cannot place them on the map.\n\n\n3.2 Repeated or conflicting locations\nThere are 321 records at coordinates already used by another record. Several accidents can happen at the same place, so I keep them. Two pairs have both the same location and the same accident time, but different record numbers. I cannot tell whether these are duplicate reports. I keep them in the main analysis and later check whether removing them changes the result.\nA few records have coordinates that disagree with their province names. I use their plotted locations to decide whether they belong in the study area. This excludes four records listed under the six provinces and includes ten listed elsewhere. The boundary data are older than the accident records, so I cannot assume every disagreement is a recording error."
   },
   {
     "objectID": "take-home-exercise-01.html#where-were-accidents-recorded",
     "href": "take-home-exercise-01.html#where-were-accidents-recorded",
     "title": "Take-home Exercise 1",
     "section": "4. Where were accidents recorded?",
-    "text": "4. Where were accidents recorded?\nWith the records checked, I can look at their locations. Each dot below represents an accident record. Records at the same location overlap, so the dots alone do not show every repeated accident.\n\n\n\n\n\n\n\n\n\nThe dots follow several long routes through Bangkok and towards the surrounding provinces. This fits the dataset’s focus on highways, rural roads and expressways. Bangkok has the largest number of mapped records, followed by Samut Prakan. Areas with fewer dots should not automatically be seen as safer: some roads may be outside this reporting system, and we do not know how much traffic each road carries.\n\n\n\n\n\nProvince\nAccident records\nShare (%)\n\n\n\n\nBangkok\n1802\n50.1\n\n\nSamut Prakan\n671\n18.6\n\n\nPathum Thani\n491\n13.6\n\n\nSamut Sakhon\n323\n9.0\n\n\nNonthaburi\n174\n4.8\n\n\nNakhon Pathom\n138\n3.8\n\n\n\n\n\nBangkok accounts for 1,802 records, about half of those on the map. Samut Prakan follows with 671. These counts use the recorded coordinates to assign each accident to a province."
+    "text": "4. Where were accidents recorded?\nEach dot is an accident record. Records at the same location overlap, so one visible dot can represent several accidents.\n\n\n\n\n\n\n\n\n\nThe dots follow several long routes through Bangkok and towards the surrounding provinces. This fits the dataset’s focus on highways, rural roads and expressways. Bangkok has the largest number of mapped records, followed by Samut Prakan. Areas with fewer dots should not automatically be seen as safer: some roads may be outside this reporting system, and we do not know how much traffic each road carries.\n\n\n\n\n\nProvince\nAccident records\nShare (%)\n\n\n\n\nBangkok\n1802\n50.1\n\n\nSamut Prakan\n671\n18.6\n\n\nPathum Thani\n491\n13.6\n\n\nSamut Sakhon\n323\n9.0\n\n\nNonthaburi\n174\n4.8\n\n\nNakhon Pathom\n138\n3.8\n\n\n\n\n\nBangkok accounts for 1,802 records, about half of those on the map. Samut Prakan follows with 671. These counts use the recorded coordinates to assign each accident to a province."
   },
   {
     "objectID": "take-home-exercise-01.html#when-were-more-accidents-recorded",
     "href": "take-home-exercise-01.html#when-were-more-accidents-recorded",
     "title": "Take-home Exercise 1",
     "section": "5. When were more accidents recorded?",
-    "text": "5. When were more accidents recorded?\nAfter looking at where accidents happened, I compare their timing. Simply comparing monthly totals would give longer months more days to accumulate accidents. I therefore divide each month’s total by its number of days.\nThe solid line uses the records shown on the map. The dashed line adds the 189 reports with missing locations. Their province names place them in Bangkok, although I cannot check their exact positions.\n\n\n\n\n\n\n\n\n\nOctober has the highest count: 394 mapped records, or about 12.7 per day. November has fewer records than December, but more per day because it is a shorter month. April also stands out compared with March and May.\nAdding the reports with missing locations raises the figures slightly but leaves the same broad pattern: more accidents were recorded towards the end of the year. The location gaps therefore do not explain that increase on their own. The chart does not tell us whether changes in traffic, road conditions or reporting caused it.\n← Back to take-home exercises"
+    "text": "5. When were more accidents recorded?\nLonger months have more days for accidents to occur. To make the comparison fairer, I divide each month’s total by its number of days.\nThe solid line uses the records shown on the map. The dashed line adds the 189 reports with missing locations. Their province names place them in Bangkok, although I cannot check their exact positions.\n\n\n\n\n\n\n\n\n\nOctober has the highest count: 394 mapped records, or about 12.7 per day. November has fewer records than December, but more per day because it is a shorter month. April also stands out compared with March and May.\nAdding the reports with missing locations raises the figures slightly but leaves the same broad pattern: more accidents were recorded towards the end of the year. The location gaps therefore do not explain that increase on their own. The chart does not tell us whether changes in traffic, road conditions or reporting caused it."
+  },
+  {
+    "objectID": "take-home-exercise-01.html#where-do-the-main-concentrations-appear",
+    "href": "take-home-exercise-01.html#where-do-the-main-concentrations-appear",
+    "title": "Take-home Exercise 1",
+    "section": "6. Where do the main concentrations appear?",
+    "text": "6. Where do the main concentrations appear?\nOverlapping dots make it hard to see where there are more reports. Kernel density estimation (KDE) smooths them into a map, with darker areas where reports are more concentrated. This is the first-order part of the analysis: looking at how the number of events varies from place to place.\nI use a Gaussian kernel with a 2 km bandwidth. This spreads each accident’s contribution around its location, fading with distance. The bandwidth controls how much the map is smoothed. I chose 2 km to look at broad areas and also try 1 km and 4 km to see how much the choice matters.\nThe map is divided into 250 m cells. Near the outer boundary, I correct for the part of the smoothing that would fall outside the study area. Accidents outside the boundary are still missing from the data. Smoothing also spreads colour over land between roads, so this map shows the broad density of reports per square kilometre. It cannot identify the risk on an individual road section. Method: spatstat KDE documentation.\n\n\n\n\n\n\n\n\n\nEastern Bangkok has the darkest patch, near 100.714°E, 13.733°N. The estimated density there is about 9.3 records per km² over the year. Other patches extend into the surrounding provinces. I would use these areas to decide where to look more closely, then check the original records to find the roads and junctions involved. Differences in traffic and reporting coverage may explain some of the shading. The missing expressway locations also leave gaps.\n\n6.1 Does the smoothing choice change the picture?\n\n\n\n\n\n\n\n\n\nEastern Bangkok stands out in all three maps. With more smoothing, the peak drops from 21.7 to 9.3 to 4.0 records per km², and nearby patches merge. The broad location stays similar, but its outline and peak value depend on the bandwidth. I would be cautious about drawing a precise hotspot boundary from any one of these maps. Whether the pattern is statistically unusual needs a separate test."
+  },
+  {
+    "objectID": "take-home-exercise-01.html#did-the-concentrations-move-during-the-year",
+    "href": "take-home-exercise-01.html#did-the-concentrations-move-during-the-year",
+    "title": "Take-home Exercise 1",
+    "section": "7. Did the concentrations move during the year?",
+    "text": "7. Did the concentrations move during the year?\nThe monthly chart showed more reports late in the year. Did those extra reports come from the same places? I split the year into four quarters to make the maps easier to compare than twelve monthly maps. All four use a 2 km bandwidth and the same colour scale.\nEach map is adjusted for the number of days in its quarter: 90, 91, 92 and 92. The colours show records per square kilometre per day, allowing for those small differences in length.\n\n\n\n\n\n\n\n\n\nBangkok and Samut Sakhon show clear increases. Bangkok averaged 3.94 reports per day in the first quarter (January to March) and 6.17 in the last (October to December). Samut Sakhon rises from 0.39 to 1.67 per day. Pathum Thani changes much less, from 1.27 to 1.41. The maps show where these changes appear within each province. I would need more years to tell whether this happens regularly, and other data to explain the increase."
+  },
+  {
+    "objectID": "take-home-exercise-01.html#do-nearby-accidents-also-happen-close-together-in-time",
+    "href": "take-home-exercise-01.html#do-nearby-accidents-also-happen-close-together-in-time",
+    "title": "Take-home Exercise 1",
+    "section": "8. Do nearby accidents also happen close together in time?",
+    "text": "8. Do nearby accidents also happen close together in time?\nA busy route may have accidents spread throughout the year. I wanted to check whether nearby accidents also tended to happen within a few days of each other. This is the second-order part of the analysis, which looks at pairs of events.\nI use a Knox-style test to count pairs of accidents within 1 km and no more than 7 days apart. I chose these limits before seeing the results, as a way to check nearby accidents over one week. They are choices for this exercise, not official safety limits. Each pair counts once, although one accident can appear in several pairs. Method: Knox test documentation.\n\n8.1 What am I comparing against?\nI keep the locations in place and shuffle the accident times, then count the close pairs again. Times are only swapped among records from the same agency in the same calendar month. Repeating this 999 times gives me a range of counts to compare with the actual count.\nThis keeps each agency’s road coverage and the monthly number of reports at each location. The dates and times available within each group also stay the same; only their assignment to locations changes. Busy dates and months therefore remain busy in the shuffled data.\nThe assumption is that swapping times within these groups gives a fair comparison when nearby accidents have no extra tendency to happen close together in time. Local traffic schedules, roadworks or reporting changes could make that assumption wrong.\nI measure distance in a straight line and time from the recorded timestamps, so 7 days means 168 hours. I test for more close pairs, which makes this a one-sided test. The comparison uses only the observed locations and times within the six provinces in 2022. I do not estimate missing neighbours beyond those edges. The result applies to these records and still leaves out the 189 reports without coordinates. Finding no extra pairs would not establish that accidents are spatially random or that roads are safe.\n\n\n\n\n\n\n\n\n\nThe actual count is 2,204 pairs. The shuffled records average 2,091, so the actual count is 5.4% higher. The middle 95% of shuffled counts falls between 2,021 and 2,164. The actual count is above that range, with a one-sided p-value of 0.002. Nearby accidents happened within a week slightly more often than this comparison suggests. The test accounts for each agency’s monthly pattern, but it cannot show that one accident caused another or that the result applies to every location.\nThe p-value describes how unusual the actual count is in this comparison. I count the shuffled patterns with at least as many close pairs, add the observed pattern, and divide by 1,000. The smallest possible p-value with 999 shuffles is 0.001.\n\n\n8.2 Does the answer depend on choosing 1 km and 7 days?\nI try 0.5, 1 and 2 km, each with time limits of 3, 7 and 14 days. That gives nine combinations, using the same shuffled records. This checks whether the result changes when I look a little closer, farther away, or over a different number of days.\n\n\n\n\n\n\n\n\n\nThe actual count is above the shuffled average in all nine comparisons. The difference is largest at 0.5 km and 3 days, at 17.1%, and smallest at 2 km and 14 days, at 2.7%. The shorter periods show larger percentage differences. After adjusting for the nine comparisons, eight have p-values below 0.05. The exception is 0.5 km and 7 days, at 0.055, so the evidence is weaker at that setting.\nTrying more settings also gives more chances to find an unusual result. For an overall check, I measure each difference relative to how much the shuffled counts vary, then take the largest one. I do the same for every shuffle. This accounts for checking all nine settings and gives an overall p-value of 0.001.\n\n\n8.3 Could repeated locations or reporting differences explain it?\nI return to the 1 km / 7 day comparison and check three alternatives: remove one record from each possible duplicate pair; leave out pairs at exactly the same coordinates; and shuffle within month without separating agencies.\n\n\n\n\n\n\n\n\n\n\n\n\nCheck\nObserved pairs\nShuffle average\nDifference (%)\np-value\n\n\n\n\nMain: shuffle within agency and month\n2,204\n2,091\n5.4\n0.002\n\n\nRemove two possible duplicate reports\n2,193\n2,082\n5.3\n0.003\n\n\nExclude pairs at identical coordinates\n2,145\n2,044\n4.9\n0.003\n\n\nShuffle within month only\n2,204\n2,079\n6.0\n0.001\n\n\n\n\n\nThe actual count stays about 5 to 6% above the shuffled average. Removing the possible duplicates leaves a difference of 5.3%; leaving out pairs at identical coordinates gives 4.9%. Those records do not explain the result on their own. Shuffling without separating agencies gives a slightly larger difference, so I keep agencies separate in the main test. Errors in coordinates or changes in local traffic and reporting during a month could still affect the result."
+  },
+  {
+    "objectID": "take-home-exercise-01.html#what-do-these-results-say-together",
+    "href": "take-home-exercise-01.html#what-do-these-results-say-together",
+    "title": "Take-home Exercise 1",
+    "section": "9. What do these results say together?",
+    "text": "9. What do these results say together?\nEastern Bangkok stands out on the density maps even when I change the amount of smoothing. The quarterly maps show that the later increase varies by province, with clear rises in Bangkok and Samut Sakhon. The pair test adds another finding: there are 5.4% more pairs within 1 km and 7 days than the shuffled comparison suggests. Removing possible duplicates and pairs at repeated locations gives similar results.\nThe maps show where reports build up, while the test suggests that nearby accidents also happen close together in time more often than expected under this comparison. I cannot tell from the regional test whether the eastern Bangkok peak is responsible. That would need a separate test of individual areas.\nThe data leave several questions open. The three agencies cover selected roads, and the spatial analysis leaves out the 189 Bangkok expressway reports without coordinates. Without traffic volumes or road lengths, I cannot compare the chance of an accident per journey. Shared or inaccurate coordinates may make accidents appear closer than they were, and straight-line distances ignore the road connections.\nThese results cover only 2022. More years would help show whether the late-year rise recurs. Traffic changes, weather, roadworks and reporting practices could all help explain the patterns, but this analysis cannot tell which mattered or identify a particular dangerous junction."
+  },
+  {
+    "objectID": "take-home-exercise-01.html#what-would-i-do-with-this-information",
+    "href": "take-home-exercise-01.html#what-would-i-do-with-this-information",
+    "title": "Take-home Exercise 1",
+    "section": "10. What would I do with this information?",
+    "text": "10. What would I do with this information?\nI would start by checking the original reports around eastern Bangkok, since that area stands out at all three bandwidths. Matching each accident to the right carriageway and junction would help identify repeated locations. Crash type, severity and road conditions would then help decide what changes to consider. The density map gives me a place to start, but cannot tell me which road treatment would work.\nThe late-year rises in Bangkok and Samut Sakhon also deserve a closer look. Agency records could show whether workload changed during those months. Traffic counts, roadworks and changes in reporting would help explain whether there were more accidents or more complete reporting. I would check other years before planning a campaign for a particular season.\nThe pair test gives a reason to review recent nearby accidents together, perhaps weekly. Before using this to trigger an alert or move staff, I would test the rule on later data and check how often it produces false alarms. This exercise has not evaluated an alert system.\nI would also try to recover the coordinates for the 189 Bangkok expressway reports and repeat the analysis. They are a large gap in the records available for mapping.\nChoosing roads for intervention or locations for emergency services would need traffic volumes, crash severity and service travel times alongside these results. The current analysis helps decide what to investigate next; it does not measure risk per journey or establish which intervention will work."
+  },
+  {
+    "objectID": "take-home-exercise-01.html#sources-and-methods",
+    "href": "take-home-exercise-01.html#sources-and-methods",
+    "title": "Take-home Exercise 1",
+    "section": "11. Sources and methods",
+    "text": "11. Sources and methods\n\nThailand Road Accident 2019–2022, version 1; Ministry of Transport source. Only 2022 is analysed.\ngeoBoundaries Thailand ADM1, 2017 boundary representation, pinned to release commit 9469f09. Derived from OpenStreetMap/Wambacher; Open Database License 1.0.\nNational Statistical Office: Bangkok and Vicinities, for the six-province grouping.\nspatstat: kernel-smoothed intensity, for the density maps and edge correction.\nKnox test for space-time interaction, for the close-pair approach. Here I adapt the shuffling to preserve agency-month groups and compare several distance/time settings together.\n\nPresentation · Project and analysis source\n← Back to take-home exercises"
+  },
+  {
+    "objectID": "take-home-exercise-01-summary.html#where-whenand-how-close-together",
+    "href": "take-home-exercise-01-summary.html#where-whenand-how-close-together",
+    "title": "Road accidents in Greater Bangkok",
+    "section": "Where, when—and how close together?",
+    "text": "Where, when—and how close together?\n\n\n\n\nOne year, six provinces\nBangkok, Nonthaburi, Pathum Thani, Nakhon Pathom, Samut Prakan and Samut Sakhon.\n\nWhere do reports concentrate?\nHow does that change during 2022?\nAre nearby accidents also unusually close in time?\n\n\nEvent: a reported accident, not a vehicle or casualty. Study period: 1 January–31 December 2022."
+  },
+  {
+    "objectID": "take-home-exercise-01-summary.html#first-know-what-is-missing",
+    "href": "take-home-exercise-01-summary.html#first-know-what-is-missing",
+    "title": "Road accidents in Greater Bangkok",
+    "section": "First, know what is missing",
+    "text": "First, know what is missing\n\n\n\n3,599\n\naccident records with usable locations inside the study area.\n189 more Bangkok reports have no coordinates. All came from the Expressway Authority: 43.1% of its Bangkok reports.\n\nWhat I checked\n\nKeep 2022 and the six-province boundary.\nExclude missing locations from spatial analysis.\nKeep repeated locations; check two possible duplicate pairs separately.\nUse coordinates when province labels disagree.\n\nWhat the data cover\nHighways, rural roads and expressways reported by three agencies. They do not represent every local street or every accident.\n\n\nSources: Ministry of Transport compilation via Kaggle and geoBoundaries; downloaded 11 September 2026. Boundaries represent 2017."
+  },
+  {
+    "objectID": "take-home-exercise-01-summary.html#a-persistent-concentration-in-eastern-bangkok",
+    "href": "take-home-exercise-01-summary.html#a-persistent-concentration-in-eastern-bangkok",
+    "title": "Road accidents in Greater Bangkok",
+    "section": "A persistent concentration in eastern Bangkok",
+    "text": "A persistent concentration in eastern Bangkok\n\n\n\n\nThe highest smoothed peak stays in eastern Bangkok with 1, 2 and 4 km bandwidths.\nAt 2 km, the peak is about 9.3 records per km² over the year.\nThe broad area is more stable than the exact outline or peak height.\n\nGaussian KDE; UTM 47N; 250 m cells; boundary correction. No traffic-volume denominator: this is reported-event density, not risk per journey."
+  },
+  {
+    "objectID": "take-home-exercise-01-summary.html#more-reports-towards-the-end-of-the-year",
+    "href": "take-home-exercise-01-summary.html#more-reports-towards-the-end-of-the-year",
+    "title": "Road accidents in Greater Bangkok",
+    "section": "More reports towards the end of the year",
+    "text": "More reports towards the end of the year\n\nOctober has 394 mapped records, or 12.7 per day. Adding the 189 reports without locations leaves the broad pattern unchanged.\n\nI divide monthly totals by the number of days. More years would be needed to check whether the pattern repeats."
+  },
+  {
+    "objectID": "take-home-exercise-01-summary.html#the-increase-was-not-the-same-everywhere",
+    "href": "take-home-exercise-01-summary.html#the-increase-was-not-the-same-everywhere",
+    "title": "Road accidents in Greater Bangkok",
+    "section": "The increase was not the same everywhere",
+    "text": "The increase was not the same everywhere\n\n\n\n\nAverage reports per day:\n\n\n\nProvince\nJan-Mar to Oct-Dec\n\n\n\n\nBangkok\n3.94 → 6.17\n\n\nSamut Sakhon\n0.39 → 1.67\n\n\nPathum Thani\n1.27 → 1.41\n\n\n\nI would look more closely at why reports rose in Bangkok and Samut Sakhon.\n\nAll maps use a 2 km bandwidth and the same colour scale, adjusted for quarter length. Changes in traffic or reporting could help explain the increase."
+  },
+  {
+    "objectID": "take-home-exercise-01-summary.html#nearby-accidents-also-bunch-up-in-time",
+    "href": "take-home-exercise-01-summary.html#nearby-accidents-also-bunch-up-in-time",
+    "title": "Road accidents in Greater Bangkok",
+    "section": "Nearby accidents also bunch up in time",
+    "text": "Nearby accidents also bunch up in time\n\n2,204 pairs within 1 km and 7 days, compared with 2,091 on average after shuffling: 5.4% more; p = 0.002.\n\nKnox-style test: keep all locations, shuffle times within agency and month, 999 times. Assumes times are exchangeable within those groups. Each pair is counted once; one accident can contribute to several pairs. This is a regional association, not evidence that accidents cause each other."
+  },
+  {
+    "objectID": "take-home-exercise-01-summary.html#does-that-result-hold-up",
+    "href": "take-home-exercise-01-summary.html#does-that-result-hold-up",
+    "title": "Road accidents in Greater Bangkok",
+    "section": "Does that result hold up?",
+    "text": "Does that result hold up?\n\n\n\nCheck at 1 km / 7 days\nAbove the shuffled average\np-value\n\n\n\n\nMain analysis\n5.4%\n0.002\n\n\nRemove two possible duplicates\n5.3%\n0.003\n\n\nExclude identical-coordinate pairs\n4.9%\n0.003\n\n\nShuffle within month only\n6.0%\n0.001\n\n\n\nThe duplicate and repeated-location checks give similar results.\nAcross nine combinations of distance and time, the actual counts are 2.7% to 17.1% above the shuffled averages. Allowing for all nine gives an overall p-value of 0.001.\n\nI checked 0.5, 1 and 2 km, each with 3, 7 and 14 days. After adjustment, eight comparisons have p-values below 0.05; 0.5 km / 7 days does not. Local traffic schedules or reporting changes could still affect the result."
+  },
+  {
+    "objectID": "take-home-exercise-01-summary.html#where-i-would-go-from-here",
+    "href": "take-home-exercise-01-summary.html#where-i-would-go-from-here",
+    "title": "Road accidents in Greater Bangkok",
+    "section": "Where I would go from here",
+    "text": "Where I would go from here\n\n\nI would:\n\nCheck the original reports around the eastern Bangkok concentration.\nReview the late-year rises in Bangkok and Samut Sakhon.\nReview recent nearby accidents together and test any alert rule on later data.\nRecover the missing expressway coordinates.\n\n\nThe maps show where reports build up. The test also finds more nearby accidents happening within days of each other than the shuffled counts suggest.\nIt cannot tell us which areas account for this result, which roads are most dangerous, or what caused the pattern.\nBefore choosing road improvements, I would need traffic volumes, crash severity, road connections and data from more years.\nRead the full report · GitHub project"
+  },
+  {
+    "objectID": "take-home-exercise-01-summary.html#where-and-when-did-accidents-happen",
+    "href": "take-home-exercise-01-summary.html#where-and-when-did-accidents-happen",
+    "title": "Road accidents in Greater Bangkok",
+    "section": "Where and when did accidents happen?",
+    "text": "Where and when did accidents happen?\n\n\n\n\nThe study covers 2022 and six provinces:\nBangkok, Nonthaburi, Pathum Thani, Nakhon Pathom, Samut Prakan and Samut Sakhon.\n\nWhere do reports concentrate?\nHow does that change during 2022?\nAre nearby accidents also unusually close in time?\n\n\nEach record is an accident report, rather than a count of vehicles or casualties. Study period: 1 January to 31 December 2022."
+  },
+  {
+    "objectID": "take-home-exercise-01-summary.html#which-records-could-i-use",
+    "href": "take-home-exercise-01-summary.html#which-records-could-i-use",
+    "title": "Road accidents in Greater Bangkok",
+    "section": "Which records could I use?",
+    "text": "Which records could I use?\n\n\n\n3,599\n\naccident records with usable locations inside the study area.\nAnother 189 Bangkok reports have no coordinates. All came from the Expressway Authority, making up 43.1% of its Bangkok reports.\n\nTo prepare the records, I:\n\nkept 2022 records inside the six provinces;\nleft reports without locations out of the maps;\nkept repeated locations and checked two possible duplicate pairs separately;\nused coordinates when province labels disagreed.\n\nThe three agencies report accidents on highways, rural roads and expressways. They do not cover every local street or every accident.\n\n\nSources: Ministry of Transport compilation via Kaggle and geoBoundaries; downloaded 11 September 2026. Boundaries represent 2017."
+  },
+  {
+    "objectID": "take-home-exercise-01-summary.html#eastern-bangkok-stands-out",
+    "href": "take-home-exercise-01-summary.html#eastern-bangkok-stands-out",
+    "title": "Road accidents in Greater Bangkok",
+    "section": "Eastern Bangkok stands out",
+    "text": "Eastern Bangkok stands out\n\n\n\n\nEastern Bangkok has the highest density with all three bandwidths: 1, 2 and 4 km.\nAt 2 km, the peak is about 9.3 records per km² over the year.\nMore smoothing changes the outline and lowers the peak, but the same broad area stands out.\n\nThe map uses Gaussian KDE, UTM 47N, 250 m cells and a boundary correction. To judge risk per journey, I would also need traffic volumes."
+  },
+  {
+    "objectID": "take-home-exercise-01-summary.html#do-nearby-accidents-happen-close-together-in-time",
+    "href": "take-home-exercise-01-summary.html#do-nearby-accidents-happen-close-together-in-time",
+    "title": "Road accidents in Greater Bangkok",
+    "section": "Do nearby accidents happen close together in time?",
+    "text": "Do nearby accidents happen close together in time?\n\nThere are 2,204 pairs within 1 km and 7 days. After shuffling the times, the average is 2,091. The actual count is 5.4% higher (p = 0.002).\n\nFor this Knox-style test, I keep locations fixed and shuffle times within each agency and month 999 times, assuming those times can be swapped. Each pair counts once; an accident can belong to several pairs. The regional result cannot show that one accident causes another."
   }
 ]

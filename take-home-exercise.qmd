@@ -18,9 +18,13 @@ Extended assignments and spatial analysis completed during ISSS626.
 
 ## Road accidents in Greater Bangkok
 
-Looking at where and when accidents were recorded in 2022, and how missing locations affect the picture.
+Where accidents concentrate, how the pattern changes through 2022, and whether nearby accidents also happen close together in time.
 
 [Read the technical report →](take-home-exercise-01.qmd){.section-link}
+
+[View the executive summary →](take-home-exercise-01-summary.qmd){.section-link}
+
+[GitHub project →](https://github.com/chinh02/isss626-chinh-le){.section-link}
 :::
 :::
 

@@ -1,0 +1,30 @@
+.reveal {
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 27px;
+  line-height: 1.25;
+  color: #17333d;
+}
+
+.reveal h1, .reveal h2, .reveal h3 {
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-weight: 650;
+  color: #17333d;
+  text-transform: none;
+}
+
+.reveal h1 { font-size: 2.1em; }
+.reveal h2 { font-size: 1.45em; margin-bottom: 0.6em; }
+.reveal p { margin: 0.4em 0; }
+.reveal a { color: #a4422d; }
+.reveal strong { color: #a4422d; }
+.reveal .small-note { font-size: 0.65em; color: #52676e; line-height: 1.4; }
+.reveal .key-number { font-size: 3.4em; color: #a4422d; font-weight: 700; }
+.reveal .columns { gap: 1.1em; }
+.reveal table { font-size: 0.8em; margin-bottom: 1em; }
+.reveal table th, .reveal table td { padding: 0.4em 0.5em; }
+.reveal li { margin-bottom: 0.3em; }
+.reveal img { margin: 0; object-fit: contain; }
+.reveal .footer { font-size: 0.48em; color: #52676e; }
+.reveal #title-slide { text-align: left; padding-top: 2em; }
+.reveal #title-slide, .reveal #title-slide h1 { color: #fff8e8; }
+.reveal #title-slide .subtitle { color: #f6b38c; }

@@ -8,7 +8,7 @@
 
 <meta name="author" content="Le Truong Chinh">
 <meta name="dcterms.date" content="2026-09-11">
-<meta name="description" content="Looking at where and when road accidents were recorded in Greater Bangkok during 2022.">
+<meta name="description" content="Where road accidents concentrate in Greater Bangkok, how the pattern changes over 2022, and whether nearby accidents also occur close together in time.">
 
 <title>Take-home Exercise 1 – Le Truong Chinh · ISSS626</title>
 <style>
@@ -80,7 +80,7 @@ ul.task-list li input[type="checkbox"] {
 
 <link rel="stylesheet" href="styles.css">
 <meta property="og:title" content="Take-home Exercise 1 – Le Truong Chinh · ISSS626">
-<meta property="og:description" content="Looking at where and when road accidents were recorded in Greater Bangkok during 2022.">
+<meta property="og:description" content="Where road accidents concentrate in Greater Bangkok, how the pattern changes over 2022, and whether nearby accidents also occur close together in time.">
 <meta property="og:image" content="take-home-exercise-01_files/figure-html/th01-missingness-1.png">
 <meta property="og:site_name" content="Le Truong Chinh · ISSS626">
 </head>
@@ -133,7 +133,7 @@ ul.task-list li input[type="checkbox"] {
             <p class="subtitle lead">Road accidents in Greater Bangkok, 2022</p>
                   <div>
         <div class="description">
-          Looking at where and when road accidents were recorded in Greater Bangkok during 2022.
+          Where road accidents concentrate in Greater Bangkok, how the pattern changes over 2022, and whether nearby accidents also occur close together in time.
         </div>
       </div>
                 </div>
@@ -159,7 +159,7 @@ ul.task-list li input[type="checkbox"] {
       <div>
       <div class="quarto-title-meta-heading">Modified</div>
       <div class="quarto-title-meta-contents">
-        <p class="date-modified">September 11, 2026</p>
+        <p class="date-modified">September 16, 2026</p>
       </div>
     </div>
       
@@ -183,6 +183,20 @@ ul.task-list li input[type="checkbox"] {
   </ul></li>
   <li><a href="#where-were-accidents-recorded" id="toc-where-were-accidents-recorded" class="nav-link" data-scroll-target="#where-were-accidents-recorded">4. Where were accidents recorded?</a></li>
   <li><a href="#when-were-more-accidents-recorded" id="toc-when-were-more-accidents-recorded" class="nav-link" data-scroll-target="#when-were-more-accidents-recorded">5. When were more accidents recorded?</a></li>
+  <li><a href="#where-do-the-main-concentrations-appear" id="toc-where-do-the-main-concentrations-appear" class="nav-link" data-scroll-target="#where-do-the-main-concentrations-appear">6. Where do the main concentrations appear?</a>
+  <ul class="collapse">
+  <li><a href="#does-the-smoothing-choice-change-the-picture" id="toc-does-the-smoothing-choice-change-the-picture" class="nav-link" data-scroll-target="#does-the-smoothing-choice-change-the-picture">6.1 Does the smoothing choice change the picture?</a></li>
+  </ul></li>
+  <li><a href="#did-the-concentrations-move-during-the-year" id="toc-did-the-concentrations-move-during-the-year" class="nav-link" data-scroll-target="#did-the-concentrations-move-during-the-year">7. Did the concentrations move during the year?</a></li>
+  <li><a href="#do-nearby-accidents-also-happen-close-together-in-time" id="toc-do-nearby-accidents-also-happen-close-together-in-time" class="nav-link" data-scroll-target="#do-nearby-accidents-also-happen-close-together-in-time">8. Do nearby accidents also happen close together in time?</a>
+  <ul class="collapse">
+  <li><a href="#what-am-i-comparing-against" id="toc-what-am-i-comparing-against" class="nav-link" data-scroll-target="#what-am-i-comparing-against">8.1 What am I comparing against?</a></li>
+  <li><a href="#does-the-answer-depend-on-choosing-1-km-and-7-days" id="toc-does-the-answer-depend-on-choosing-1-km-and-7-days" class="nav-link" data-scroll-target="#does-the-answer-depend-on-choosing-1-km-and-7-days">8.2 Does the answer depend on choosing 1 km and 7 days?</a></li>
+  <li><a href="#could-repeated-locations-or-reporting-differences-explain-it" id="toc-could-repeated-locations-or-reporting-differences-explain-it" class="nav-link" data-scroll-target="#could-repeated-locations-or-reporting-differences-explain-it">8.3 Could repeated locations or reporting differences explain it?</a></li>
+  </ul></li>
+  <li><a href="#what-do-these-results-say-together" id="toc-what-do-these-results-say-together" class="nav-link" data-scroll-target="#what-do-these-results-say-together">9. What do these results say together?</a></li>
+  <li><a href="#what-would-i-do-with-this-information" id="toc-what-would-i-do-with-this-information" class="nav-link" data-scroll-target="#what-would-i-do-with-this-information">10. What would I do with this information?</a></li>
+  <li><a href="#sources-and-methods" id="toc-sources-and-methods" class="nav-link" data-scroll-target="#sources-and-methods">11. Sources and methods</a></li>
   </ul>
 </nav>
     </div>
@@ -194,18 +208,20 @@ ul.task-list li input[type="checkbox"] {
 
 
 <div class="exercise-lead">
-<p>Where were road accidents recorded in Greater Bangkok, and were there more at certain times of the year? I use the 2022 accident records to look at these patterns, starting with a check of the data.</p>
+<p>I use the 2022 road accident records to look at where accidents were reported in Greater Bangkok, how this changed over the year, and whether nearby accidents often happened within days of each other.</p>
 </div>
+<p><a href="./take-home-exercise-01-summary.html">View the short presentation</a></p>
 <section id="what-i-want-to-find-out" class="level2">
 <h2 class="anchored" data-anchor-id="what-i-want-to-find-out">1. What I want to find out</h2>
-<p>I chose Greater Bangkok because it lets me look at the city together with its surrounding provinces. The 2022 data cover a full calendar year, so I can compare different months within the same period.</p>
-<p>There are three questions I want to explore:</p>
+<p>I chose Greater Bangkok so I could look at the city and its surrounding provinces together. The 2022 data cover a full year, which makes it possible to compare the months.</p>
+<p>There are four questions I want to explore:</p>
 <ul>
 <li>Where were most accidents recorded?</li>
 <li>Which months had more accidents?</li>
+<li>Did nearby accidents happen close together in time more often than expected?</li>
 <li>Could missing locations change what the maps and charts show?</li>
 </ul>
-<p>I start by checking which records can be used, then look at the locations and timing. A high accident count is a reason to look more closely at an area, but it does not tell us how dangerous it is without knowing how many people travel there.</p>
+<p>I check the records before making the maps. Then I look for places with many reports and test whether nearby accidents happened close together in time. To judge how dangerous a road is, I would also need to know how much traffic it carries.</p>
 </section>
 <section id="the-data" class="level2">
 <h2 class="anchored" data-anchor-id="the-data">2. The data</h2>
@@ -219,7 +235,7 @@ ul.task-list li input[type="checkbox"] {
 <tbody>
 <tr class="odd">
 <td><a href="https://www.kaggle.com/datasets/thaweewatboy/thailand-road-accident-2019-2022">Thailand Road Accident 2019–2022</a></td>
-<td>Accident locations and dates. I use only the records from 2022. Each record describes a reported accident, rather than an individual vehicle or casualty.</td>
+<td>Accident locations and dates. I use only 2022. Each row is an accident report; it does not count a single vehicle or casualty.</td>
 </tr>
 <tr class="even">
 <td><a href="https://www.geoboundaries.org/api/current/gbOpen/THA/ADM1/">Thailand provincial boundaries</a></td>
@@ -229,7 +245,8 @@ ul.task-list li input[type="checkbox"] {
 </table>
 <p>Both datasets were downloaded on 11 September 2026. The accident data come from a compilation of Ministry of Transport records covering <strong>highways, rural roads and expressways</strong>. They do not cover every accident on every local street. <a href="https://datagov.mot.go.th/dataset/roadaccident">Source: Ministry of Transport</a>.</p>
 <p>Here, Greater Bangkok means <strong>Bangkok, Nonthaburi, Pathum Thani, Nakhon Pathom, Samut Prakan and Samut Sakhon</strong>, following the National Statistical Office’s <a href="https://www.nso.go.th/public/e-book/Statistical-Yearbook/SYB-2025/110/">Bangkok and Vicinities grouping</a>.</p>
-<p>I use the date the accident happened, from <strong>1 January to 31 December 2022</strong>, rather than the date the report was submitted. I treat the recorded times as local Thai time, although the source does not state the time zone.</p>
+<p>The study runs from 1 January to 31 December 2022, using the date of the accident. A report submitted later still belongs to the day the accident happened. I treat the times as local Thai time, although the source does not state the time zone.</p>
+<p>I combine the six provinces into one study area, so the analysis can cross their internal borders. WGS 84 / UTM zone 47N (EPSG:32647) lets me measure distances in metres. These are straight-line distances, so two nearby points may still be on different roads or opposite sides of a river.</p>
 </section>
 <section id="checking-the-records" class="level2">
 <h2 class="anchored" data-anchor-id="checking-the-records">3. Checking the records</h2>
@@ -264,7 +281,7 @@ ul.task-list li input[type="checkbox"] {
 </table>
 </div>
 </div>
-<p>This leaves <strong>3,599 accident records</strong> for the map. All the dates could be read, and there were no completely duplicated records.</p>
+<p>This leaves <strong>3,599 accident records</strong> for the map. All the dates could be read, and there were no completely duplicated records. No coordinates were outside the valid latitude/longitude ranges or recorded as (0, 0). I also checked the boundary shapes for invalid or empty geometry before using them to select the points.</p>
 <section id="missing-locations" class="level3">
 <h3 class="anchored" data-anchor-id="missing-locations">3.1 Missing locations</h3>
 <p>There are <strong>189 records without coordinates</strong>. All are listed as accidents in Bangkok. I checked which agency reported them to see whether the missing locations were spread across the data.</p>
@@ -281,18 +298,18 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="repeated-or-conflicting-locations" class="level3">
 <h3 class="anchored" data-anchor-id="repeated-or-conflicting-locations">3.2 Repeated or conflicting locations</h3>
-<p>Some records share the same location. This can happen when several accidents occur at the same place, so I keep them. Two pairs also share the same accident time but have different record numbers. They may be duplicate reports; the available information is not enough to decide, so they remain in the data.</p>
+<p>There are 321 records at coordinates already used by another record. Several accidents can happen at the same place, so I keep them. Two pairs have both the same location and the same accident time, but different record numbers. I cannot tell whether these are duplicate reports. I keep them in the main analysis and later check whether removing them changes the result.</p>
 <p>A few records have coordinates that disagree with their province names. I use their plotted locations to decide whether they belong in the study area. This excludes four records listed under the six provinces and includes ten listed elsewhere. The boundary data are older than the accident records, so I cannot assume every disagreement is a recording error.</p>
 </section>
 </section>
 <section id="where-were-accidents-recorded" class="level2">
 <h2 class="anchored" data-anchor-id="where-were-accidents-recorded">4. Where were accidents recorded?</h2>
-<p>With the records checked, I can look at their locations. Each dot below represents an accident record. Records at the same location overlap, so the dots alone do not show every repeated accident.</p>
+<p>Each dot is an accident record. Records at the same location overlap, so one visible dot can represent several accidents.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="take-home-exercise-01_files/figure-html/th01-location-map-1.png" class="img-fluid figure-img" alt="Map of six Greater Bangkok provinces with 3,599 recorded accident locations in 2022, showing linear concentrations and uneven spatial coverage." width="864"></p>
+<p><img src="take-home-01/figures/locations.png" class="img-fluid figure-img" alt="Map of six Greater Bangkok provinces with 3,599 recorded accident locations in 2022, showing linear concentrations and uneven spatial coverage." width="720"></p>
 </figure>
 </div>
 </div>
@@ -347,19 +364,184 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="when-were-more-accidents-recorded" class="level2">
 <h2 class="anchored" data-anchor-id="when-were-more-accidents-recorded">5. When were more accidents recorded?</h2>
-<p>After looking at where accidents happened, I compare their timing. Simply comparing monthly totals would give longer months more days to accumulate accidents. I therefore divide each month’s total by its number of days.</p>
+<p>Longer months have more days for accidents to occur. To make the comparison fairer, I divide each month’s total by its number of days.</p>
 <p>The solid line uses the records shown on the map. The dashed line adds the 189 reports with missing locations. Their province names place them in Bangkok, although I cannot check their exact positions.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="take-home-exercise-01_files/figure-html/th01-monthly-pattern-1.png" class="img-fluid figure-img" alt="Monthly accident records per day. Both the mapped records and the comparison including reports with missing locations peak in October." width="864"></p>
+<p><img src="take-home-01/figures/monthly.png" class="img-fluid figure-img" alt="Monthly accident records per day. Both the mapped records and the comparison including reports with missing locations peak in October." width="720"></p>
 </figure>
 </div>
 </div>
 </div>
 <p><strong>October has the highest count: 394 mapped records, or about 12.7 per day.</strong> November has fewer records than December, but more per day because it is a shorter month. April also stands out compared with March and May.</p>
 <p>Adding the reports with missing locations raises the figures slightly but leaves the same broad pattern: more accidents were recorded towards the end of the year. The location gaps therefore do not explain that increase on their own. The chart does not tell us whether changes in traffic, road conditions or reporting caused it.</p>
+</section>
+<section id="where-do-the-main-concentrations-appear" class="level2">
+<h2 class="anchored" data-anchor-id="where-do-the-main-concentrations-appear">6. Where do the main concentrations appear?</h2>
+<p>Overlapping dots make it hard to see where there are more reports. Kernel density estimation (KDE) smooths them into a map, with darker areas where reports are more concentrated. This is the first-order part of the analysis: looking at how the number of events varies from place to place.</p>
+<p>I use a Gaussian kernel with a 2 km bandwidth. This spreads each accident’s contribution around its location, fading with distance. The bandwidth controls how much the map is smoothed. I chose 2 km to look at broad areas and also try 1 km and 4 km to see how much the choice matters.</p>
+<p>The map is divided into 250 m cells. Near the outer boundary, I correct for the part of the smoothing that would fall outside the study area. Accidents outside the boundary are still missing from the data. Smoothing also spreads colour over land between roads, so this map shows the broad density of reports per square kilometre. It cannot identify the risk on an individual road section. <a href="https://search.r-project.org/CRAN/refmans/spatstat.explore/html/density.ppp.html">Method: spatstat KDE documentation</a>.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="take-home-01/figures/density.png" class="img-fluid figure-img" alt="Smoothed density of recorded accidents across the six Greater Bangkok provinces, using a two kilometre bandwidth." width="720"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Eastern Bangkok has the darkest patch, near 100.714°E, 13.733°N. The estimated density there is about 9.3 records per km² over the year. Other patches extend into the surrounding provinces. I would use these areas to decide where to look more closely, then check the original records to find the roads and junctions involved. Differences in traffic and reporting coverage may explain some of the shading. The missing expressway locations also leave gaps.</p>
+<section id="does-the-smoothing-choice-change-the-picture" class="level3">
+<h3 class="anchored" data-anchor-id="does-the-smoothing-choice-change-the-picture">6.1 Does the smoothing choice change the picture?</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="take-home-exercise-01_files/figure-html/th01-bandwidth-check-1.png" class="img-fluid figure-img" alt="Three density maps using one, two and four kilometre bandwidths with the same colour scale." width="864"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Eastern Bangkok stands out in all three maps. With more smoothing, the peak drops from 21.7 to 9.3 to 4.0 records per km², and nearby patches merge. The broad location stays similar, but its outline and peak value depend on the bandwidth. I would be cautious about drawing a precise hotspot boundary from any one of these maps. Whether the pattern is statistically unusual needs a separate test.</p>
+</section>
+</section>
+<section id="did-the-concentrations-move-during-the-year" class="level2">
+<h2 class="anchored" data-anchor-id="did-the-concentrations-move-during-the-year">7. Did the concentrations move during the year?</h2>
+<p>The monthly chart showed more reports late in the year. Did those extra reports come from the same places? I split the year into four quarters to make the maps easier to compare than twelve monthly maps. All four use a 2 km bandwidth and the same colour scale.</p>
+<p>Each map is adjusted for the number of days in its quarter: 90, 91, 92 and 92. The colours show records per square kilometre per day, allowing for those small differences in length.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="take-home-01/figures/quarters.png" class="img-fluid figure-img" alt="Four quarterly accident density maps, adjusted for quarter length and shown on a common colour scale." width="720"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Bangkok and Samut Sakhon show clear increases. Bangkok averaged 3.94 reports per day in the first quarter (January to March) and 6.17 in the last (October to December). Samut Sakhon rises from 0.39 to 1.67 per day. Pathum Thani changes much less, from 1.27 to 1.41. The maps show where these changes appear within each province. I would need more years to tell whether this happens regularly, and other data to explain the increase.</p>
+</section>
+<section id="do-nearby-accidents-also-happen-close-together-in-time" class="level2">
+<h2 class="anchored" data-anchor-id="do-nearby-accidents-also-happen-close-together-in-time">8. Do nearby accidents also happen close together in time?</h2>
+<p>A busy route may have accidents spread throughout the year. I wanted to check whether nearby accidents also tended to happen within a few days of each other. This is the second-order part of the analysis, which looks at pairs of events.</p>
+<p>I use a Knox-style test to count pairs of accidents within 1 km and no more than 7 days apart. I chose these limits before seeing the results, as a way to check nearby accidents over one week. They are choices for this exercise, not official safety limits. Each pair counts once, although one accident can appear in several pairs. <a href="https://search.r-project.org/CRAN/refmans/surveillance/html/knox.html">Method: Knox test documentation</a>.</p>
+<section id="what-am-i-comparing-against" class="level3">
+<h3 class="anchored" data-anchor-id="what-am-i-comparing-against">8.1 What am I comparing against?</h3>
+<p>I keep the locations in place and shuffle the accident times, then count the close pairs again. Times are only swapped among records from the same agency in the same calendar month. Repeating this 999 times gives me a range of counts to compare with the actual count.</p>
+<p>This keeps each agency’s road coverage and the monthly number of reports at each location. The dates and times available within each group also stay the same; only their assignment to locations changes. Busy dates and months therefore remain busy in the shuffled data.</p>
+<p>The assumption is that swapping times within these groups gives a fair comparison when nearby accidents have no extra tendency to happen close together in time. Local traffic schedules, roadworks or reporting changes could make that assumption wrong.</p>
+<p>I measure distance in a straight line and time from the recorded timestamps, so 7 days means 168 hours. I test for more close pairs, which makes this a one-sided test. The comparison uses only the observed locations and times within the six provinces in 2022. I do not estimate missing neighbours beyond those edges. The result applies to these records and still leaves out the 189 reports without coordinates. Finding no extra pairs would not establish that accidents are spatially random or that roads are safe.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="take-home-01/figures/pair-test.png" class="img-fluid figure-img" alt="Histogram of close-pair counts after shuffling times, with the actual observed count marked for comparison." width="720"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The actual count is 2,204 pairs. The shuffled records average 2,091, so the actual count is 5.4% higher. The middle 95% of shuffled counts falls between 2,021 and 2,164. The actual count is above that range, with a one-sided p-value of 0.002. Nearby accidents happened within a week slightly more often than this comparison suggests. The test accounts for each agency’s monthly pattern, but it cannot show that one accident caused another or that the result applies to every location.</p>
+<p>The p-value describes how unusual the actual count is in this comparison. I count the shuffled patterns with at least as many close pairs, add the observed pattern, and divide by 1,000. The smallest possible p-value with 999 shuffles is 0.001.</p>
+</section>
+<section id="does-the-answer-depend-on-choosing-1-km-and-7-days" class="level3">
+<h3 class="anchored" data-anchor-id="does-the-answer-depend-on-choosing-1-km-and-7-days">8.2 Does the answer depend on choosing 1 km and 7 days?</h3>
+<p>I try 0.5, 1 and 2 km, each with time limits of 3, 7 and 14 days. That gives nine combinations, using the same shuffled records. This checks whether the result changes when I look a little closer, farther away, or over a different number of days.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="take-home-exercise-01_files/figure-html/th01-scale-check-1.png" class="img-fluid figure-img" alt="Nine combinations of distance and time thresholds, showing the percentage difference between observed close pairs and the shuffle average." width="864"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The actual count is above the shuffled average in all nine comparisons. The difference is largest at 0.5 km and 3 days, at 17.1%, and smallest at 2 km and 14 days, at 2.7%. The shorter periods show larger percentage differences. After adjusting for the nine comparisons, eight have p-values below 0.05. The exception is 0.5 km and 7 days, at 0.055, so the evidence is weaker at that setting.</p>
+<p>Trying more settings also gives more chances to find an unusual result. For an overall check, I measure each difference relative to how much the shuffled counts vary, then take the largest one. I do the same for every shuffle. This accounts for checking all nine settings and gives an overall p-value of 0.001.</p>
+</section>
+<section id="could-repeated-locations-or-reporting-differences-explain-it" class="level3">
+<h3 class="anchored" data-anchor-id="could-repeated-locations-or-reporting-differences-explain-it">8.3 Could repeated locations or reporting differences explain it?</h3>
+<p>I return to the 1 km / 7 day comparison and check three alternatives: remove one record from each possible duplicate pair; leave out pairs at exactly the same coordinates; and shuffle within month without separating agencies.</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 41%">
+<col style="width: 16%">
+<col style="width: 17%">
+<col style="width: 16%">
+<col style="width: 8%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Check</th>
+<th style="text-align: right;">Observed pairs</th>
+<th style="text-align: right;">Shuffle average</th>
+<th style="text-align: right;">Difference (%)</th>
+<th style="text-align: left;">p-value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Main: shuffle within agency and month</td>
+<td style="text-align: right;">2,204</td>
+<td style="text-align: right;">2,091</td>
+<td style="text-align: right;">5.4</td>
+<td style="text-align: left;">0.002</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Remove two possible duplicate reports</td>
+<td style="text-align: right;">2,193</td>
+<td style="text-align: right;">2,082</td>
+<td style="text-align: right;">5.3</td>
+<td style="text-align: left;">0.003</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Exclude pairs at identical coordinates</td>
+<td style="text-align: right;">2,145</td>
+<td style="text-align: right;">2,044</td>
+<td style="text-align: right;">4.9</td>
+<td style="text-align: left;">0.003</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Shuffle within month only</td>
+<td style="text-align: right;">2,204</td>
+<td style="text-align: right;">2,079</td>
+<td style="text-align: right;">6.0</td>
+<td style="text-align: left;">0.001</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>The actual count stays about 5 to 6% above the shuffled average. Removing the possible duplicates leaves a difference of 5.3%; leaving out pairs at identical coordinates gives 4.9%. Those records do not explain the result on their own. Shuffling without separating agencies gives a slightly larger difference, so I keep agencies separate in the main test. Errors in coordinates or changes in local traffic and reporting during a month could still affect the result.</p>
+</section>
+</section>
+<section id="what-do-these-results-say-together" class="level2">
+<h2 class="anchored" data-anchor-id="what-do-these-results-say-together">9. What do these results say together?</h2>
+<p>Eastern Bangkok stands out on the density maps even when I change the amount of smoothing. The quarterly maps show that the later increase varies by province, with clear rises in Bangkok and Samut Sakhon. The pair test adds another finding: there are 5.4% more pairs within 1 km and 7 days than the shuffled comparison suggests. Removing possible duplicates and pairs at repeated locations gives similar results.</p>
+<p>The maps show where reports build up, while the test suggests that nearby accidents also happen close together in time more often than expected under this comparison. I cannot tell from the regional test whether the eastern Bangkok peak is responsible. That would need a separate test of individual areas.</p>
+<p>The data leave several questions open. The three agencies cover selected roads, and the spatial analysis leaves out the 189 Bangkok expressway reports without coordinates. Without traffic volumes or road lengths, I cannot compare the chance of an accident per journey. Shared or inaccurate coordinates may make accidents appear closer than they were, and straight-line distances ignore the road connections.</p>
+<p>These results cover only 2022. More years would help show whether the late-year rise recurs. Traffic changes, weather, roadworks and reporting practices could all help explain the patterns, but this analysis cannot tell which mattered or identify a particular dangerous junction.</p>
+</section>
+<section id="what-would-i-do-with-this-information" class="level2">
+<h2 class="anchored" data-anchor-id="what-would-i-do-with-this-information">10. What would I do with this information?</h2>
+<p>I would start by checking the original reports around eastern Bangkok, since that area stands out at all three bandwidths. Matching each accident to the right carriageway and junction would help identify repeated locations. Crash type, severity and road conditions would then help decide what changes to consider. The density map gives me a place to start, but cannot tell me which road treatment would work.</p>
+<p>The late-year rises in Bangkok and Samut Sakhon also deserve a closer look. Agency records could show whether workload changed during those months. Traffic counts, roadworks and changes in reporting would help explain whether there were more accidents or more complete reporting. I would check other years before planning a campaign for a particular season.</p>
+<p>The pair test gives a reason to review recent nearby accidents together, perhaps weekly. Before using this to trigger an alert or move staff, I would test the rule on later data and check how often it produces false alarms. This exercise has not evaluated an alert system.</p>
+<p>I would also try to recover the coordinates for the 189 Bangkok expressway reports and repeat the analysis. They are a large gap in the records available for mapping.</p>
+<p>Choosing roads for intervention or locations for emergency services would need traffic volumes, crash severity and service travel times alongside these results. The current analysis helps decide what to investigate next; it does not measure risk per journey or establish which intervention will work.</p>
+</section>
+<section id="sources-and-methods" class="level2">
+<h2 class="anchored" data-anchor-id="sources-and-methods">11. Sources and methods</h2>
+<ul>
+<li><a href="https://www.kaggle.com/datasets/thaweewatboy/thailand-road-accident-2019-2022">Thailand Road Accident 2019–2022</a>, version 1; <a href="https://datagov.mot.go.th/dataset/roadaccident">Ministry of Transport source</a>. Only 2022 is analysed.</li>
+<li><a href="https://www.geoboundaries.org/api/current/gbOpen/THA/ADM1/">geoBoundaries Thailand ADM1</a>, 2017 boundary representation, pinned to release commit 9469f09. Derived from OpenStreetMap/Wambacher; Open Database License 1.0.</li>
+<li><a href="https://www.nso.go.th/public/e-book/Statistical-Yearbook/SYB-2025/110/">National Statistical Office: Bangkok and Vicinities</a>, for the six-province grouping.</li>
+<li><a href="https://search.r-project.org/CRAN/refmans/spatstat.explore/html/density.ppp.html">spatstat: kernel-smoothed intensity</a>, for the density maps and edge correction.</li>
+<li><a href="https://search.r-project.org/CRAN/refmans/surveillance/html/knox.html">Knox test for space-time interaction</a>, for the close-pair approach. Here I adapt the shuffling to preserve agency-month groups and compare several distance/time settings together.</li>
+</ul>
+<p><a href="./take-home-exercise-01-summary.html">Presentation</a> · <a href="https://github.com/chinh02/isss626-chinh-le">Project and analysis source</a></p>
 <p><a href="./take-home-exercise.html" class="back-link">← Back to take-home exercises</a></p>
 
 
