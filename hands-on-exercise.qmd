@@ -42,6 +42,16 @@ Mapping 2023 forest fire events in Kepulauan Bangka Belitung and estimating how 
 
 [View exercise →](hands-on-exercise-03.qmd){.section-link}
 :::
+
+::: {.exercise-entry}
+<span>04</span>
+
+## Spatial Weights and Applications
+
+Building contiguity, distance and nearest-neighbour relationships for Hunan counties, then using them to calculate spatial lags.
+
+[View exercise →](hands-on-exercise-04.qmd){.section-link}
+:::
 :::
 
 [← Back to home](index.qmd){.back-link}
