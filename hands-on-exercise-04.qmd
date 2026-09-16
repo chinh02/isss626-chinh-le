@@ -9,6 +9,7 @@ title-block-banner: true
 page-layout: article
 toc: true
 toc-depth: 3
+number-sections: true
 code-overflow: wrap
 format:
   html:
