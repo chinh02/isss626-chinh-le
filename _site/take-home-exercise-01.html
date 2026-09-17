@@ -159,7 +159,7 @@ ul.task-list li input[type="checkbox"] {
       <div>
       <div class="quarto-title-meta-heading">Modified</div>
       <div class="quarto-title-meta-contents">
-        <p class="date-modified">September 16, 2026</p>
+        <p class="date-modified">September 17, 2026</p>
       </div>
     </div>
       
@@ -186,6 +186,7 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#where-do-the-main-concentrations-appear" id="toc-where-do-the-main-concentrations-appear" class="nav-link" data-scroll-target="#where-do-the-main-concentrations-appear">6. Where do the main concentrations appear?</a>
   <ul class="collapse">
   <li><a href="#does-the-smoothing-choice-change-the-picture" id="toc-does-the-smoothing-choice-change-the-picture" class="nav-link" data-scroll-target="#does-the-smoothing-choice-change-the-picture">6.1 Does the smoothing choice change the picture?</a></li>
+  <li><a href="#which-roads-make-up-the-eastern-bangkok-concentration" id="toc-which-roads-make-up-the-eastern-bangkok-concentration" class="nav-link" data-scroll-target="#which-roads-make-up-the-eastern-bangkok-concentration">6.2 Which roads make up the eastern Bangkok concentration?</a></li>
   </ul></li>
   <li><a href="#did-the-concentrations-move-during-the-year" id="toc-did-the-concentrations-move-during-the-year" class="nav-link" data-scroll-target="#did-the-concentrations-move-during-the-year">7. Did the concentrations move during the year?</a></li>
   <li><a href="#do-nearby-accidents-also-happen-close-together-in-time" id="toc-do-nearby-accidents-also-happen-close-together-in-time" class="nav-link" data-scroll-target="#do-nearby-accidents-also-happen-close-together-in-time">8. Do nearby accidents also happen close together in time?</a>
@@ -193,9 +194,10 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#what-am-i-comparing-against" id="toc-what-am-i-comparing-against" class="nav-link" data-scroll-target="#what-am-i-comparing-against">8.1 What am I comparing against?</a></li>
   <li><a href="#does-the-answer-depend-on-choosing-1-km-and-7-days" id="toc-does-the-answer-depend-on-choosing-1-km-and-7-days" class="nav-link" data-scroll-target="#does-the-answer-depend-on-choosing-1-km-and-7-days">8.2 Does the answer depend on choosing 1 km and 7 days?</a></li>
   <li><a href="#could-repeated-locations-or-reporting-differences-explain-it" id="toc-could-repeated-locations-or-reporting-differences-explain-it" class="nav-link" data-scroll-target="#could-repeated-locations-or-reporting-differences-explain-it">8.3 Could repeated locations or reporting differences explain it?</a></li>
+  <li><a href="#what-changes-when-distance-follows-the-roads" id="toc-what-changes-when-distance-follows-the-roads" class="nav-link" data-scroll-target="#what-changes-when-distance-follows-the-roads">8.4 What changes when distance follows the roads?</a></li>
   </ul></li>
   <li><a href="#what-do-these-results-say-together" id="toc-what-do-these-results-say-together" class="nav-link" data-scroll-target="#what-do-these-results-say-together">9. What do these results say together?</a></li>
-  <li><a href="#what-would-i-do-with-this-information" id="toc-what-would-i-do-with-this-information" class="nav-link" data-scroll-target="#what-would-i-do-with-this-information">10. What would I do with this information?</a></li>
+  <li><a href="#recommendations-for-road-safety" id="toc-recommendations-for-road-safety" class="nav-link" data-scroll-target="#recommendations-for-road-safety">10. Recommendations for road safety</a></li>
   <li><a href="#sources-and-methods" id="toc-sources-and-methods" class="nav-link" data-scroll-target="#sources-and-methods">11. Sources and methods</a></li>
   </ul>
 </nav>
@@ -214,9 +216,10 @@ ul.task-list li input[type="checkbox"] {
 <section id="what-i-want-to-find-out" class="level2">
 <h2 class="anchored" data-anchor-id="what-i-want-to-find-out">1. What I want to find out</h2>
 <p>I chose Greater Bangkok so I could look at the city and its surrounding provinces together. The 2022 data cover a full year, which makes it possible to compare the months.</p>
-<p>There are four questions I want to explore:</p>
+<p>There are five questions I want to explore:</p>
 <ul>
 <li>Where were most accidents recorded?</li>
+<li>Which roads make up the main concentration?</li>
 <li>Which months had more accidents?</li>
 <li>Did nearby accidents happen close together in time more often than expected?</li>
 <li>Could missing locations change what the maps and charts show?</li>
@@ -241,12 +244,16 @@ ul.task-list li input[type="checkbox"] {
 <td><a href="https://www.geoboundaries.org/api/current/gbOpen/THA/ADM1/">Thailand provincial boundaries</a></td>
 <td>Defining the study area and placing accidents within its provinces. These boundaries represent 2017.</td>
 </tr>
+<tr class="odd">
+<td><a href="https://www.openstreetmap.org/copyright">OpenStreetMap roads</a>, retrieved through <a href="https://overpass-api.de/">Overpass</a></td>
+<td>A closer look at main roads and connectors in eastern Bangkok, as mapped on 1 January 2022.</td>
+</tr>
 </tbody>
 </table>
-<p>Both datasets were downloaded on 11 September 2026. The accident data come from a compilation of Ministry of Transport records covering <strong>highways, rural roads and expressways</strong>. They do not cover every accident on every local street. <a href="https://datagov.mot.go.th/dataset/roadaccident">Source: Ministry of Transport</a>.</p>
+<p>The accident data and boundaries were downloaded on 11 September 2026, and the roads on 17 September. The accident data come from a compilation of Ministry of Transport records covering <strong>highways, rural roads and expressways</strong>. They do not cover every accident on every local street. <a href="https://datagov.mot.go.th/dataset/roadaccident">Source: Ministry of Transport</a>.</p>
 <p>Here, Greater Bangkok means <strong>Bangkok, Nonthaburi, Pathum Thani, Nakhon Pathom, Samut Prakan and Samut Sakhon</strong>, following the National Statistical Office’s <a href="https://www.nso.go.th/public/e-book/Statistical-Yearbook/SYB-2025/110/">Bangkok and Vicinities grouping</a>.</p>
 <p>The study runs from 1 January to 31 December 2022, using the date of the accident. A report submitted later still belongs to the day the accident happened. I treat the times as local Thai time, although the source does not state the time zone.</p>
-<p>I combine the six provinces into one study area, so the analysis can cross their internal borders. WGS 84 / UTM zone 47N (EPSG:32647) lets me measure distances in metres. These are straight-line distances, so two nearby points may still be on different roads or opposite sides of a river.</p>
+<p>I combine the six provinces into one study area, so the analysis can cross their internal borders. WGS 84 / UTM zone 47N (EPSG:32647) lets me measure distances in metres. I start with straight-line distances, then follow the roads for a closer look at eastern Bangkok.</p>
 </section>
 <section id="checking-the-records" class="level2">
 <h2 class="anchored" data-anchor-id="checking-the-records">3. Checking the records</h2>
@@ -406,6 +413,21 @@ ul.task-list li input[type="checkbox"] {
 </div>
 <p>Eastern Bangkok stands out in all three maps. With more smoothing, the peak drops from 21.7 to 9.3 to 4.0 records per km², and nearby patches merge. The broad location stays similar, but its outline and peak value depend on the bandwidth. I would be cautious about drawing a precise hotspot boundary from any one of these maps. Whether the pattern is statistically unusual needs a separate test.</p>
 </section>
+<section id="which-roads-make-up-the-eastern-bangkok-concentration" class="level3">
+<h3 class="anchored" data-anchor-id="which-roads-make-up-the-eastern-bangkok-concentration">6.2 Which roads make up the eastern Bangkok concentration?</h3>
+<p>The broad density map made me want to look more closely at eastern Bangkok. I take a 10 km by 10 km area around its strongest peak and match the reports to the roads. Of the 442 reports here, 426 have usable matches. I leave out 16 where nearby roads at different levels make the choice unclear.</p>
+<p>Route 7 accounts for 245 of the matched reports and Route 9 for 122. Together, that is about 86%. Network KDE smooths these reports along connected roads. Using a 1 km smoothing distance, the map shows which stretches contribute to the broader patch we saw earlier.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="take-home-01/figures/roads.png" class="img-fluid figure-img" alt="Road density in a ten kilometre square in eastern Bangkok, showing concentrations along Routes 7 and 9." width="720"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The darkest stretch lies on Route 7, east of its junction with Route 9. I would start a closer review there and on the connecting ramps. All the reports in this small area come from the Department of Highways, so the quieter local streets are not a fair comparison. The map also cannot tell us the chance of an accident per journey without traffic counts.</p>
+</section>
 </section>
 <section id="did-the-concentrations-move-during-the-year" class="level2">
 <h2 class="anchored" data-anchor-id="did-the-concentrations-move-during-the-year">7. Did the concentrations move during the year?</h2>
@@ -516,21 +538,57 @@ ul.task-list li input[type="checkbox"] {
 </div>
 <p>The actual count stays about 5 to 6% above the shuffled average. Removing the possible duplicates leaves a difference of 5.3%; leaving out pairs at identical coordinates gives 4.9%. Those records do not explain the result on their own. Shuffling without separating agencies gives a slightly larger difference, so I keep agencies separate in the main test. Errors in coordinates or changes in local traffic and reporting during a month could still affect the result.</p>
 </section>
+<section id="what-changes-when-distance-follows-the-roads" class="level3">
+<h3 class="anchored" data-anchor-id="what-changes-when-distance-follows-the-roads">8.4 What changes when distance follows the roads?</h3>
+<p>For the same 426 matched reports in eastern Bangkok, I repeat the 1 km / 7 day comparison using distance along connected roads. The straight-line comparison below uses those same road matches. Road distances work in either direction on the mapped main roads and connectors; they do not represent driving time or include every local street.</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Distance measured</th>
+<th style="text-align: right;">Actual close pairs</th>
+<th style="text-align: right;">Shuffle average</th>
+<th style="text-align: left;">p-value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Straight line</td>
+<td style="text-align: right;">563</td>
+<td style="text-align: right;">536</td>
+<td style="text-align: left;">0.067</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Along roads</td>
+<td style="text-align: right;">240</td>
+<td style="text-align: right;">246</td>
+<td style="text-align: left;">0.676</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Following the roads gives 240 close pairs, compared with about 246 after shuffling the times. Neither comparison gives clear evidence of extra clustering in time in this small area.</p>
+<p>Routes 7 and 9 account for many reports here, but their timing looks much like the shuffled records. The earlier finding across all six provinces should not be assumed to apply to every concentration on the map.</p>
+</section>
 </section>
 <section id="what-do-these-results-say-together" class="level2">
 <h2 class="anchored" data-anchor-id="what-do-these-results-say-together">9. What do these results say together?</h2>
 <p>Eastern Bangkok stands out on the density maps even when I change the amount of smoothing. The quarterly maps show that the later increase varies by province, with clear rises in Bangkok and Samut Sakhon. The pair test adds another finding: there are 5.4% more pairs within 1 km and 7 days than the shuffled comparison suggests. Removing possible duplicates and pairs at repeated locations gives similar results.</p>
-<p>The maps show where reports build up, while the test suggests that nearby accidents also happen close together in time more often than expected under this comparison. I cannot tell from the regional test whether the eastern Bangkok peak is responsible. That would need a separate test of individual areas.</p>
+<p>The closer look at eastern Bangkok points to Routes 7 and 9, which account for about 86% of its matched reports. The local road-distance test gives no clear evidence of extra clustering in time here. I would keep that distinction in mind when deciding which places need further investigation.</p>
 <p>The data leave several questions open. The three agencies cover selected roads, and the spatial analysis leaves out the 189 Bangkok expressway reports without coordinates. Without traffic volumes or road lengths, I cannot compare the chance of an accident per journey. Shared or inaccurate coordinates may make accidents appear closer than they were, and straight-line distances ignore the road connections.</p>
 <p>These results cover only 2022. More years would help show whether the late-year rise recurs. Traffic changes, weather, roadworks and reporting practices could all help explain the patterns, but this analysis cannot tell which mattered or identify a particular dangerous junction.</p>
 </section>
-<section id="what-would-i-do-with-this-information" class="level2">
-<h2 class="anchored" data-anchor-id="what-would-i-do-with-this-information">10. What would I do with this information?</h2>
-<p>I would start by checking the original reports around eastern Bangkok, since that area stands out at all three bandwidths. Matching each accident to the right carriageway and junction would help identify repeated locations. Crash type, severity and road conditions would then help decide what changes to consider. The density map gives me a place to start, but cannot tell me which road treatment would work.</p>
-<p>The late-year rises in Bangkok and Samut Sakhon also deserve a closer look. Agency records could show whether workload changed during those months. Traffic counts, roadworks and changes in reporting would help explain whether there were more accidents or more complete reporting. I would check other years before planning a campaign for a particular season.</p>
-<p>The pair test gives a reason to review recent nearby accidents together, perhaps weekly. Before using this to trigger an alert or move staff, I would test the rule on later data and check how often it produces false alarms. This exercise has not evaluated an alert system.</p>
-<p>I would also try to recover the coordinates for the 189 Bangkok expressway reports and repeat the analysis. They are a large gap in the records available for mapping.</p>
-<p>Choosing roads for intervention or locations for emergency services would need traffic volumes, crash severity and service travel times alongside these results. The current analysis helps decide what to investigate next; it does not measure risk per journey or establish which intervention will work.</p>
+<section id="recommendations-for-road-safety" class="level2">
+<h2 class="anchored" data-anchor-id="recommendations-for-road-safety">10. Recommendations for road safety</h2>
+<ul>
+<li><p>Prioritise road safety inspections on Route 7 east of its junction with Route 9, and on nearby connecting ramps. Check signs, lane markings and visibility, then repair any defects found.</p></li>
+<li><p>Review patrol and emergency-response coverage in Bangkok and Samut Sakhon, where reports rose late in 2022. Use recent accident and dispatch records to confirm when extra coverage is needed before changing schedules.</p></li>
+<li><p>Have the reporting agencies review recent nearby accidents together each week. Flag repeated locations for site inspections, and test the 1 km / 7 day rule on later records before using it for automatic alerts.</p></li>
+<li><p>Require usable coordinates and a road-section reference in accident reports. Recover the locations of the 189 unmapped Bangkok expressway reports, and check new submissions for missing or implausible coordinates.</p></li>
+<li><p>Use crash severity and traffic volumes alongside these maps to rank road improvements. Confirm the location and conditions on site before choosing a treatment, so spending follows the problems found at each road section.</p></li>
+</ul>
 </section>
 <section id="sources-and-methods" class="level2">
 <h2 class="anchored" data-anchor-id="sources-and-methods">11. Sources and methods</h2>
@@ -540,6 +598,8 @@ ul.task-list li input[type="checkbox"] {
 <li><a href="https://www.nso.go.th/public/e-book/Statistical-Yearbook/SYB-2025/110/">National Statistical Office: Bangkok and Vicinities</a>, for the six-province grouping.</li>
 <li><a href="https://search.r-project.org/CRAN/refmans/spatstat.explore/html/density.ppp.html">spatstat: kernel-smoothed intensity</a>, for the density maps and edge correction.</li>
 <li><a href="https://search.r-project.org/CRAN/refmans/surveillance/html/knox.html">Knox test for space-time interaction</a>, for the close-pair approach. Here I adapt the shuffling to preserve agency-month groups and compare several distance/time settings together.</li>
+<li><a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>, roads as mapped on 1 January 2022, retrieved through <a href="https://overpass-api.de/">Overpass</a>. Open Database License 1.0.</li>
+<li><a href="https://jeremygelb.github.io/spNetwork/reference/nkde.html">spNetwork</a>, for road density and network distances in the eastern Bangkok comparison.</li>
 </ul>
 <p><a href="./take-home-exercise-01-summary.html">Presentation</a> · <a href="https://github.com/chinh02/isss626-chinh-le">Project and analysis source</a></p>
 <p><a href="./take-home-exercise.html" class="back-link">← Back to take-home exercises</a></p>

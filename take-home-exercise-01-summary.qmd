@@ -2,7 +2,7 @@
 title: "Road accidents in Greater Bangkok"
 subtitle: "What the 2022 reports tell us"
 author: "Le Truong Chinh · ISSS626"
-date: "16 September 2026"
+date: "17 September 2026"
 format:
   revealjs:
     theme: simple
@@ -89,6 +89,27 @@ The map uses Gaussian KDE, UTM 47N, 250 m cells and a boundary correction. To ju
 :::
 :::
 
+## A closer look at Routes 7 and 9
+
+::: {.columns}
+::: {.column width="62%"}
+![](take-home-01/figures/roads.png){height=550 alt="Accident density following Routes 7 and 9 in eastern Bangkok."}
+:::
+::: {.column width="38%"}
+In a 10 km by 10 km area around the eastern Bangkok peak, I could match 426 reports to roads.
+
+Routes 7 and 9 account for about 86% of them.
+
+Following the roads gives 240 pairs within 1 km and a week, compared with about 246 after shuffling the times (p = 0.676).
+
+This local test gives no clear evidence of extra clustering in time.
+
+::: {.small-note}
+This is a closer look at one area. It uses main roads and connectors as mapped in January 2022, with distance measured in either direction.
+:::
+:::
+:::
+
 ## More reports towards the end of the year
 
 ![](take-home-01/figures/monthly.png){height=430 alt="Monthly reports per day, peaking in October with or without the reports lacking coordinates."}
@@ -149,23 +170,22 @@ Across nine combinations of distance and time, the actual counts are 2.7% to 17.
 I checked 0.5, 1 and 2 km, each with 3, 7 and 14 days. After adjustment, eight comparisons have p-values below 0.05; 0.5 km / 7 days does not. Local traffic schedules or reporting changes could still affect the result.
 :::
 
-## Where I would go from here
+## Recommendations for road safety
 
 ::: {.columns}
 ::: {.column width="53%"}
-I would:
-
-1. Check the original reports around the eastern Bangkok concentration.
-2. Review the late-year rises in Bangkok and Samut Sakhon.
-3. Review recent nearby accidents together and test any alert rule on later data.
-4. Recover the missing expressway coordinates.
+- Inspect Route 7 near Route 9 and the connecting ramps; repair any defects found.
+- Review patrol and response coverage using recent accident and dispatch records.
+- Review nearby accidents weekly and test any alert rule before adopting it.
+- Require usable locations in reports and recover the missing expressway coordinates.
+- Use crash severity and traffic volumes to prioritise road improvements.
 :::
 ::: {.column width="47%"}
 The maps show where reports build up. The test also finds more nearby accidents happening within days of each other than the shuffled counts suggest.
 
 It cannot tell us which areas account for this result, which roads are most dangerous, or what caused the pattern.
 
-Before choosing road improvements, I would need traffic volumes, crash severity, road connections and data from more years.
+Confirm current demand and conditions on site before changing deployments or choosing road treatments.
 
 [Read the full report](take-home-exercise-01.qmd) · [GitHub project](https://github.com/chinh02/isss626-chinh-le)
 :::

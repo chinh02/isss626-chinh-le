@@ -10,7 +10,7 @@
   <meta name="generator" content="quarto-1.10.18">
 
   <meta name="author" content="Le Truong Chinh · ISSS626">
-  <meta name="dcterms.date" content="2026-09-16">
+  <meta name="dcterms.date" content="2026-09-17">
   <title>Le Truong Chinh · ISSS626 – Road accidents in Greater Bangkok</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -149,7 +149,7 @@ Le Truong Chinh · ISSS626
 </div>
 </div>
 
-  <p class="date">2026-09-16</p>
+  <p class="date">2026-09-17</p>
 </section>
 <section id="where-and-when-did-accidents-happen" class="slide level2">
 <h2>Where and when did accidents happen?</h2>
@@ -203,6 +203,21 @@ Le Truong Chinh · ISSS626
 <p>More smoothing changes the outline and lowers the peak, but the same broad area stands out.</p>
 <div class="small-note">
 <p>The map uses Gaussian KDE, UTM 47N, 250 m cells and a boundary correction. To judge risk per journey, I would also need traffic volumes.</p>
+</div>
+</div></div>
+</section>
+<section id="a-closer-look-at-routes-7-and-9" class="slide level2">
+<h2>A closer look at Routes 7 and 9</h2>
+<div class="columns">
+<div class="column" style="width:62%;">
+<p><img data-src="take-home-01/figures/roads.png" alt="Accident density following Routes 7 and 9 in eastern Bangkok." height="550"></p>
+</div><div class="column" style="width:38%;">
+<p>In a 10 km by 10 km area around the eastern Bangkok peak, I could match 426 reports to roads.</p>
+<p>Routes 7 and 9 account for about 86% of them.</p>
+<p>Following the roads gives 240 pairs within 1 km and a week, compared with about 246 after shuffling the times (p = 0.676).</p>
+<p>This local test gives no clear evidence of extra clustering in time.</p>
+<div class="small-note">
+<p>This is a closer look at one area. It uses main roads and connectors as mapped in January 2022, with distance measured in either direction.</p>
 </div>
 </div></div>
 </section>
@@ -296,21 +311,21 @@ Le Truong Chinh · ISSS626
 <p>I checked 0.5, 1 and 2 km, each with 3, 7 and 14 days. After adjustment, eight comparisons have p-values below 0.05; 0.5 km / 7 days does not. Local traffic schedules or reporting changes could still affect the result.</p>
 </div>
 </section>
-<section id="where-i-would-go-from-here" class="slide level2">
-<h2>Where I would go from here</h2>
+<section id="recommendations-for-road-safety" class="slide level2">
+<h2>Recommendations for road safety</h2>
 <div class="columns">
 <div class="column" style="width:53%;">
-<p>I would:</p>
-<ol type="1">
-<li>Check the original reports around the eastern Bangkok concentration.</li>
-<li>Review the late-year rises in Bangkok and Samut Sakhon.</li>
-<li>Review recent nearby accidents together and test any alert rule on later data.</li>
-<li>Recover the missing expressway coordinates.</li>
-</ol>
+<ul>
+<li>Inspect Route 7 near Route 9 and the connecting ramps; repair any defects found.</li>
+<li>Review patrol and response coverage using recent accident and dispatch records.</li>
+<li>Review nearby accidents weekly and test any alert rule before adopting it.</li>
+<li>Require usable locations in reports and recover the missing expressway coordinates.</li>
+<li>Use crash severity and traffic volumes to prioritise road improvements.</li>
+</ul>
 </div><div class="column" style="width:47%;">
 <p>The maps show where reports build up. The test also finds more nearby accidents happening within days of each other than the shuffled counts suggest.</p>
 <p>It cannot tell us which areas account for this result, which roads are most dangerous, or what caused the pattern.</p>
-<p>Before choosing road improvements, I would need traffic volumes, crash severity, road connections and data from more years.</p>
+<p>Confirm current demand and conditions on site before changing deployments or choosing road treatments.</p>
 <p><a href="./take-home-exercise-01.html">Read the full report</a> · <a href="https://github.com/chinh02/isss626-chinh-le">GitHub project</a></p>
 </div></div>
 

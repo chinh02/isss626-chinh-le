@@ -1,0 +1,2 @@
+"filename","url","query","snapshot","sha256","sha256_elements","licence","accessed_utc"
+"roads-eastern-bangkok-20220101.json","https://overpass-api.de/api/interpreter","[out:json][timeout:120][date:""2022-01-01T00:00:00Z""];way[""highway""~""^(motorway|trunk|primary|secondary|tertiary|unclassified)(_link)?$""](13.65,100.65,13.80,100.80);out geom;","2022-01-01T00:00:00Z","ec61d17aaaf19ec77a208d337029ea307dd674a6a0057fd654f5eef6df9cbf1f","6822b196f6c4654db15e03f186a39e9b0c07cf8cf1242e62f9aa63d7719905cf","OpenStreetMap contributors, ODbL 1.0","2026-09-17 14:59:47 UTC"
