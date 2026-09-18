@@ -111,5 +111,37 @@ It can also be run directly after the preparation has been rendered.
 
 Generated summary CSVs and session information are saved with the derived data.
 Presentation figures are in take-home-01/figures/. The revealjs presentation
-contains nine content slides plus a cover. Render the report before the slides
+contains ten content slides plus a cover. Render the report before the slides
 to refresh the shared figures, and review slide wording if the input data change.
+
+## Severity, timing and monthly map
+
+The report also runs `scripts/analyse-take-home-01-facets.R` after saving the
+prepared records. It checks non-negative integer casualty counts and compares
+fatal reports (at least one recorded death), injury-only reports, and reports
+with no recorded casualty. All comparisons use the same 3,599 mapped records;
+the 189 unlocated reports include two fatal reports and are audited separately.
+Vehicle labels describe the single category supplied per report, not every
+vehicle involved. Time periods are equal six-hour blocks in local Thai time;
+the night comparison uses 18:00–05:59, not measured lighting conditions.
+
+The two severity maps divide their Gaussian KDEs by their own event counts,
+then express density as percentage of the group per square kilometre. They use
+the existing 2 km bandwidth, 250 m cells and Jones-Diggle edge correction. The
+script checks that each density integrates to its event count within 2%.
+These maps compare distributions; they are not maps of fatality probability.
+Province, agency, vehicle and night/day summaries provide descriptive checks
+of how the record mix affects comparisons. No new significance tests are run.
+Counts and deaths are kept distinct, and the outcome groups sum to the full
+sample. CSV tables and the RDS results are saved in the derived-data directory.
+
+`take-home-01/explorer-template.html` supplies the monthly map's HTML, CSS and
+JavaScript. The R script inserts display coordinates, province boundaries and
+counts to create the self-contained `accident-explorer.html`. It requires no
+external map tiles or JavaScript packages. Display boundaries are simplified
+by 100 m; record selection continues to use the original boundaries. Each
+animation frame shows one calendar month, never an interpolated location or
+cumulative count. Playback starts only on request, can be paused, and stops
+after December. Province totals remain visible as a numerical alternative to
+overlapping points. The report explicitly includes the generated HTML as a
+Quarto resource so it is copied into the published site.

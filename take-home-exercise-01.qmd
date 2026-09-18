@@ -3,8 +3,10 @@ title: "Take-home Exercise 1"
 subtitle: "Road accidents in Greater Bangkok, 2022"
 author: "Le Truong Chinh"
 date: "11 September 2026"
-date-modified: "17 September 2026"
-description: "Where road accidents concentrate in Greater Bangkok, how the pattern changes over 2022, and whether nearby accidents also occur close together in time."
+date-modified: "18 September 2026"
+description: "Where accidents and fatal reports concentrate in Greater Bangkok, how the pattern changes over 2022, and what vehicle types and accident times add to the picture."
+resources:
+  - take-home-01/accident-explorer.html
 title-block-banner: true
 page-layout: article
 toc: true
@@ -19,7 +21,7 @@ execute:
 ---
 
 ::: {.exercise-lead}
-I use the 2022 road accident records to look at where accidents were reported in Greater Bangkok, how this changed over the year, and whether nearby accidents often happened within days of each other.
+I use the 2022 road accident records to look at where accidents were reported in Greater Bangkok, which reports involved deaths, and how the pattern changed through the year.
 :::
 
 [View the short presentation](take-home-exercise-01-summary.qmd)
@@ -28,11 +30,12 @@ I use the 2022 road accident records to look at where accidents were reported in
 
 I chose Greater Bangkok so I could look at the city and its surrounding provinces together. The 2022 data cover a full year, which makes it possible to compare the months.
 
-There are five questions I want to explore:
+There are six questions I want to explore:
 
 - Where were most accidents recorded?
 - Which roads make up the main concentration?
 - Which months had more accidents?
+- Do the places with the most reports also have the most fatal reports, and how do time of day and vehicle type matter?
 - Did nearby accidents happen close together in time more often than expected?
 - Could missing locations change what the maps and charts show?
 
@@ -42,9 +45,9 @@ I check the records before making the maps. Then I look for places with many rep
 
 | Data | What I use it for |
 |---|---|
-| [Thailand Road Accident 2019–2022](https://www.kaggle.com/datasets/thaweewatboy/thailand-road-accident-2019-2022) | Accident locations and dates. I use only 2022. Each row is an accident report; it does not count a single vehicle or casualty. |
-| [Thailand provincial boundaries](https://www.geoboundaries.org/api/current/gbOpen/THA/ADM1/) | Defining the study area and placing accidents within its provinces. These boundaries represent 2017. |
-| [OpenStreetMap roads](https://www.openstreetmap.org/copyright), retrieved through [Overpass](https://overpass-api.de/) | A closer look at main roads and connectors in eastern Bangkok, as mapped on 1 January 2022. |
+| [Thailand Road Accident 2019–2022 on Kaggle](https://www.kaggle.com/datasets/thaweewatboy/thailand-road-accident-2019-2022) | Locations, dates, vehicle categories, weather and recorded casualties. I use only 2022. Each row is an accident report, which may involve several vehicles or people. |
+| [geoBoundaries country downloads](https://www.geoboundaries.org/countryDownloads.html) | Select **Thailand → ADM1** for provincial boundaries. I use the boundaries representing 2017 to define the study area and assign reports to provinces. |
+| [OpenStreetMap: eastern Bangkok](https://www.openstreetmap.org/#map=12/13.7330/100.7140) | Browse the roads around Routes 7 and 9. The analysis uses roads as mapped on **1 January 2022**; the linked map shows today's roads. |
 
 The accident data and boundaries were downloaded on 11 September 2026, and the roads on 17 September. The accident data come from a compilation of Ministry of Transport records covering **highways, rural roads and expressways**. They do not cover every accident on every local street. [Source: Ministry of Transport](https://datagov.mot.go.th/dataset/roadaccident).
 
@@ -239,6 +242,8 @@ tibble(
 
 This leaves **`r format(nrow(accidents), big.mark = ",")` accident records** for the map. All the dates could be read, and there were no completely duplicated records. No coordinates were outside the valid latitude/longitude ranges or recorded as (0, 0). I also checked the boundary shapes for invalid or empty geometry before using them to select the points.
 
+None of the mapped reports has a missing or negative injury or death count. I call a report fatal when it records at least one death. The mapped records include **159 fatal reports and 177 deaths**. A zero means no death was recorded in this file; the source does not tell me whether casualties were followed up later.
+
 ### 3.1 Missing locations
 
 There are **189 records without coordinates**. All are listed as accidents in Bangkok. I checked which agency reported them to see whether the missing locations were spread across the data.
@@ -269,7 +274,7 @@ ggplot(missingness, aes(x = missing_pct, y = reorder(agency_label, missing_pct))
        caption = "Source: Ministry of Transport compilation via Kaggle, version 1.")
 ```
 
-All 189 came from the Expressway Authority. They make up **43.1% of its 439 Bangkok reports**, compared with no missing locations in the other two agencies' Bangkok records. This means the map leaves out a substantial part of the Expressway Authority's reports. I keep these records for the monthly comparison because their dates are still available, but cannot place them on the map.
+All 189 came from the Expressway Authority. They make up **43.1% of its 439 Bangkok reports**, compared with no missing locations in the other two agencies' Bangkok records. This means the map leaves out a substantial part of the Expressway Authority's reports. I keep these records for the monthly comparison because their dates are still available, but cannot place them on the map. Two of the excluded reports record a death, so the later severity maps and comparisons also leave those out.
 
 ### 3.2 Repeated or conflicting locations
 
@@ -425,6 +430,41 @@ write_csv(accidents %>% st_drop_geometry() %>% filter(same_location_time_n > 1),
 ```
 
 ```{r}
+#| label: th01-facets-analysis
+#| include: false
+source("scripts/analyse-take-home-01-facets.R", local = new.env())
+facets <- readRDS(file.path(derived_dir, "facets_analysis.rds"))
+```
+
+### 5.1 Does the time of day change the picture?
+
+I split the day into four equal six-hour periods to see when more accidents were reported and how often they involved a death.
+
+```{r}
+#| label: th01-time-severity
+#| fig-alt: "Two bar charts: overnight has 644 reports, fewer than the other six-hour periods, but 8.5 percent involve a death, the largest share."
+knitr::include_graphics("take-home-01/figures/time-severity.png")
+```
+
+Midnight to 6 am has the fewest reports, but **55 of its 644 reports involve a death (8.5%)**. During the daytime, the share is around 2 to 2.5%. For emergency planning, I would consider how often accidents involved a death as well as how many were reported.
+
+To check whether different vehicle types might explain this, I compared motorcycle reports during the day and at night. At night, 58 of 213 were fatal (27.2%), compared with 22 of 193 during the day (11.4%). I use 6 pm to 6 am for nighttime; this is based on the clock, not measured darkness. The nighttime share is higher even within this group, although differences in traffic, speed or reporting could still matter.
+
+### 5.2 Which vehicle groups stand out?
+
+The source gives each report one vehicle category. It does not list every vehicle involved, so I compare reports carrying each label without assuming which vehicle or person caused the accident.
+
+```{r}
+#| label: th01-vehicle-severity
+#| fig-alt: "Motorcycle reports have the highest fatal share among the six common named vehicle categories: 80 of 406, or 19.7 percent."
+knitr::include_graphics("take-home-01/figures/vehicle-severity.png")
+```
+
+Cars and pickups appear more often in the file. Motorcycles account for 406 reports (11.3% of the total), yet **80 of the 159 fatal reports (50.3%)** carry the motorcycle label.
+
+The same difference appears within both agencies that record motorcycle accidents. In Department of Highways records, 17.6% of motorcycle reports are fatal, compared with 2.5% of other reports. For the Department of Rural Roads, the figures are 24.2% and 8.5%. These percentages describe accidents in the file; they cannot tell us the chance of dying on a motorcycle journey. Another 399 reports use the vehicle label "other", which limits the comparison.
+
+```{r}
 #| label: th01-complete-analysis
 #| include: false
 source("scripts/analyse-take-home-01.R", local = TRUE)
@@ -537,6 +577,34 @@ knitr::include_graphics("take-home-01/figures/roads.png")
 
 The darkest stretch lies on Route 7, east of its junction with Route 9. I would start a closer review there and on the connecting ramps. All the reports in this small area come from the Department of Highways, so the quieter local streets are not a fair comparison. The map also cannot tell us the chance of an accident per journey without traffic counts.
 
+### 6.3 Do fatal reports concentrate in the same places?
+
+I compare the locations of all reports with the 159 that involved a death. Both maps use the same 2 km smoothing. Dividing the density values by each group's number of reports lets me compare where they concentrate on a shared colour scale.
+
+```{r}
+#| label: th01-severity-geography
+#| fig-alt: "Comparable density maps: all reports peak in eastern Bangkok, while reports involving a death have their strongest two-kilometre smoothed peak in Pathum Thani."
+knitr::include_graphics("take-home-01/figures/severity-geography.png")
+```
+
+The strongest peak is in **Pathum Thani** for fatal reports, compared with eastern Bangkok for all reports. Nonthaburi and Samut Prakan also stand out more. The colours show where reports within each group concentrate, not a road user's chance of dying. With only 159 fatal reports, a few locations and the amount of smoothing can have more influence on the map's shape.
+
+The province totals make the difference easier to see:
+
+```{r}
+#| label: th01-province-severity
+facets$by_province %>%
+  transmute(Province = province_geom, Reports = reports,
+    `Fatal reports` = fatal_reports,
+    `Share of all reports (%)` = round(report_share, 1),
+    `Share of fatal reports (%)` = round(fatal_share, 1)) %>%
+  knitr::kable(format.args = list(big.mark = ","))
+```
+
+Bangkok accounts for **50.1% of all reports but 17.0% of fatal reports**. Pathum Thani and Samut Prakan together account for just over half of fatal reports, although they have about a third of all reports. Nonthaburi has relatively few reports overall, but 26 of its 174 reports are fatal. Looking only at totals would give it less attention.
+
+I checked the Department of Highways records separately to see whether agency coverage explained the difference. The fatal share is still 1.3% in Bangkok and 12.6% in Nonthaburi. I would investigate those locations, but would need to account for differences in roads, vehicles and reporting before comparing how safe the provinces are.
+
 ## 7. Did the concentrations move during the year?
 
 The monthly chart showed more reports late in the year. Did those extra reports come from the same places? I split the year into four quarters to make the maps easier to compare than twelve monthly maps. All four use a 2 km bandwidth and the same colour scale.
@@ -561,6 +629,41 @@ knitr::include_graphics("take-home-01/figures/quarters.png")
 ```
 
 Bangkok and Samut Sakhon show clear increases. Bangkok averaged 3.94 reports per day in the first quarter (January to March) and 6.17 in the last (October to December). Samut Sakhon rises from 0.39 to 1.67 per day. Pathum Thani changes much less, from 1.27 to 1.41. The maps show where these changes appear within each province. I would need more years to tell whether this happens regularly, and other data to explain the increase.
+
+### 7.1 Did the rise in reports also mean more harm?
+
+I separate reports into three groups: at least one death, injuries with no recorded death, and no recorded injury or death. Each report belongs to one group, even if several people were hurt.
+
+```{r}
+#| label: th01-quarter-outcomes
+#| fig-alt: "Stacked bars show reports per day by outcome. All three categories rise from the first to the last quarter, with a smaller increase in fatal reports."
+knitr::include_graphics("take-home-01/figures/quarter-outcomes.png")
+```
+
+From the first quarter to the last, reports involving injuries but no deaths rise from **2.99 to 4.63 per day**. Fatal reports rise more slowly, from 0.43 to 0.51 per day. The total rises from 8.14 to 12.32 per day. Emergency services would therefore need to consider the increase in injuries alongside the overall number of accidents.
+
+The increase appears in all three agencies' records, with the Department of Highways accounting for 346 of the 400 additional reports. Reports marked rainy peak in July to September (160), then fall to 44 in October to December. Most reports in the last quarter are marked clear weather (1,079 of 1,133). Rain alone does not explain the rise in this file. I would need traffic counts and information on how much driving took place in each weather condition to investigate further.
+
+### 7.2 Explore the months on the map
+
+The red dots below pick out fatal reports. Use **Play** to step through the months, or select a province to see its counts. **Whole year** brings back the full pattern. The locations stay fixed; only the reports belonging to each month change.
+
+```{=html}
+<iframe id="th01-explorer" src="take-home-01/accident-explorer.html" title="Monthly accident map with playback and province comparisons" style="width:100%;height:1000px;border:0" loading="lazy"></iframe>
+<script>
+window.addEventListener('message', function(event) {
+  const frame = document.getElementById('th01-explorer');
+  if (event.source === frame.contentWindow && event.data?.type === 'th01-explorer-height') {
+    const height = Number(event.data.height);
+    if (Number.isFinite(height) && height > 0) frame.style.height = Math.ceil(height + 4) + 'px';
+  }
+});
+</script>
+```
+
+[Open the map on its own](take-home-01/accident-explorer.html)
+
+October has the most mapped reports (394), while **July has the most fatal reports (24)**. Use the province counts to compare places where overlapping dots are hard to read.
 
 ## 8. Do nearby accidents also happen close together in time?
 
@@ -666,32 +769,38 @@ Routes 7 and 9 account for many reports here, but their timing looks much like t
 
 Eastern Bangkok stands out on the density maps even when I change the amount of smoothing. The quarterly maps show that the later increase varies by province, with clear rises in Bangkok and Samut Sakhon. The pair test adds another finding: there are 5.4% more pairs within 1 km and 7 days than the shuffled comparison suggests. Removing possible duplicates and pairs at repeated locations gives similar results.
 
-The closer look at eastern Bangkok points to Routes 7 and 9, which account for about 86% of its matched reports. The local road-distance test gives no clear evidence of extra clustering in time here. I would keep that distinction in mind when deciding which places need further investigation.
+Routes 7 and 9 account for about 86% of the matched reports in the eastern Bangkok study area. The road-distance test gives no clear evidence of extra clustering in time there. The result across all six provinces therefore needs a closer check before it is used to guide action on these roads.
 
-The data leave several questions open. The three agencies cover selected roads, and the spatial analysis leaves out the 189 Bangkok expressway reports without coordinates. Without traffic volumes or road lengths, I cannot compare the chance of an accident per journey. Shared or inaccurate coordinates may make accidents appear closer than they were, and straight-line distances ignore the road connections.
+Pathum Thani and Samut Prakan account for just over half of fatal reports. Nonthaburi also deserves attention because many of its reports involve a death, despite its smaller total. Motorcycle reports and accidents overnight more often involve deaths too. The comparisons within agencies and vehicle groups give similar findings, though differences in traffic and reporting remain.
 
-These results cover only 2022. More years would help show whether the late-year rise recurs. Traffic changes, weather, roadworks and reporting practices could all help explain the patterns, but this analysis cannot tell which mattered or identify a particular dangerous junction.
+The three agencies cover selected roads, and the maps leave out the 189 Bangkok expressway reports without coordinates. Without traffic volumes or road lengths, I cannot compare the chance of an accident per journey. Shared or inaccurate coordinates may make accidents appear closer than they were, and straight-line distances ignore the road connections.
+
+These results cover only 2022. More years would help show whether the late-year rise recurs. The weather labels do not support a simple rain explanation, but the file contains no measure of time spent driving in rain. Traffic changes, roadworks and reporting practices could still help explain the patterns. The casualty counts also depend on how each agency records and follows up an accident.
 
 ## 10. Recommendations for road safety
 
 - Prioritise road safety inspections on Route 7 east of its junction with Route 9, and on nearby connecting ramps. Check signs, lane markings and visibility, then repair any defects found.
 
-- Review patrol and emergency-response coverage in Bangkok and Samut Sakhon, where reports rose late in 2022. Use recent accident and dispatch records to confirm when extra coverage is needed before changing schedules.
+- Include locations of fatal accidents in Pathum Thani, Samut Prakan and Nonthaburi when choosing sites to inspect. Ranking places only by the number of reports would give Bangkok much more attention. Read the individual crash reports and inspect each site before deciding what to change.
+
+- Check nighttime emergency coverage and motorcycle safety where fatal accidents occurred. Inspect lighting, visibility and road layout, and check dispatch records for delays. These are things to investigate; the accident records do not establish what caused the more severe outcomes.
+
+- Review patrol and emergency-response coverage in Bangkok and Samut Sakhon, where reports rose late in 2022. Allow for the rise in injury reports as well as the total workload, and confirm the pattern in recent records before changing schedules.
 
 - Have the reporting agencies review recent nearby accidents together each week. Flag repeated locations for site inspections, and test the 1 km / 7 day rule on later records before using it for automatic alerts.
 
 - Require usable coordinates and a road-section reference in accident reports. Recover the locations of the 189 unmapped Bangkok expressway reports, and check new submissions for missing or implausible coordinates.
 
-- Use crash severity and traffic volumes alongside these maps to rank road improvements. Confirm the location and conditions on site before choosing a treatment, so spending follows the problems found at each road section.
+- Use the recorded injuries and deaths, along with traffic volumes, to decide which road improvements come first. Check conditions on site so each proposed change addresses a problem found on that road.
 
 ## 11. Sources and methods
 
 - [Thailand Road Accident 2019–2022](https://www.kaggle.com/datasets/thaweewatboy/thailand-road-accident-2019-2022), version 1; [Ministry of Transport source](https://datagov.mot.go.th/dataset/roadaccident). Only 2022 is analysed.
-- [geoBoundaries Thailand ADM1](https://www.geoboundaries.org/api/current/gbOpen/THA/ADM1/), 2017 boundary representation, pinned to release commit 9469f09. Derived from OpenStreetMap/Wambacher; Open Database License 1.0.
+- [geoBoundaries country downloads](https://www.geoboundaries.org/countryDownloads.html), select Thailand and ADM1. The analysis uses the 2017 boundary representation, pinned to release commit 9469f09. Derived from OpenStreetMap/Wambacher; Open Database License 1.0.
 - [National Statistical Office: Bangkok and Vicinities](https://www.nso.go.th/public/e-book/Statistical-Yearbook/SYB-2025/110/), for the six-province grouping.
 - [spatstat: kernel-smoothed intensity](https://search.r-project.org/CRAN/refmans/spatstat.explore/html/density.ppp.html), for the density maps and edge correction.
 - [Knox test for space-time interaction](https://search.r-project.org/CRAN/refmans/surveillance/html/knox.html), for the close-pair approach. Here I adapt the shuffling to preserve agency-month groups and compare several distance/time settings together.
-- [OpenStreetMap contributors](https://www.openstreetmap.org/copyright), roads as mapped on 1 January 2022, retrieved through [Overpass](https://overpass-api.de/). Open Database License 1.0.
+- [OpenStreetMap: eastern Bangkok](https://www.openstreetmap.org/#map=12/13.7330/100.7140), with [contributor attribution and licence](https://www.openstreetmap.org/copyright). The analysis uses roads as mapped on 1 January 2022. Open Database License 1.0.
 - [spNetwork](https://jeremygelb.github.io/spNetwork/reference/nkde.html), for road density and network distances in the eastern Bangkok comparison.
 
 [Presentation](take-home-exercise-01-summary.qmd) · [Project and analysis source](https://github.com/chinh02/isss626-chinh-le)

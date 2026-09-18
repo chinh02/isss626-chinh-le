@@ -2,7 +2,7 @@
 title: "Road accidents in Greater Bangkok"
 subtitle: "What the 2022 reports tell us"
 author: "Le Truong Chinh · ISSS626"
-date: "17 September 2026"
+date: "18 September 2026"
 format:
   revealjs:
     theme: simple
@@ -34,6 +34,7 @@ Bangkok, Nonthaburi, Pathum Thani, Nakhon Pathom, Samut Prakan and Samut Sakhon.
 
 - Where do reports concentrate?
 - How does that change during 2022?
+- Does the pattern change when deaths are considered?
 - Are nearby accidents also unusually close in time?
 
 ::: {.small-note}
@@ -67,7 +68,7 @@ The three agencies report accidents on highways, rural roads and expressways. Th
 :::
 
 ::: {.small-note}
-Sources: [Ministry of Transport compilation via Kaggle](https://www.kaggle.com/datasets/thaweewatboy/thailand-road-accident-2019-2022) and [geoBoundaries](https://www.geoboundaries.org/api/current/gbOpen/THA/ADM1/); downloaded 11 September 2026. Boundaries represent 2017.
+Sources: [Ministry of Transport compilation via Kaggle](https://www.kaggle.com/datasets/thaweewatboy/thailand-road-accident-2019-2022) and [geoBoundaries country downloads](https://www.geoboundaries.org/countryDownloads.html) (Thailand, ADM1); downloaded 11 September 2026. Boundaries represent 2017.
 :::
 
 ## Eastern Bangkok stands out
@@ -110,14 +111,37 @@ This is a closer look at one area. It uses main roads and connectors as mapped i
 :::
 :::
 
+## Fatal reports tell a different story
+
+::: {.columns}
+::: {.column width="65%"}
+![](take-home-01/figures/severity-geography.png){height=420 alt="The smoothed peak shifts from eastern Bangkok for all reports to Pathum Thani for fatal reports."}
+
+Motorcycles appear in 11.3% of reports but 50.3% of fatal reports.
+:::
+::: {.column width="35%"}
+159 mapped reports involved at least one death, recording 177 deaths in total.
+
+Pathum Thani and Samut Prakan together account for just over half of fatal reports.
+
+Bangkok has half of all reports, but only 17.0% of fatal reports.
+
+From midnight to 6 am, 8.5% of reports were fatal, compared with around 2 to 2.5% during daytime hours.
+:::
+:::
+
+::: {.small-note}
+Each map is scaled to its own group total, with the same 2 km smoothing and colour scale. These are patterns among reported accidents, not risk per journey. Two fatal reports without coordinates are excluded.
+:::
+
 ## More reports towards the end of the year
 
 ![](take-home-01/figures/monthly.png){height=430 alt="Monthly reports per day, peaking in October with or without the reports lacking coordinates."}
 
-October has 394 mapped records, or 12.7 per day. Adding the 189 reports without locations leaves the broad pattern unchanged.
+October has the most mapped records: 394, or 12.7 per day. July has the most fatal reports (24).
 
 ::: {.small-note}
-I divide monthly totals by the number of days. More years would be needed to check whether the pattern repeats.
+I divide monthly totals by the number of days. Adding the 189 reports without locations leaves the broad pattern unchanged. More years would be needed to check whether it repeats.
 :::
 
 ## The increase was not the same everywhere
@@ -135,7 +159,7 @@ Average reports per day:
 | Samut Sakhon | 0.39 → 1.67 |
 | Pathum Thani | 1.27 → 1.41 |
 
-I would look more closely at why reports rose in Bangkok and Samut Sakhon.
+Across all six provinces, reports involving injuries but no deaths rise from 2.99 to 4.63 per day.
 
 ::: {.small-note}
 All maps use a 2 km bandwidth and the same colour scale, adjusted for quarter length. Changes in traffic or reporting could help explain the increase.
@@ -175,17 +199,18 @@ I checked 0.5, 1 and 2 km, each with 3, 7 and 14 days. After adjustment, eight c
 ::: {.columns}
 ::: {.column width="53%"}
 - Inspect Route 7 near Route 9 and the connecting ramps; repair any defects found.
-- Review patrol and response coverage using recent accident and dispatch records.
+- Include locations of fatal accidents in Pathum Thani, Samut Prakan and Nonthaburi when choosing sites to inspect.
+- Review nighttime response coverage and motorcycle safety at these locations.
+- Plan for the late-year rise in injury reports using recent accident and dispatch records.
 - Review nearby accidents weekly and test any alert rule before adopting it.
 - Require usable locations in reports and recover the missing expressway coordinates.
-- Use crash severity and traffic volumes to prioritise road improvements.
 :::
 ::: {.column width="47%"}
-The maps show where reports build up. The test also finds more nearby accidents happening within days of each other than the shuffled counts suggest.
+The places with the most reports differ from those with the most fatal reports. Across the region, nearby accidents also happen within days of each other more often than the shuffled counts suggest.
 
 It cannot tell us which areas account for this result, which roads are most dangerous, or what caused the pattern.
 
-Confirm current demand and conditions on site before changing deployments or choosing road treatments.
+Check traffic volumes and conditions on site before changing patrol coverage or deciding on road improvements.
 
 [Read the full report](take-home-exercise-01.qmd) · [GitHub project](https://github.com/chinh02/isss626-chinh-le)
 :::

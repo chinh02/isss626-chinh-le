@@ -8,7 +8,7 @@
 
 <meta name="author" content="Le Truong Chinh">
 <meta name="dcterms.date" content="2026-09-11">
-<meta name="description" content="Where road accidents concentrate in Greater Bangkok, how the pattern changes over 2022, and whether nearby accidents also occur close together in time.">
+<meta name="description" content="Where accidents and fatal reports concentrate in Greater Bangkok, how the pattern changes over 2022, and what vehicle types and accident times add to the picture.">
 
 <title>Take-home Exercise 1 – Le Truong Chinh · ISSS626</title>
 <style>
@@ -80,7 +80,7 @@ ul.task-list li input[type="checkbox"] {
 
 <link rel="stylesheet" href="styles.css">
 <meta property="og:title" content="Take-home Exercise 1 – Le Truong Chinh · ISSS626">
-<meta property="og:description" content="Where road accidents concentrate in Greater Bangkok, how the pattern changes over 2022, and whether nearby accidents also occur close together in time.">
+<meta property="og:description" content="Where accidents and fatal reports concentrate in Greater Bangkok, how the pattern changes over 2022, and what vehicle types and accident times add to the picture.">
 <meta property="og:image" content="take-home-exercise-01_files/figure-html/th01-missingness-1.png">
 <meta property="og:site_name" content="Le Truong Chinh · ISSS626">
 </head>
@@ -133,7 +133,7 @@ ul.task-list li input[type="checkbox"] {
             <p class="subtitle lead">Road accidents in Greater Bangkok, 2022</p>
                   <div>
         <div class="description">
-          Where road accidents concentrate in Greater Bangkok, how the pattern changes over 2022, and whether nearby accidents also occur close together in time.
+          Where accidents and fatal reports concentrate in Greater Bangkok, how the pattern changes over 2022, and what vehicle types and accident times add to the picture.
         </div>
       </div>
                 </div>
@@ -159,7 +159,7 @@ ul.task-list li input[type="checkbox"] {
       <div>
       <div class="quarto-title-meta-heading">Modified</div>
       <div class="quarto-title-meta-contents">
-        <p class="date-modified">September 17, 2026</p>
+        <p class="date-modified">September 18, 2026</p>
       </div>
     </div>
       
@@ -182,13 +182,22 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#repeated-or-conflicting-locations" id="toc-repeated-or-conflicting-locations" class="nav-link" data-scroll-target="#repeated-or-conflicting-locations">3.2 Repeated or conflicting locations</a></li>
   </ul></li>
   <li><a href="#where-were-accidents-recorded" id="toc-where-were-accidents-recorded" class="nav-link" data-scroll-target="#where-were-accidents-recorded">4. Where were accidents recorded?</a></li>
-  <li><a href="#when-were-more-accidents-recorded" id="toc-when-were-more-accidents-recorded" class="nav-link" data-scroll-target="#when-were-more-accidents-recorded">5. When were more accidents recorded?</a></li>
+  <li><a href="#when-were-more-accidents-recorded" id="toc-when-were-more-accidents-recorded" class="nav-link" data-scroll-target="#when-were-more-accidents-recorded">5. When were more accidents recorded?</a>
+  <ul class="collapse">
+  <li><a href="#does-the-time-of-day-change-the-picture" id="toc-does-the-time-of-day-change-the-picture" class="nav-link" data-scroll-target="#does-the-time-of-day-change-the-picture">5.1 Does the time of day change the picture?</a></li>
+  <li><a href="#which-vehicle-groups-stand-out" id="toc-which-vehicle-groups-stand-out" class="nav-link" data-scroll-target="#which-vehicle-groups-stand-out">5.2 Which vehicle groups stand out?</a></li>
+  </ul></li>
   <li><a href="#where-do-the-main-concentrations-appear" id="toc-where-do-the-main-concentrations-appear" class="nav-link" data-scroll-target="#where-do-the-main-concentrations-appear">6. Where do the main concentrations appear?</a>
   <ul class="collapse">
   <li><a href="#does-the-smoothing-choice-change-the-picture" id="toc-does-the-smoothing-choice-change-the-picture" class="nav-link" data-scroll-target="#does-the-smoothing-choice-change-the-picture">6.1 Does the smoothing choice change the picture?</a></li>
   <li><a href="#which-roads-make-up-the-eastern-bangkok-concentration" id="toc-which-roads-make-up-the-eastern-bangkok-concentration" class="nav-link" data-scroll-target="#which-roads-make-up-the-eastern-bangkok-concentration">6.2 Which roads make up the eastern Bangkok concentration?</a></li>
+  <li><a href="#do-fatal-reports-concentrate-in-the-same-places" id="toc-do-fatal-reports-concentrate-in-the-same-places" class="nav-link" data-scroll-target="#do-fatal-reports-concentrate-in-the-same-places">6.3 Do fatal reports concentrate in the same places?</a></li>
   </ul></li>
-  <li><a href="#did-the-concentrations-move-during-the-year" id="toc-did-the-concentrations-move-during-the-year" class="nav-link" data-scroll-target="#did-the-concentrations-move-during-the-year">7. Did the concentrations move during the year?</a></li>
+  <li><a href="#did-the-concentrations-move-during-the-year" id="toc-did-the-concentrations-move-during-the-year" class="nav-link" data-scroll-target="#did-the-concentrations-move-during-the-year">7. Did the concentrations move during the year?</a>
+  <ul class="collapse">
+  <li><a href="#did-the-rise-in-reports-also-mean-more-harm" id="toc-did-the-rise-in-reports-also-mean-more-harm" class="nav-link" data-scroll-target="#did-the-rise-in-reports-also-mean-more-harm">7.1 Did the rise in reports also mean more harm?</a></li>
+  <li><a href="#explore-the-months-on-the-map" id="toc-explore-the-months-on-the-map" class="nav-link" data-scroll-target="#explore-the-months-on-the-map">7.2 Explore the months on the map</a></li>
+  </ul></li>
   <li><a href="#do-nearby-accidents-also-happen-close-together-in-time" id="toc-do-nearby-accidents-also-happen-close-together-in-time" class="nav-link" data-scroll-target="#do-nearby-accidents-also-happen-close-together-in-time">8. Do nearby accidents also happen close together in time?</a>
   <ul class="collapse">
   <li><a href="#what-am-i-comparing-against" id="toc-what-am-i-comparing-against" class="nav-link" data-scroll-target="#what-am-i-comparing-against">8.1 What am I comparing against?</a></li>
@@ -210,17 +219,18 @@ ul.task-list li input[type="checkbox"] {
 
 
 <div class="exercise-lead">
-<p>I use the 2022 road accident records to look at where accidents were reported in Greater Bangkok, how this changed over the year, and whether nearby accidents often happened within days of each other.</p>
+<p>I use the 2022 road accident records to look at where accidents were reported in Greater Bangkok, which reports involved deaths, and how the pattern changed through the year.</p>
 </div>
 <p><a href="./take-home-exercise-01-summary.html">View the short presentation</a></p>
 <section id="what-i-want-to-find-out" class="level2">
 <h2 class="anchored" data-anchor-id="what-i-want-to-find-out">1. What I want to find out</h2>
 <p>I chose Greater Bangkok so I could look at the city and its surrounding provinces together. The 2022 data cover a full year, which makes it possible to compare the months.</p>
-<p>There are five questions I want to explore:</p>
+<p>There are six questions I want to explore:</p>
 <ul>
 <li>Where were most accidents recorded?</li>
 <li>Which roads make up the main concentration?</li>
 <li>Which months had more accidents?</li>
+<li>Do the places with the most reports also have the most fatal reports, and how do time of day and vehicle type matter?</li>
 <li>Did nearby accidents happen close together in time more often than expected?</li>
 <li>Could missing locations change what the maps and charts show?</li>
 </ul>
@@ -237,16 +247,16 @@ ul.task-list li input[type="checkbox"] {
 </thead>
 <tbody>
 <tr class="odd">
-<td><a href="https://www.kaggle.com/datasets/thaweewatboy/thailand-road-accident-2019-2022">Thailand Road Accident 2019–2022</a></td>
-<td>Accident locations and dates. I use only 2022. Each row is an accident report; it does not count a single vehicle or casualty.</td>
+<td><a href="https://www.kaggle.com/datasets/thaweewatboy/thailand-road-accident-2019-2022">Thailand Road Accident 2019–2022 on Kaggle</a></td>
+<td>Locations, dates, vehicle categories, weather and recorded casualties. I use only 2022. Each row is an accident report, which may involve several vehicles or people.</td>
 </tr>
 <tr class="even">
-<td><a href="https://www.geoboundaries.org/api/current/gbOpen/THA/ADM1/">Thailand provincial boundaries</a></td>
-<td>Defining the study area and placing accidents within its provinces. These boundaries represent 2017.</td>
+<td><a href="https://www.geoboundaries.org/countryDownloads.html">geoBoundaries country downloads</a></td>
+<td>Select <strong>Thailand → ADM1</strong> for provincial boundaries. I use the boundaries representing 2017 to define the study area and assign reports to provinces.</td>
 </tr>
 <tr class="odd">
-<td><a href="https://www.openstreetmap.org/copyright">OpenStreetMap roads</a>, retrieved through <a href="https://overpass-api.de/">Overpass</a></td>
-<td>A closer look at main roads and connectors in eastern Bangkok, as mapped on 1 January 2022.</td>
+<td><a href="https://www.openstreetmap.org/#map=12/13.7330/100.7140">OpenStreetMap: eastern Bangkok</a></td>
+<td>Browse the roads around Routes 7 and 9. The analysis uses roads as mapped on <strong>1 January 2022</strong>; the linked map shows today’s roads.</td>
 </tr>
 </tbody>
 </table>
@@ -289,6 +299,7 @@ ul.task-list li input[type="checkbox"] {
 </div>
 </div>
 <p>This leaves <strong>3,599 accident records</strong> for the map. All the dates could be read, and there were no completely duplicated records. No coordinates were outside the valid latitude/longitude ranges or recorded as (0, 0). I also checked the boundary shapes for invalid or empty geometry before using them to select the points.</p>
+<p>None of the mapped reports has a missing or negative injury or death count. I call a report fatal when it records at least one death. The mapped records include <strong>159 fatal reports and 177 deaths</strong>. A zero means no death was recorded in this file; the source does not tell me whether casualties were followed up later.</p>
 <section id="missing-locations" class="level3">
 <h3 class="anchored" data-anchor-id="missing-locations">3.1 Missing locations</h3>
 <p>There are <strong>189 records without coordinates</strong>. All are listed as accidents in Bangkok. I checked which agency reported them to see whether the missing locations were spread across the data.</p>
@@ -301,7 +312,7 @@ ul.task-list li input[type="checkbox"] {
 </div>
 </div>
 </div>
-<p>All 189 came from the Expressway Authority. They make up <strong>43.1% of its 439 Bangkok reports</strong>, compared with no missing locations in the other two agencies’ Bangkok records. This means the map leaves out a substantial part of the Expressway Authority’s reports. I keep these records for the monthly comparison because their dates are still available, but cannot place them on the map.</p>
+<p>All 189 came from the Expressway Authority. They make up <strong>43.1% of its 439 Bangkok reports</strong>, compared with no missing locations in the other two agencies’ Bangkok records. This means the map leaves out a substantial part of the Expressway Authority’s reports. I keep these records for the monthly comparison because their dates are still available, but cannot place them on the map. Two of the excluded reports record a death, so the later severity maps and comparisons also leave those out.</p>
 </section>
 <section id="repeated-or-conflicting-locations" class="level3">
 <h3 class="anchored" data-anchor-id="repeated-or-conflicting-locations">3.2 Repeated or conflicting locations</h3>
@@ -384,6 +395,36 @@ ul.task-list li input[type="checkbox"] {
 </div>
 <p><strong>October has the highest count: 394 mapped records, or about 12.7 per day.</strong> November has fewer records than December, but more per day because it is a shorter month. April also stands out compared with March and May.</p>
 <p>Adding the reports with missing locations raises the figures slightly but leaves the same broad pattern: more accidents were recorded towards the end of the year. The location gaps therefore do not explain that increase on their own. The chart does not tell us whether changes in traffic, road conditions or reporting caused it.</p>
+<section id="does-the-time-of-day-change-the-picture" class="level3">
+<h3 class="anchored" data-anchor-id="does-the-time-of-day-change-the-picture">5.1 Does the time of day change the picture?</h3>
+<p>I split the day into four equal six-hour periods to see when more accidents were reported and how often they involved a death.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="take-home-01/figures/time-severity.png" class="img-fluid figure-img" alt="Two bar charts: overnight has 644 reports, fewer than the other six-hour periods, but 8.5 percent involve a death, the largest share." width="800"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Midnight to 6 am has the fewest reports, but <strong>55 of its 644 reports involve a death (8.5%)</strong>. During the daytime, the share is around 2 to 2.5%. For emergency planning, I would consider how often accidents involved a death as well as how many were reported.</p>
+<p>To check whether different vehicle types might explain this, I compared motorcycle reports during the day and at night. At night, 58 of 213 were fatal (27.2%), compared with 22 of 193 during the day (11.4%). I use 6 pm to 6 am for nighttime; this is based on the clock, not measured darkness. The nighttime share is higher even within this group, although differences in traffic, speed or reporting could still matter.</p>
+</section>
+<section id="which-vehicle-groups-stand-out" class="level3">
+<h3 class="anchored" data-anchor-id="which-vehicle-groups-stand-out">5.2 Which vehicle groups stand out?</h3>
+<p>The source gives each report one vehicle category. It does not list every vehicle involved, so I compare reports carrying each label without assuming which vehicle or person caused the accident.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="take-home-01/figures/vehicle-severity.png" class="img-fluid figure-img" alt="Motorcycle reports have the highest fatal share among the six common named vehicle categories: 80 of 406, or 19.7 percent." width="720"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Cars and pickups appear more often in the file. Motorcycles account for 406 reports (11.3% of the total), yet <strong>80 of the 159 fatal reports (50.3%)</strong> carry the motorcycle label.</p>
+<p>The same difference appears within both agencies that record motorcycle accidents. In Department of Highways records, 17.6% of motorcycle reports are fatal, compared with 2.5% of other reports. For the Department of Rural Roads, the figures are 24.2% and 8.5%. These percentages describe accidents in the file; they cannot tell us the chance of dying on a motorcycle journey. Another 399 reports use the vehicle label “other”, which limits the comparison.</p>
+</section>
 </section>
 <section id="where-do-the-main-concentrations-appear" class="level2">
 <h2 class="anchored" data-anchor-id="where-do-the-main-concentrations-appear">6. Where do the main concentrations appear?</h2>
@@ -428,6 +469,89 @@ ul.task-list li input[type="checkbox"] {
 </div>
 <p>The darkest stretch lies on Route 7, east of its junction with Route 9. I would start a closer review there and on the connecting ramps. All the reports in this small area come from the Department of Highways, so the quieter local streets are not a fair comparison. The map also cannot tell us the chance of an accident per journey without traffic counts.</p>
 </section>
+<section id="do-fatal-reports-concentrate-in-the-same-places" class="level3">
+<h3 class="anchored" data-anchor-id="do-fatal-reports-concentrate-in-the-same-places">6.3 Do fatal reports concentrate in the same places?</h3>
+<p>I compare the locations of all reports with the 159 that involved a death. Both maps use the same 2 km smoothing. Dividing the density values by each group’s number of reports lets me compare where they concentrate on a shared colour scale.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="take-home-01/figures/severity-geography.png" class="img-fluid figure-img" alt="Comparable density maps: all reports peak in eastern Bangkok, while reports involving a death have their strongest two-kilometre smoothed peak in Pathum Thani." width="900"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The strongest peak is in <strong>Pathum Thani</strong> for fatal reports, compared with eastern Bangkok for all reports. Nonthaburi and Samut Prakan also stand out more. The colours show where reports within each group concentrate, not a road user’s chance of dying. With only 159 fatal reports, a few locations and the amount of smoothing can have more influence on the map’s shape.</p>
+<p>The province totals make the difference easier to see:</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 15%">
+<col style="width: 9%">
+<col style="width: 15%">
+<col style="width: 28%">
+<col style="width: 30%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Province</th>
+<th style="text-align: right;">Reports</th>
+<th style="text-align: right;">Fatal reports</th>
+<th style="text-align: right;">Share of all reports (%)</th>
+<th style="text-align: right;">Share of fatal reports (%)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Pathum Thani</td>
+<td style="text-align: right;">491</td>
+<td style="text-align: right;">41</td>
+<td style="text-align: right;">13.6</td>
+<td style="text-align: right;">25.8</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Samut Prakan</td>
+<td style="text-align: right;">671</td>
+<td style="text-align: right;">40</td>
+<td style="text-align: right;">18.6</td>
+<td style="text-align: right;">25.2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Bangkok</td>
+<td style="text-align: right;">1,802</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">50.1</td>
+<td style="text-align: right;">17.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Nonthaburi</td>
+<td style="text-align: right;">174</td>
+<td style="text-align: right;">26</td>
+<td style="text-align: right;">4.8</td>
+<td style="text-align: right;">16.4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Samut Sakhon</td>
+<td style="text-align: right;">323</td>
+<td style="text-align: right;">19</td>
+<td style="text-align: right;">9.0</td>
+<td style="text-align: right;">11.9</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Nakhon Pathom</td>
+<td style="text-align: right;">138</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">3.8</td>
+<td style="text-align: right;">3.8</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Bangkok accounts for <strong>50.1% of all reports but 17.0% of fatal reports</strong>. Pathum Thani and Samut Prakan together account for just over half of fatal reports, although they have about a third of all reports. Nonthaburi has relatively few reports overall, but 26 of its 174 reports are fatal. Looking only at totals would give it less attention.</p>
+<p>I checked the Department of Highways records separately to see whether agency coverage explained the difference. The fatal share is still 1.3% in Bangkok and 12.6% in Nonthaburi. I would investigate those locations, but would need to account for differences in roads, vehicles and reporting before comparing how safe the provinces are.</p>
+</section>
 </section>
 <section id="did-the-concentrations-move-during-the-year" class="level2">
 <h2 class="anchored" data-anchor-id="did-the-concentrations-move-during-the-year">7. Did the concentrations move during the year?</h2>
@@ -443,6 +567,37 @@ ul.task-list li input[type="checkbox"] {
 </div>
 </div>
 <p>Bangkok and Samut Sakhon show clear increases. Bangkok averaged 3.94 reports per day in the first quarter (January to March) and 6.17 in the last (October to December). Samut Sakhon rises from 0.39 to 1.67 per day. Pathum Thani changes much less, from 1.27 to 1.41. The maps show where these changes appear within each province. I would need more years to tell whether this happens regularly, and other data to explain the increase.</p>
+<section id="did-the-rise-in-reports-also-mean-more-harm" class="level3">
+<h3 class="anchored" data-anchor-id="did-the-rise-in-reports-also-mean-more-harm">7.1 Did the rise in reports also mean more harm?</h3>
+<p>I separate reports into three groups: at least one death, injuries with no recorded death, and no recorded injury or death. Each report belongs to one group, even if several people were hurt.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="take-home-01/figures/quarter-outcomes.png" class="img-fluid figure-img" alt="Stacked bars show reports per day by outcome. All three categories rise from the first to the last quarter, with a smaller increase in fatal reports." width="720"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>From the first quarter to the last, reports involving injuries but no deaths rise from <strong>2.99 to 4.63 per day</strong>. Fatal reports rise more slowly, from 0.43 to 0.51 per day. The total rises from 8.14 to 12.32 per day. Emergency services would therefore need to consider the increase in injuries alongside the overall number of accidents.</p>
+<p>The increase appears in all three agencies’ records, with the Department of Highways accounting for 346 of the 400 additional reports. Reports marked rainy peak in July to September (160), then fall to 44 in October to December. Most reports in the last quarter are marked clear weather (1,079 of 1,133). Rain alone does not explain the rise in this file. I would need traffic counts and information on how much driving took place in each weather condition to investigate further.</p>
+</section>
+<section id="explore-the-months-on-the-map" class="level3">
+<h3 class="anchored" data-anchor-id="explore-the-months-on-the-map">7.2 Explore the months on the map</h3>
+<p>The red dots below pick out fatal reports. Use <strong>Play</strong> to step through the months, or select a province to see its counts. <strong>Whole year</strong> brings back the full pattern. The locations stay fixed; only the reports belonging to each month change.</p>
+<iframe id="th01-explorer" src="take-home-01/accident-explorer.html" title="Monthly accident map with playback and province comparisons" style="width:100%;height:1000px;border:0" loading="lazy"></iframe>
+<script>
+window.addEventListener('message', function(event) {
+  const frame = document.getElementById('th01-explorer');
+  if (event.source === frame.contentWindow && event.data?.type === 'th01-explorer-height') {
+    const height = Number(event.data.height);
+    if (Number.isFinite(height) && height > 0) frame.style.height = Math.ceil(height + 4) + 'px';
+  }
+});
+</script>
+<p><a href="take-home-01/accident-explorer.html">Open the map on its own</a></p>
+<p>October has the most mapped reports (394), while <strong>July has the most fatal reports (24)</strong>. Use the province counts to compare places where overlapping dots are hard to read.</p>
+</section>
 </section>
 <section id="do-nearby-accidents-also-happen-close-together-in-time" class="level2">
 <h2 class="anchored" data-anchor-id="do-nearby-accidents-also-happen-close-together-in-time">8. Do nearby accidents also happen close together in time?</h2>
@@ -576,29 +731,32 @@ ul.task-list li input[type="checkbox"] {
 <section id="what-do-these-results-say-together" class="level2">
 <h2 class="anchored" data-anchor-id="what-do-these-results-say-together">9. What do these results say together?</h2>
 <p>Eastern Bangkok stands out on the density maps even when I change the amount of smoothing. The quarterly maps show that the later increase varies by province, with clear rises in Bangkok and Samut Sakhon. The pair test adds another finding: there are 5.4% more pairs within 1 km and 7 days than the shuffled comparison suggests. Removing possible duplicates and pairs at repeated locations gives similar results.</p>
-<p>The closer look at eastern Bangkok points to Routes 7 and 9, which account for about 86% of its matched reports. The local road-distance test gives no clear evidence of extra clustering in time here. I would keep that distinction in mind when deciding which places need further investigation.</p>
-<p>The data leave several questions open. The three agencies cover selected roads, and the spatial analysis leaves out the 189 Bangkok expressway reports without coordinates. Without traffic volumes or road lengths, I cannot compare the chance of an accident per journey. Shared or inaccurate coordinates may make accidents appear closer than they were, and straight-line distances ignore the road connections.</p>
-<p>These results cover only 2022. More years would help show whether the late-year rise recurs. Traffic changes, weather, roadworks and reporting practices could all help explain the patterns, but this analysis cannot tell which mattered or identify a particular dangerous junction.</p>
+<p>Routes 7 and 9 account for about 86% of the matched reports in the eastern Bangkok study area. The road-distance test gives no clear evidence of extra clustering in time there. The result across all six provinces therefore needs a closer check before it is used to guide action on these roads.</p>
+<p>Pathum Thani and Samut Prakan account for just over half of fatal reports. Nonthaburi also deserves attention because many of its reports involve a death, despite its smaller total. Motorcycle reports and accidents overnight more often involve deaths too. The comparisons within agencies and vehicle groups give similar findings, though differences in traffic and reporting remain.</p>
+<p>The three agencies cover selected roads, and the maps leave out the 189 Bangkok expressway reports without coordinates. Without traffic volumes or road lengths, I cannot compare the chance of an accident per journey. Shared or inaccurate coordinates may make accidents appear closer than they were, and straight-line distances ignore the road connections.</p>
+<p>These results cover only 2022. More years would help show whether the late-year rise recurs. The weather labels do not support a simple rain explanation, but the file contains no measure of time spent driving in rain. Traffic changes, roadworks and reporting practices could still help explain the patterns. The casualty counts also depend on how each agency records and follows up an accident.</p>
 </section>
 <section id="recommendations-for-road-safety" class="level2">
 <h2 class="anchored" data-anchor-id="recommendations-for-road-safety">10. Recommendations for road safety</h2>
 <ul>
 <li><p>Prioritise road safety inspections on Route 7 east of its junction with Route 9, and on nearby connecting ramps. Check signs, lane markings and visibility, then repair any defects found.</p></li>
-<li><p>Review patrol and emergency-response coverage in Bangkok and Samut Sakhon, where reports rose late in 2022. Use recent accident and dispatch records to confirm when extra coverage is needed before changing schedules.</p></li>
+<li><p>Include locations of fatal accidents in Pathum Thani, Samut Prakan and Nonthaburi when choosing sites to inspect. Ranking places only by the number of reports would give Bangkok much more attention. Read the individual crash reports and inspect each site before deciding what to change.</p></li>
+<li><p>Check nighttime emergency coverage and motorcycle safety where fatal accidents occurred. Inspect lighting, visibility and road layout, and check dispatch records for delays. These are things to investigate; the accident records do not establish what caused the more severe outcomes.</p></li>
+<li><p>Review patrol and emergency-response coverage in Bangkok and Samut Sakhon, where reports rose late in 2022. Allow for the rise in injury reports as well as the total workload, and confirm the pattern in recent records before changing schedules.</p></li>
 <li><p>Have the reporting agencies review recent nearby accidents together each week. Flag repeated locations for site inspections, and test the 1 km / 7 day rule on later records before using it for automatic alerts.</p></li>
 <li><p>Require usable coordinates and a road-section reference in accident reports. Recover the locations of the 189 unmapped Bangkok expressway reports, and check new submissions for missing or implausible coordinates.</p></li>
-<li><p>Use crash severity and traffic volumes alongside these maps to rank road improvements. Confirm the location and conditions on site before choosing a treatment, so spending follows the problems found at each road section.</p></li>
+<li><p>Use the recorded injuries and deaths, along with traffic volumes, to decide which road improvements come first. Check conditions on site so each proposed change addresses a problem found on that road.</p></li>
 </ul>
 </section>
 <section id="sources-and-methods" class="level2">
 <h2 class="anchored" data-anchor-id="sources-and-methods">11. Sources and methods</h2>
 <ul>
 <li><a href="https://www.kaggle.com/datasets/thaweewatboy/thailand-road-accident-2019-2022">Thailand Road Accident 2019–2022</a>, version 1; <a href="https://datagov.mot.go.th/dataset/roadaccident">Ministry of Transport source</a>. Only 2022 is analysed.</li>
-<li><a href="https://www.geoboundaries.org/api/current/gbOpen/THA/ADM1/">geoBoundaries Thailand ADM1</a>, 2017 boundary representation, pinned to release commit 9469f09. Derived from OpenStreetMap/Wambacher; Open Database License 1.0.</li>
+<li><a href="https://www.geoboundaries.org/countryDownloads.html">geoBoundaries country downloads</a>, select Thailand and ADM1. The analysis uses the 2017 boundary representation, pinned to release commit 9469f09. Derived from OpenStreetMap/Wambacher; Open Database License 1.0.</li>
 <li><a href="https://www.nso.go.th/public/e-book/Statistical-Yearbook/SYB-2025/110/">National Statistical Office: Bangkok and Vicinities</a>, for the six-province grouping.</li>
 <li><a href="https://search.r-project.org/CRAN/refmans/spatstat.explore/html/density.ppp.html">spatstat: kernel-smoothed intensity</a>, for the density maps and edge correction.</li>
 <li><a href="https://search.r-project.org/CRAN/refmans/surveillance/html/knox.html">Knox test for space-time interaction</a>, for the close-pair approach. Here I adapt the shuffling to preserve agency-month groups and compare several distance/time settings together.</li>
-<li><a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>, roads as mapped on 1 January 2022, retrieved through <a href="https://overpass-api.de/">Overpass</a>. Open Database License 1.0.</li>
+<li><a href="https://www.openstreetmap.org/#map=12/13.7330/100.7140">OpenStreetMap: eastern Bangkok</a>, with <a href="https://www.openstreetmap.org/copyright">contributor attribution and licence</a>. The analysis uses roads as mapped on 1 January 2022. Open Database License 1.0.</li>
 <li><a href="https://jeremygelb.github.io/spNetwork/reference/nkde.html">spNetwork</a>, for road density and network distances in the eastern Bangkok comparison.</li>
 </ul>
 <p><a href="./take-home-exercise-01-summary.html">Presentation</a> · <a href="https://github.com/chinh02/isss626-chinh-le">Project and analysis source</a></p>

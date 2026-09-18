@@ -10,7 +10,7 @@
   <meta name="generator" content="quarto-1.10.18">
 
   <meta name="author" content="Le Truong Chinh · ISSS626">
-  <meta name="dcterms.date" content="2026-09-17">
+  <meta name="dcterms.date" content="2026-09-18">
   <title>Le Truong Chinh · ISSS626 – Road accidents in Greater Bangkok</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -149,7 +149,7 @@ Le Truong Chinh · ISSS626
 </div>
 </div>
 
-  <p class="date">2026-09-17</p>
+  <p class="date">2026-09-18</p>
 </section>
 <section id="where-and-when-did-accidents-happen" class="slide level2">
 <h2>Where and when did accidents happen?</h2>
@@ -162,6 +162,7 @@ Le Truong Chinh · ISSS626
 <ul>
 <li>Where do reports concentrate?</li>
 <li>How does that change during 2022?</li>
+<li>Does the pattern change when deaths are considered?</li>
 <li>Are nearby accidents also unusually close in time?</li>
 </ul>
 <div class="small-note">
@@ -189,7 +190,7 @@ Le Truong Chinh · ISSS626
 <p>The three agencies report accidents on highways, rural roads and expressways. They do not cover every local street or every accident.</p>
 </div></div>
 <div class="small-note">
-<p>Sources: <a href="https://www.kaggle.com/datasets/thaweewatboy/thailand-road-accident-2019-2022">Ministry of Transport compilation via Kaggle</a> and <a href="https://www.geoboundaries.org/api/current/gbOpen/THA/ADM1/">geoBoundaries</a>; downloaded 11 September 2026. Boundaries represent 2017.</p>
+<p>Sources: <a href="https://www.kaggle.com/datasets/thaweewatboy/thailand-road-accident-2019-2022">Ministry of Transport compilation via Kaggle</a> and <a href="https://www.geoboundaries.org/countryDownloads.html">geoBoundaries country downloads</a> (Thailand, ADM1); downloaded 11 September 2026. Boundaries represent 2017.</p>
 </div>
 </section>
 <section id="eastern-bangkok-stands-out" class="slide level2">
@@ -221,12 +222,28 @@ Le Truong Chinh · ISSS626
 </div>
 </div></div>
 </section>
+<section id="fatal-reports-tell-a-different-story" class="slide level2">
+<h2>Fatal reports tell a different story</h2>
+<div class="columns">
+<div class="column" style="width:65%;">
+<p><img data-src="take-home-01/figures/severity-geography.png" alt="The smoothed peak shifts from eastern Bangkok for all reports to Pathum Thani for fatal reports." height="420"></p>
+<p>Motorcycles appear in 11.3% of reports but 50.3% of fatal reports.</p>
+</div><div class="column" style="width:35%;">
+<p>159 mapped reports involved at least one death, recording 177 deaths in total.</p>
+<p>Pathum Thani and Samut Prakan together account for just over half of fatal reports.</p>
+<p>Bangkok has half of all reports, but only 17.0% of fatal reports.</p>
+<p>From midnight to 6 am, 8.5% of reports were fatal, compared with around 2 to 2.5% during daytime hours.</p>
+</div></div>
+<div class="small-note">
+<p>Each map is scaled to its own group total, with the same 2 km smoothing and colour scale. These are patterns among reported accidents, not risk per journey. Two fatal reports without coordinates are excluded.</p>
+</div>
+</section>
 <section id="more-reports-towards-the-end-of-the-year" class="slide level2">
 <h2>More reports towards the end of the year</h2>
 <p><img data-src="take-home-01/figures/monthly.png" alt="Monthly reports per day, peaking in October with or without the reports lacking coordinates." height="430"></p>
-<p>October has 394 mapped records, or 12.7 per day. Adding the 189 reports without locations leaves the broad pattern unchanged.</p>
+<p>October has the most mapped records: 394, or 12.7 per day. July has the most fatal reports (24).</p>
 <div class="small-note">
-<p>I divide monthly totals by the number of days. More years would be needed to check whether the pattern repeats.</p>
+<p>I divide monthly totals by the number of days. Adding the 189 reports without locations leaves the broad pattern unchanged. More years would be needed to check whether it repeats.</p>
 </div>
 </section>
 <section id="the-increase-was-not-the-same-everywhere" class="slide level2">
@@ -258,7 +275,7 @@ Le Truong Chinh · ISSS626
 </tr>
 </tbody>
 </table>
-<p>I would look more closely at why reports rose in Bangkok and Samut Sakhon.</p>
+<p>Across all six provinces, reports involving injuries but no deaths rise from 2.99 to 4.63 per day.</p>
 <div class="small-note">
 <p>All maps use a 2 km bandwidth and the same colour scale, adjusted for quarter length. Changes in traffic or reporting could help explain the increase.</p>
 </div>
@@ -317,15 +334,16 @@ Le Truong Chinh · ISSS626
 <div class="column" style="width:53%;">
 <ul>
 <li>Inspect Route 7 near Route 9 and the connecting ramps; repair any defects found.</li>
-<li>Review patrol and response coverage using recent accident and dispatch records.</li>
+<li>Include locations of fatal accidents in Pathum Thani, Samut Prakan and Nonthaburi when choosing sites to inspect.</li>
+<li>Review nighttime response coverage and motorcycle safety at these locations.</li>
+<li>Plan for the late-year rise in injury reports using recent accident and dispatch records.</li>
 <li>Review nearby accidents weekly and test any alert rule before adopting it.</li>
 <li>Require usable locations in reports and recover the missing expressway coordinates.</li>
-<li>Use crash severity and traffic volumes to prioritise road improvements.</li>
 </ul>
 </div><div class="column" style="width:47%;">
-<p>The maps show where reports build up. The test also finds more nearby accidents happening within days of each other than the shuffled counts suggest.</p>
+<p>The places with the most reports differ from those with the most fatal reports. Across the region, nearby accidents also happen within days of each other more often than the shuffled counts suggest.</p>
 <p>It cannot tell us which areas account for this result, which roads are most dangerous, or what caused the pattern.</p>
-<p>Confirm current demand and conditions on site before changing deployments or choosing road treatments.</p>
+<p>Check traffic volumes and conditions on site before changing patrol coverage or deciding on road improvements.</p>
 <p><a href="./take-home-exercise-01.html">Read the full report</a> · <a href="https://github.com/chinh02/isss626-chinh-le">GitHub project</a></p>
 </div></div>
 

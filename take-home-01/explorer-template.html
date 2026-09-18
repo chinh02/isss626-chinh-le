@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Accidents through 2022 · Greater Bangkok</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/1.5 system-ui, sans-serif; color: #17333d; background: #fff; }
+  main { border: 1px solid #d9e1df; border-radius: 14px; overflow: hidden; }
+  header { padding: 22px 24px 16px; background: #f5f7f3; }
+  .eyebrow { margin: 0 0 5px; font-size: 11px; font-weight: 700; letter-spacing: .12em; color: #4e6e73; }
+  h1 { font-size: 25px; line-height: 1.2; margin: 0 0 7px; }
+  p { margin: 0; }
+  .intro, .note { color: #52666c; font-size: 13px; }
+  .controls { padding: 18px 24px 0; }
+  .buttons { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  button { font: inherit; color: inherit; cursor: pointer; border: 1px solid #aebfbe; border-radius: 6px; background: white; padding: 7px 13px; }
+  button:hover { background: #edf3ef; }
+  button:focus-visible, input:focus-visible { outline: 3px solid #176a86; outline-offset: 3px; }
+  #play { background: #17333d; color: #fff; min-width: 82px; }
+  button[aria-pressed="true"] { border-color: #17333d; box-shadow: inset 0 0 0 1px #17333d; }
+  .check { margin-left: auto; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+  #month { width: 100%; accent-color: #2a8583; cursor: pointer; margin: 16px 0 0; }
+  .months { display: flex; justify-content: space-between; color: #52666c; font-size: 11px; }
+  .period { font-size: 21px; font-weight: 650; margin: 15px 0 2px; }
+  .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 15px 24px; }
+  .metric { background: #f3f6f5; padding: 10px 14px; border-radius: 7px; }
+  .metric strong { display: block; font-size: 27px; line-height: 1.3; font-variant-numeric: tabular-nums; }
+  .metric span { font-size: 12px; }
+  .metric.fatal { background: #fbefea; color: #963c2d; }
+  .content { display: grid; grid-template-columns: minmax(0, 1fr) 195px; align-items: center; gap: 14px; padding: 0 20px 15px; }
+  svg { display: block; width: 100%; height: auto; }
+  .boundary { fill: #f1f3ed; stroke: #7b9597; stroke-width: .65; fill-rule: evenodd; }
+  .boundary.selected { fill: #e1ece8; stroke: #17333d; stroke-width: 1.5; }
+  .province-label { font-size: 11px; fill: #17333d; text-anchor: middle; paint-order: stroke; stroke: white; stroke-width: 3px; stroke-linejoin: round; pointer-events: none; }
+  .dot { fill: #526f7b; opacity: .5; }
+  .fatal-dot { fill: #b94735; stroke: #fff; stroke-width: .55; opacity: .95; }
+  .legend { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; font-size: 11px; }
+  .key { display: inline-block; border-radius: 50%; width: 8px; height: 8px; margin-right: 4px; background: #526f7b; }
+  .key.red { background: #b94735; width: 10px; height: 10px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; }
+  caption { font-weight: 650; text-align: left; padding: 0 0 8px; }
+  th { font-weight: 550; font-size: 10px; color: #52666c; }
+  th, td { text-align: right; padding: 7px 2px; border-bottom: 1px solid #e5eae7; }
+  th:first-child, td:first-child { text-align: left; }
+  .province-button { border: 0; padding: 2px 0; text-align: left; font-size: 12px; background: transparent; }
+  .province-button.active { text-decoration: underline; font-weight: 650; }
+  #reset { font-size: 11px; padding: 5px 8px; margin: 12px 0; }
+  footer { border-top: 1px solid #e5eae7; padding: 14px 24px 18px; font-size: 11px; color: #52666c; }
+  footer p + p { margin-top: 6px; }
+  footer a { color: #276875; }
+  @media (max-width: 570px) {
+    header, .controls, footer { padding-left: 16px; padding-right: 16px; }
+    .metrics { padding-left: 16px; padding-right: 16px; gap: 7px; }
+    .metric { padding: 9px; }
+    .metric strong { font-size: 23px; }
+    .content { grid-template-columns: 1fr; padding: 0 14px 16px; }
+    .check { margin-left: 0; }
+    .province-button { font-size: 13px; }
+    table { font-size: 13px; }
+  }
+  @media print { .buttons, #month, .months { display: none; } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <p class="eyebrow">GREATER BANGKOK / 2022</p>
+    <h1>Where reports build up, month by month</h1>
+    <p class="intro">Play through the year, or pause on a month. Red dots mark reports involving at least one death.</p>
+  </header>
+  <div class="controls">
+    <div class="buttons">
+      <button id="play" type="button" aria-pressed="false">▶ Play</button>
+      <button id="annual" type="button" aria-pressed="true">Whole year</button>
+      <label class="check"><input id="fatal-only" type="checkbox"> Show only fatal reports</label>
+    </div>
+    <input id="month" type="range" min="1" max="12" value="1" step="1" aria-label="Month in 2022" aria-valuetext="January 2022; whole-year view currently selected">
+    <div class="months" aria-hidden="true"><span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span></div>
+    <p class="period" id="period" aria-live="polite">Whole year · 2022</p>
+    <p class="note" id="scope">All six provinces</p>
+  </div>
+  <div class="metrics">
+    <div class="metric"><strong id="report-count">—</strong><span>reports</span></div>
+    <div class="metric fatal"><strong id="fatal-count">—</strong><span>involving a death</span></div>
+    <div class="metric fatal"><strong id="death-count">—</strong><span>deaths recorded</span></div>
+  </div>
+  <div class="content">
+    <div>
+      <svg id="map" role="img" aria-labelledby="map-title map-description">
+        <title id="map-title">Accident locations in Greater Bangkok</title>
+        <desc id="map-description">Grey points show reports without a recorded death. Red points show fatal reports. The table gives exact counts for each province.</desc>
+        <g id="boundaries"></g><g id="points"></g><g id="labels"></g>
+      </svg>
+      <div class="legend"><span><i class="key"></i>No recorded death</span><span><i class="key red"></i>At least one death</span></div>
+    </div>
+    <div>
+      <table>
+        <caption>Compare provinces</caption>
+        <thead><tr><th scope="col">Province</th><th scope="col">Reports</th><th scope="col">Fatal</th></tr></thead>
+        <tbody id="province-rows"></tbody>
+      </table>
+      <button id="reset" type="button">Show all six provinces</button>
+      <p class="note">Select a province to focus the map and totals. The table keeps all six for comparison.</p>
+    </div>
+  </div>
+  <footer>
+    <p id="period-note">Counts cover the selected period. Fatal means at least one recorded death, not the number of people who died.</p>
+    <p>Each frame shows one month, not a running total or movement between locations. Overlapping dots can hide reports. Months have different lengths; use the charts in the report to compare daily averages.</p>
+    <p>189 reports without coordinates are excluded, including two involving a death. Sources: <a href="https://www.kaggle.com/datasets/thaweewatboy/thailand-road-accident-2019-2022" target="_blank" rel="noopener">Ministry of Transport compilation via Kaggle</a> · <a href="https://www.geoboundaries.org/countryDownloads.html" target="_blank" rel="noopener">geoBoundaries</a>.</p>
+  </footer>
+</main>
+<noscript><p>This explorer needs JavaScript. The report's maps and tables contain the main findings.</p></noscript>
+<script id="accident-data" type="application/json">__ACCIDENT_DATA__</script>
+<script>
+(() => {
+  const data = JSON.parse(document.getElementById('accident-data').textContent);
+  const $ = id => document.getElementById(id);
+  const ns = 'http://www.w3.org/2000/svg';
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  let month = 0, province = 0, timer = null;
+  const number = n => n.toLocaleString('en');
+  function shape(tag, attributes, parent) {
+    const node = document.createElementNS(ns, tag);
+    Object.entries(attributes).forEach(([name, value]) => node.setAttribute(name, value));
+    parent.appendChild(node);
+    return node;
+  }
+  $('map').setAttribute('viewBox', `0 0 ${data.width} ${data.height}`);
+  const boundaries = data.provinces.map(p => {
+    const path = shape('path', {d: p.path, class: 'boundary'}, $('boundaries'));
+    shape('title', {}, path).textContent = p.name;
+    const label = shape('text', {x:p.x, y:p.y, class:'province-label'}, $('labels'));
+    p.name.split(' ').forEach((word, i) => {
+      shape('tspan', {x:p.x, dy:i ? '1.15em' : '0'}, label).textContent = word;
+    });
+    return path;
+  });
+  const rows = data.provinces.map((p, i) => {
+    const tr = document.createElement('tr');
+    const name = document.createElement('td');
+    const button = document.createElement('button');
+    button.type = 'button'; button.className = 'province-button'; button.textContent = p.name;
+    button.addEventListener('click', () => { pause(); province = i + 1; render(); });
+    name.appendChild(button); tr.appendChild(name);
+    const reports = document.createElement('td'), fatal = document.createElement('td');
+    tr.append(reports, fatal); $('province-rows').appendChild(tr);
+    return {button, reports, fatal};
+  });
+  function resize() {
+    if (window.parent !== window) window.parent.postMessage({type:'th01-explorer-height', height:Math.ceil(document.querySelector('main').getBoundingClientRect().height)}, '*');
+  }
+  function pause() {
+    clearInterval(timer); timer = null;
+    $('play').textContent = '▶ Play'; $('play').setAttribute('aria-pressed', 'false');
+  }
+  function render() {
+    const periodRecords = data.records.filter(r => month === 0 || r.month === month);
+    const selected = periodRecords.filter(r => province === 0 || r.province === province);
+    const onlyFatal = $('fatal-only').checked;
+    const fatal = selected.filter(r => r.fatal);
+    $('period').textContent = `${month === 0 ? 'Whole year' : months[month - 1]} · 2022`;
+    $('scope').textContent = province === 0 ? 'All six provinces' : data.provinces[province - 1].name;
+    $('annual').setAttribute('aria-pressed', String(month === 0));
+    $('month').setAttribute('aria-valuetext', month === 0 ? 'January 2022; whole-year view currently selected' : months[month - 1] + ' 2022');
+    $('report-count').textContent = number(selected.length);
+    $('fatal-count').textContent = number(fatal.length);
+    $('death-count').textContent = number(selected.reduce((sum, r) => sum + r.deaths, 0));
+    $('period-note').textContent = `${number(selected.reduce((sum, r) => sum + r.injuries, 0))} injuries recorded in this selection. Totals include all reports in the selected place and period, even when only fatal dots are shown.`;
+    $('map-title').textContent = `Accident locations: ${$('period').textContent}, ${$('scope').textContent}`;
+    $('points').replaceChildren();
+    selected.filter(r => !onlyFatal || r.fatal).sort((a,b) => a.fatal - b.fatal).forEach(r => {
+      shape('circle', {cx:r.x, cy:r.y, r:r.fatal ? 2.7 : 1.25,
+        class:r.fatal ? 'fatal-dot' : 'dot'}, $('points'));
+    });
+    data.provinces.forEach((p, i) => {
+      const subset = periodRecords.filter(r => r.province === i + 1);
+      rows[i].reports.textContent = number(subset.length);
+      rows[i].fatal.textContent = number(subset.filter(r => r.fatal).length);
+      rows[i].button.classList.toggle('active', province === i + 1);
+      rows[i].button.setAttribute('aria-pressed', String(province === i + 1));
+      boundaries[i].classList.toggle('selected', province === i + 1);
+    });
+    resize();
+  }
+  $('month').addEventListener('input', e => { pause(); month = Number(e.target.value); render(); });
+  $('annual').addEventListener('click', () => { pause(); month = 0; $('month').value = '1'; render(); });
+  $('reset').addEventListener('click', () => { pause(); province = 0; render(); });
+  $('fatal-only').addEventListener('change', render);
+  $('play').addEventListener('click', () => {
+    if (timer) { pause(); return; }
+    if (month === 0 || month === 12) month = 1;
+    $('month').value = String(month); render();
+    $('play').textContent = 'Ⅱ Pause'; $('play').setAttribute('aria-pressed', 'true');
+    timer = setInterval(() => {
+      month += 1; $('month').value = String(month); render();
+      if (month === 12) pause();
+    }, 1600);
+  });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });
+  new ResizeObserver(resize).observe(document.querySelector('main'));
+  render();
+})();
+</script>
+</body>
+</html>
