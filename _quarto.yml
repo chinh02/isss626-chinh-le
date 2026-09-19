@@ -15,6 +15,8 @@ website:
         text: Home
       - href: hands-on-exercise.qmd
         text: Hands-on exercise
+      - href: In-class_Ex/In-class_Ex04/In_Class_Ex4.qmd
+        text: In-class exercise
       - href: take-home-exercise.qmd
         text: Take-home exercise
       - href: learning-notes.qmd
