@@ -1,0 +1,778 @@
+---
+title: "Hands-on Exercise 5"
+subtitle: "Global and Local Measures of Spatial Autocorrelation"
+author: "Le Truong Chinh"
+date: "24 September 2026"
+date-modified: "24 September 2026"
+description: "An executed ISSS626 exercise examining global and local spatial autocorrelation in Hunan's GDP per capita."
+title-block-banner: true
+page-layout: article
+toc: true
+toc-depth: 4
+number-sections: true
+code-overflow: wrap
+format:
+  html:
+    code-fold: false
+execute:
+  echo: true
+  eval: true
+  warning: false
+  message: false
+  fig-align: center
+  fig-width: 8
+  fig-height: 5.5
+---
+
+::: {.exercise-lead}
+This exercise asks two related questions about GDP per capita in Hunan. First, is there an overall spatial pattern? Second, where are the clusters and unusual counties?
+:::
+
+::: {.callout-note title="A small addition to the tutorial 🙂"}
+I keep the code from [Chapter 9](https://r4gdsa.netlify.app/chap09.html) and [Chapter 10](https://r4gdsa.netlify.app/chap10.html) unchanged. I add short explanations after the main results and one summary table at the end.
+:::
+
+## Global Measures of Spatial Autocorrelation
+
+### Overview
+
+Global measures give one result for the whole study area. Here, they help me check whether counties with similar GDP per capita tend to be near one another.
+
+### Getting Started
+
+#### The analytical question
+
+Is GDP per capita spread evenly across Hunan, or do similar values form a spatial pattern?
+
+#### The Study Area and Data
+
+The analysis uses the Hunan county boundaries and the 2012 development indicators. There are 88 counties in the boundary layer.
+
+#### Setting the Analytical Toolls
+
+```{r}
+pacman::p_load(sf, spdep, tmap, tidyverse)
+```
+
+### Getting the Data Into R Environment
+
+#### Import shapefile into r environment
+
+```{r}
+hunan <- st_read(dsn = "chap09/data/geospatial", 
+                 layer = "Hunan")
+```
+
+#### Import csv file into r environment
+
+```{r}
+hunan2012 <- read_csv("chap09/data/aspatial/Hunan_2012.csv")
+```
+
+#### Performing relational join
+
+```{r}
+hunan <- left_join(hunan,hunan2012) %>%
+  select(1:4, 7, 15)
+```
+
+#### Visualising Regional Development Indicator
+
+The same data can look different depending on how values are grouped. Equal intervals use ranges of the same width, while quantiles place a similar number of counties in each group.
+
+```{r}
+#| fig-width: 12
+#| fig-height: 8
+equal <- tm_shape(hunan) +
+  tm_polygons(fill = "GDPPC",
+              fill.scale = tm_scale_intervals(
+                style = "equal",
+                n = 5,
+                values = "brewer.blues")) +
+  tm_borders(fiil_alpha = 0.5) + 
+  tm_layout(legend.position = c("left", "bottom"), 
+            main.title = "Equal interval classification")
+
+quantile <- tm_shape(hunan) +
+  tm_polygons(fill = "GDPPC",
+              fill.scale = tm_scale_intervals(
+                style = "quantile",
+                n = 5)) +
+  tm_borders(fiil_alpha = 0.5) + 
+  tm_layout(legend.position = c("left", "bottom"), 
+            main.title = "Quantile classification")
+
+tmap_arrange(equal, 
+             quantile, 
+             asp=1, 
+             ncol=2)
+```
+
+The broad pattern is similar in both maps, although the class boundaries change which counties appear in the darkest groups.
+
+### Global Measures of Spatial Autocorrelation
+
+#### Computing Contiguity Spatial Weights
+
+Queen contiguity treats counties that share an edge or a corner as neighbours.
+
+```{r}
+wm_q <- poly2nb(hunan, 
+                queen=TRUE)
+summary(wm_q)
+```
+
+#### Row-standardised weights matrix
+
+Row-standardised weights make the weights around each county sum to one.
+
+```{r}
+rswm_q <- nb2listw(wm_q, 
+                   style="W", 
+                   zero.policy = TRUE)
+rswm_q
+```
+
+#### What can we learn from the code chunk above?
+
+The neighbour list contains 88 counties. Each neighbouring county receives an equal share of the weight for the county being evaluated.
+
+### Global Measures of Spatial Autocorrelation: Moran's I
+
+#### Maron's I test
+
+Moran's I is positive when counties with similar values tend to be close together.
+
+```{r}
+moran.test(hunan$GDPPC, 
+           listw=rswm_q, 
+           zero.policy = TRUE, 
+           na.action=na.omit)
+```
+
+The positive Moran's I and very small p-value indicate that GDPPC is spatially clustered rather than randomly arranged.
+
+#### Computing Monte Carlo Moran's I
+
+The permutation test compares the observed result with 999 random arrangements of the same values.
+
+```{r}
+set.seed(1234)
+bperm= moran.mc(hunan$GDPPC, 
+                listw=rswm_q, 
+                nsim=999, 
+                zero.policy = TRUE, 
+                na.action=na.omit)
+bperm
+```
+
+The observed result is more extreme than all the simulated values, which supports the same conclusion.
+
+#### Visualising Monte Carlo Moran's I
+
+```{r}
+mean(bperm$res[1:999])
+var(bperm$res[1:999])
+summary(bperm$res[1:999])
+hist(bperm$res, 
+     freq=TRUE, 
+     breaks=20, 
+     xlab="Simulated Moran's I")
+abline(v=0, 
+       col="red") 
+```
+
+Most random results sit near zero, while the observed value is clearly higher.
+
+### Global Measures of Spatial Autocorrelation: Geary's C
+
+#### Geary's C test
+
+Geary's C focuses more on differences between neighbouring counties. A value below one indicates that neighbours tend to be similar.
+
+```{r}
+geary.test(hunan$GDPPC, listw=rswm_q)
+```
+
+The result is below one with a small p-value, so it agrees with Moran's I.
+
+#### Computing Monte Carlo Geary's C
+
+```{r}
+set.seed(1234)
+bperm=geary.mc(hunan$GDPPC, 
+               listw=rswm_q, 
+               nsim=999)
+bperm
+```
+
+#### Visualising the Monte Carlo Geary's C
+
+```{r}
+mean(bperm$res[1:999])
+var(bperm$res[1:999])
+summary(bperm$res[1:999])
+hist(bperm$res, freq=TRUE, breaks=20, xlab="Simulated Geary c")
+abline(v=1, col="red") 
+```
+
+The random results are centred close to one. The observed value is lower, showing that neighbouring counties are more alike than expected by chance.
+
+### Spatial Correlogram
+
+A correlogram checks whether the pattern remains as the number of neighbour steps increases.
+
+#### Compute Moran's I correlogram
+
+```{r}
+MI_corr <- sp.correlogram(wm_q, 
+                          hunan$GDPPC, 
+                          order=6, 
+                          method="I", 
+                          style="W")
+plot(MI_corr)
+```
+
+```{r}
+print(MI_corr)
+```
+
+The positive relationship is strongest for nearby counties and weakens with distance. At later neighbour steps, the sign becomes negative.
+
+#### Compute Geary's C correlogram and plot
+
+```{r}
+GC_corr <- sp.correlogram(wm_q, 
+                          hunan$GDPPC, 
+                          order=6, 
+                          method="C", 
+                          style="W")
+plot(GC_corr)
+```
+
+```{r}
+print(GC_corr)
+```
+
+The Geary result tells a similar story: the clearest similarity is among the closest counties.
+
+## Local Measures of Spatial Autocorrelation
+
+### Overview
+
+The global tests confirm that a pattern exists. Local measures show where the pattern occurs and separate clusters from spatial outliers.
+
+### Getting Started
+
+#### The analytical question
+
+Which counties form clusters of high or low GDPPC, and which counties differ from their surroundings?
+
+#### The Study Area and Data
+
+The same Hunan datasets are used again. This part projects the boundary to UTM Zone 50N before calculating distances.
+
+#### Setting the Analytical Toolls
+
+```{r}
+pacman::p_load(sf, sfdep, tmap, tidyverse)
+```
+
+### Getting the Data Into R Environment
+
+#### Import shapefile into r environment
+
+```{r}
+hunan <- st_read(dsn = "chap10/data/geospatial", 
+                 layer = "Hunan") %>% 
+  st_transform(crs = 32650)
+```
+
+#### Import csv file into r environment
+
+```{r}
+hunan2012 <- read_csv("chap10/data/aspatial/Hunan_2012.csv")
+```
+
+#### Performing relational join
+
+```{r}
+hunan <- left_join(hunan,hunan2012) %>%
+  select(1:4, 7, 15)
+```
+
+#### Visualising Regional Development Indicator
+
+```{r}
+#| fig-width: 12
+#| fig-height: 8
+equal <- tm_shape(hunan) +
+  tm_polygons(fill = "GDPPC",
+              fill.scale = tm_scale_intervals(
+                style = "equal",
+                n = 5,
+                values = "brewer.blues"),
+              fill.legend = tm_legend(
+                title = "GDPPC",
+                position = tm_pos_in(
+                  "left", "bottom"))) + 
+  tm_borders(fill_alpha = 0.5) +
+  tm_title("Equal interval classification")
+
+quantile <- tm_shape(hunan) +
+  tm_polygons(fill = "GDPPC",
+              fill.scale = tm_scale_intervals(
+                style = "quantile",
+                n = 5,
+                values = "brewer.blues"),
+              fill.legend = tm_legend(
+                title = "GDPPC",
+                position = tm_pos_in(
+                  "left", "bottom"))) + 
+  tm_borders(fill_alpha = 0.5) +
+  tm_title("Quantile interval classification")
+
+tmap_arrange(equal, 
+             quantile, 
+             asp=1, 
+             ncol=2)
+```
+
+### Local Indicators of Spatial Association(LISA)
+
+#### Computing Contiguity Spatial Weights
+
+```{r}
+wm_q <- hunan %>%
+  mutate(nb = st_contiguity(geometry),
+         wt = st_weights(
+           nb, style = "W"),
+         .before = 1)
+```
+
+```{r}
+summary(wm_q$nb)
+```
+
+#### Row-standardised weights matrix
+
+The `wt` column stores the row-standardised weights for each county's neighbours.
+
+#### What can we learn from the code chunk above?
+
+These weights let every county be compared fairly with its own set of neighbours, even when the neighbour counts differ.
+
+#### Computing local Moran's I
+
+```{r}
+set.seed(1234)
+```
+
+```{r}
+lisa <- wm_q %>% 
+  mutate(local_moran = local_moran(
+    GDPPC, nb, wt, nsim = 99),
+         .before = 1) %>%
+  unnest(local_moran)
+```
+
+```{r}
+glimpse(lisa)
+```
+
+##### Mapping the local Moran's I
+
+##### Mapping local Moran's I values
+
+```{r}
+tm_shape(lisa) +
+  tm_polygons(fill = "ii",
+              fill.scale = tm_scale_intervals(
+                style = "pretty",
+                n = 5,
+                values = "brewer.RdBu"),
+              fill.legend = tm_legend(
+                title = "Local Morans'I",
+                position = tm_pos_out())) + 
+  tm_borders(fill_alpha = 0.5) +
+  tm_title("Loal Morans'I of GDPPC (Queen's method)")
+```
+
+##### Mapping local Moran's I p-values
+
+```{r}
+tm_shape(lisa) +
+  tm_polygons(fill = "p_ii", 
+              fill.scale = tm_scale_intervals(
+                breaks = c(-Inf, 0.001, 0.01, 0.05, 0.1, Inf),
+                values = "-brewer.Reds"),
+              fill.legend = tm_legend(
+                title = "p-value",
+      position = tm_pos_out())) + 
+  tm_borders(fill_alpha = 0.5) +
+  tm_title("p-values of Loal Moran's I of GDPPC (Queen's method)")
+```
+
+##### Mapping both local Moran's I values and p-values
+
+```{r fig.width=12, fig.height=8}
+ii.map <- tm_shape(lisa) +
+  tm_polygons(fill = "ii",
+              fill.scale = tm_scale_intervals(
+                style = "pretty",
+                n = 5,
+                values = "brewer.RdBu"),
+              fill.legend = tm_legend(
+                title = "Local Moran's I",
+                position = tm_pos_in(
+                  "left", "bottom"))) + 
+  tm_borders(fill_alpha = 0.5) +
+  tm_title("Loal Moran's I of GDPPC (Queen's method)")
+
+p_ii.map <- tm_shape(lisa) +
+  tm_polygons(fill = "p_ii", 
+              fill.scale = tm_scale_intervals(
+                breaks = c(-Inf, 0.001, 0.01, 0.05, 0.1, Inf),
+                values = "-brewer.Reds"),
+              fill.legend = tm_legend(
+                title = "p-value",
+      position = tm_pos_in("left", "bottom")
+    )) + 
+  tm_borders(fill_alpha = 0.5) +
+  tm_title("p-values of Loal Moran's I of GDPPC (Queen's method)")
+
+tmap_arrange(ii.map, p_ii.map, asp=1, ncol=2)
+```
+
+The p-value map is important because a large local Moran's I value is not automatically a reliable cluster.
+
+#### Preparing and Visualising LISA Map
+
+##### Plotting Moran scatterplot
+
+```{r}
+lisa <- lisa %>%
+  mutate(lag_GDPPC = st_lag(
+    GDPPC, nb, wt),
+    .before = 1) %>%
+  unnest(lag_GDPPC)
+```
+
+```{r}
+ggplot(data = lisa, 
+       aes(x = GDPPC, 
+           y = lag_GDPPC)) +
+  geom_point() +
+  geom_smooth(method = "lm", 
+              se = FALSE, 
+              color = "red") +
+  labs(x = "GDPPC",
+       y = "Spatial Lag of GDPPC",
+       title = "Moran Scatterplot") +
+  theme_minimal()
+```
+
+```{r}
+ggplot(data = lisa, 
+       aes(x = GDPPC, 
+           y = lag_GDPPC, 
+           color = mean)) +
+  geom_point(size = 2) +
+  geom_smooth(method = "lm", 
+              se = FALSE, 
+              color = "black") +
+  geom_hline(yintercept=mean(lisa$lag_GDPPC), lty=2) + 
+    geom_vline(xintercept=mean(lisa$GDPPC), lty=2) +
+  scale_color_manual(
+    values = c("High-High" = "red", 
+               "Low-Low" = "blue",
+               "Low-High" = "lightblue", 
+               "High-Low" = "pink")) +
+  labs(x = "GDPPC",
+       y = "Spatial Lag of GDPPC",
+       title = "Moran Scatterplot with LISA Quadrants") +
+  theme_minimal()
+```
+
+The four groups separate counties that match their surroundings from counties that stand out locally.
+
+##### Plotting Moran scatterplot with standardised variable
+
+```{r}
+lisa <- lisa %>%
+  mutate(z_GDPPC = scale(GDPPC),
+         z_lag_GDPPC = scale(lag_GDPPC),
+         .before = 1)
+```
+
+```{r}
+ggplot(data = lisa, 
+       aes(x = z_GDPPC, 
+           y = z_lag_GDPPC, 
+           color = mean)) +
+  geom_point(size = 2) +
+  geom_smooth(method = "lm", 
+              se = FALSE, 
+              color = "black") +
+  geom_hline(yintercept=mean(lisa$z_lag_GDPPC), lty=2) + 
+    geom_vline(xintercept=mean(lisa$z_GDPPC), lty=2) +
+  scale_color_manual(
+    values = c("High-High" = "red", 
+               "Low-Low" = "blue",
+               "Low-High" = "lightblue", 
+               "High-Low" = "pink")) +
+  labs(x = "Standardised GDPPC",
+       y = "Standardised Spatial Lag of GDPPC",
+       title = "Standardised Moran Scatterplot with LISA Quadrants") +
+  theme_minimal()
+```
+
+Standardising changes the scale but not which quadrant each county belongs to.
+
+##### Preparing LISA map classes
+
+```{r}
+signif <- 0.05       
+```
+
+##### Plotting and visualising LISA map
+
+```{r}
+lisa <- lisa %>%
+  mutate(
+    LISA_cluster = ifelse(
+      p_ii < 0.05,
+      as.character(mean), 
+      "Insignificant"),
+    LISA_cluster = factor(
+      LISA_cluster,
+      levels = c("Insignificant", "Low-Low", "Low-High", "High-Low", "High-High")
+    )
+  )
+```
+
+```{r}
+lisa_map <- tm_shape(lisa) + 
+  tm_polygons(
+    fill = "LISA_cluster",
+    fill.scale = tm_scale_categorical(
+      values = c(
+        "grey80",      # Insignificant
+        "blue",        # Low-Low
+        "lightblue",   # Low-High
+        "pink",        # High-Low
+        "red"          # High-High
+      )
+    ),
+    fill.legend = tm_legend(
+      title = "LISA Cluster",
+      position = tm_pos_in("left", "bottom"))
+  ) +
+  tm_borders() +
+  tm_title("Local Moran's I Clusters (p < 0.05)")
+lisa_map
+```
+
+```{r}
+#| echo: false
+#| fig-width: 12
+#| fig-height: 8
+
+tmap_arrange(ii.map, lisa_map, asp=1, ncol=2)
+```
+
+The cluster map keeps only counties with p-values below 0.05. Grey counties do not have enough evidence to assign a cluster type.
+
+### Hot Spots and Cold Spots Analysis (HCSA)
+
+Gi* looks for groups of unusually high or low values within a distance-based neighbourhood.
+
+#### Deriving distance weight matrix
+
+##### Computing fixed distance weights
+
+```{r}
+ct <- critical_threshold(st_geometry(hunan))
+ct
+```
+
+The threshold is the shortest distance that ensures every county has at least one neighbour.
+
+```{r}
+hunan_fdw <- hunan %>% 
+  mutate(nb = include_self(
+    st_dist_band(
+      st_geometry(geometry), 
+                 upper = ct)),
+    wt = st_weights(nb, 
+                      style = "W"),
+    .before = 1) 
+```
+
+##### Computing adaptive distance weights
+
+```{r}
+hunan_adw <- hunan %>%
+  mutate(nb = include_self(
+    st_knn(
+      st_geometry(geometry),
+      k = 6)),
+    wt = st_weights(
+      nb, style = "W"),
+    .before = 1)
+```
+
+The fixed-distance method keeps one distance for all counties. The adaptive method instead keeps six neighbours for each county.
+
+##### Computing adaptive distance weights
+
+#### Computing local Gi\*
+
+```{r}
+HCSA_fdw <- hunan_fdw %>%
+  mutate(
+    gistar = local_gstar_perm(
+      GDPPC, nb, wt, nsim = 99),
+    .before = 1) %>%
+  unnest(gistar)
+```
+
+#### Preparing and Visualising HCSA Map
+
+##### Mapping Gi\* with fix distance weights
+
+```{r}
+tm_shape(HCSA_fdw) +
+  tm_polygons(fill = "gi_star",
+              fill.scale = tm_scale_intervals(
+                style = "pretty",
+                n = 6,
+                values = "brewer.rd_bu"),
+              fill.legend = tm_legend(
+                title = "Gi*",
+                position = tm_pos_out())) + 
+  tm_borders(fill_alpha = 0.5) +
+  tm_title("Gi* of GDPPC (Fixed Bandwidth d = 60799.91m)")
+```
+
+##### Mapping local Gi\* p-values
+
+```{r}
+tm_shape(HCSA_fdw) +
+  tm_polygons(fill = "p_sim", 
+              fill.scale = tm_scale_intervals(
+                breaks = c(-Inf, 0.001, 0.01, 0.05, 0.1, Inf),
+                values = "-brewer.Reds"),
+              fill.legend = tm_legend(
+                title = "simulated p-value",
+      position = tm_pos_out())) + 
+  tm_borders(fill_alpha = 0.5) +
+  tm_title("p-values of local Gi* of GDPPC (Fixed distance)")
+```
+
+##### Mapping both Gi\* values and p-values
+
+```{r fig.width=12, fig.height=8}
+Gi_star_map <- tm_shape(HCSA_fdw) +
+  tm_polygons(fill = "gi_star",
+              fill.scale = tm_scale_intervals(
+                style = "pretty",
+                n = 5,
+                values = "-brewer.rd_bu"),
+              fill.legend = tm_legend(
+                title = "local Gi*",
+                position = tm_pos_in(
+                  "left", "bottom"))) + 
+  tm_borders(fill_alpha = 0.5) +
+  tm_title("Local Gi* of GDPPC")
+
+p_values_map <- tm_shape(HCSA_fdw) +
+  tm_polygons(fill = "p_sim", 
+              fill.scale = tm_scale_intervals(
+                breaks = c(0, 0.001, 0.01, 0.05, 0.1, 1),
+                values = "-brewer.reds"),
+              fill.legend = tm_legend(
+                title = "p-value",
+      position = tm_pos_in("left", "bottom")
+    )) + 
+  tm_borders(fill_alpha = 0.5) +
+  tm_title("p-values of local Gi* of GDPPC (fixed distance)")
+
+tmap_arrange(Gi_star_map, p_values_map, asp=1, ncol=2)
+```
+
+##### Plotting and visualising HCSA Map
+
+```{r}
+HCSA_fdw <- HCSA_fdw %>%
+  mutate(HCSA_cluster = case_when(
+    p_sim > 0.05 ~ "Insignificant",
+    p_sim <= 0.05 & cluster == "High" ~ "Hot spot",
+    p_sim <= 0.05 & cluster == "Low"  ~ "Cold spot",
+    TRUE ~ "Other"),
+    HCSA_cluster = factor(
+      HCSA_cluster,
+      levels = c("Insignificant", "Hot spot", "Cold spot")
+    ),
+    .before = 1
+  )
+```
+
+```{r}
+HCSA_map <- tm_shape(HCSA_fdw) + 
+  tm_polygons(
+    fill = "HCSA_cluster",
+    fill.scale = tm_scale_categorical(
+      values = c(
+        "grey80",      # Insignificant
+        "red",        # Low-Low
+        "blue"          # High-High
+      )
+    ),
+    fill.legend = tm_legend(
+      title = "HSCA Cluster",
+      position = tm_pos_in("left", "bottom"))
+  ) +
+  tm_borders() +
+  tm_title("HCSA Clusters (p < 0.05)")
+HCSA_map
+```
+
+```{r}
+#| fig-width: 12
+#| fig-height: 8
+
+tmap_arrange(Gi_star_map, HCSA_map, asp=1, ncol=2)
+```
+
+The final map separates significant hot and cold areas from counties without a clear result.
+
+## Some other observations
+
+I place the two local classifications into one small table. This makes it easier to see how many counties receive a clear label under each method.
+
+```{r}
+bind_rows(
+  lisa %>%
+    st_drop_geometry() %>%
+    count(Category = LISA_cluster) %>%
+    mutate(Method = "Local Moran's I"),
+  HCSA_fdw %>%
+    st_drop_geometry() %>%
+    count(Category = HCSA_cluster) %>%
+    mutate(Method = "Gi*")
+) %>%
+  select(Method, Category, Counties = n) %>%
+  knitr::kable()
+```
+
+Local Moran's I identifies 13 counties: eight High-High, three Low-Low and two Low-High. Gi* identifies seven hot spots and three cold spots. The counts differ because the two methods look for different kinds of spatial patterns.
+
+## Takeaways
+
+Both global tests show that Hunan's GDPPC has a real spatial pattern. The local results then reveal that this pattern is not spread evenly: some counties form clear high or low groups, while others do not have enough evidence for a local label. These results describe where values cluster, but they do not explain the causes.
+
+## References
+
+- [Chapter 9: Global Measures of Spatial Autocorrelation](https://r4gdsa.netlify.app/chap09.html)
+- [Chapter 10: Local Measures of Spatial Autocorrelation](https://r4gdsa.netlify.app/chap10.html)

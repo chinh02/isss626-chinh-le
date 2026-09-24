@@ -52,6 +52,16 @@ Building contiguity, distance and nearest-neighbour relationships for Hunan coun
 
 [View exercise →](hands-on-exercise-04.qmd){.section-link}
 :::
+
+::: {.exercise-entry}
+<span>05</span>
+
+## Global and Local Measures of Spatial Autocorrelation
+
+Testing whether Hunan's GDP per capita is spatially clustered, then locating clusters, outliers, hot spots and cold spots.
+
+[View exercise →](hands-on-exercise-05.qmd){.section-link}
+:::
 :::
 
 [← Back to home](index.qmd){.back-link}
