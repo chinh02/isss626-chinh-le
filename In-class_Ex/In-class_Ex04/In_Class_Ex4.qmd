@@ -1,9 +1,17 @@
 ---
 title: "In-Class Exercise 4"
+subtitle: "Geographically Weighted Summary Statistics"
 author: "Le Truong Chinh"
-format: html
-date: "September 18, 2026"
-date-modified: today
+date: "18 September 2026"
+date-modified: "18 September 2026"
+description: "An ISSS626 in-class exercise computing geographically weighted summary statistics of Hunan's GDP per capita."
+title-block-banner: true
+page-layout: article
+toc: true
+code-overflow: wrap
+format:
+  html:
+    code-fold: false
 execute:
   echo: true
   eval: true

@@ -1,0 +1,38 @@
+---
+title: "In-class exercise"
+description: "In-class geospatial exercises by Le Truong Chinh for ISSS626."
+page-layout: full
+toc: false
+---
+
+::: {.section-page}
+<p class="eyebrow">IN-CLASS</p>
+
+# In-class exercise
+
+Exercises worked through during ISSS626 lessons.
+
+::: {.exercise-list}
+::: {.exercise-entry}
+<span>04</span>
+
+## Geographically Weighted Summary Statistics
+
+Choosing an adaptive bandwidth for Hunan counties, then mapping the geographically weighted mean of GDP per capita.
+
+[View exercise →](In-class_Ex/In-class_Ex04/In_Class_Ex4.qmd){.section-link}
+:::
+
+::: {.exercise-entry}
+<span>05</span>
+
+## Global and Local Measures of Spatial Autocorrelation: sfdep methods
+
+Repeating the Hunan GDP per capita analysis with sfdep: Moran's I, LISA clusters and outliers, and Gi\* hot and cold spots.
+
+[View exercise →](In-class_Ex/In-class_Ex05/In_Class_Ex5.qmd){.section-link}
+:::
+:::
+
+[← Back to home](index.qmd){.back-link}
+:::
