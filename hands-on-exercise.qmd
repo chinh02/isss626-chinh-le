@@ -62,6 +62,16 @@ Testing whether Hunan's GDP per capita is spatially clustered, then locating clu
 
 [View exercise →](hands-on-exercise-05.qmd){.section-link}
 :::
+
+::: {.exercise-entry}
+<span>06</span>
+
+## Geographical Segmentation with Spatially Constrained Clustering Techniques
+
+Grouping Shan State townships by household ICT access, then comparing ordinary clustering with SKATER and ClustGeo.
+
+[View exercise →](hands-on-exercise-06.qmd){.section-link}
+:::
 :::
 
 [← Back to home](index.qmd){.back-link}
