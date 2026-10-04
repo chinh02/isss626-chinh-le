@@ -32,6 +32,16 @@ Repeating the Hunan GDP per capita analysis with sfdep: Moran's I, LISA clusters
 
 [View exercise →](In-class_Ex/In-class_Ex05/In_Class_Ex5.qmd){.section-link}
 :::
+
+::: {.exercise-entry}
+<span>06</span>
+
+## Emerging Hot Spot Analysis
+
+Tracing how GDP per capita hot and cold spots changed across Hunan from 2005 to 2016.
+
+[View exercise →](In-class_Ex/In-class_Ex06/In_Class_Ex6.qmd){.section-link}
+:::
 :::
 
 [← Back to home](index.qmd){.back-link}

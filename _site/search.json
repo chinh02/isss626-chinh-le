@@ -809,7 +809,7 @@
     "href": "in-class-exercise.html",
     "title": "In-class exercise",
     "section": "",
-    "text": "IN-CLASS\n\n\n\nExercises worked through during ISSS626 lessons.\n\n\n04\n\n\nChoosing an adaptive bandwidth for Hunan counties, then mapping the geographically weighted mean of GDP per capita.\nView exercise →\n\n\n\n05\n\n\nRepeating the Hunan GDP per capita analysis with sfdep: Moran’s I, LISA clusters and outliers, and Gi* hot and cold spots.\nView exercise →\n\n\n\n← Back to home"
+    "text": "IN-CLASS\n\n\n\nExercises worked through during ISSS626 lessons.\n\n\n04\n\n\nChoosing an adaptive bandwidth for Hunan counties, then mapping the geographically weighted mean of GDP per capita.\nView exercise →\n\n\n\n05\n\n\nRepeating the Hunan GDP per capita analysis with sfdep: Moran’s I, LISA clusters and outliers, and Gi* hot and cold spots.\nView exercise →\n\n\n\n06\n\n\nTracing how GDP per capita hot and cold spots changed across Hunan from 2005 to 2016.\nView exercise →\n\n\n\n← Back to home"
   },
   {
     "objectID": "in-class-exercise.html#geographically-weighted-summary-statistics",
@@ -929,5 +929,89 @@
     "title": "Hands-on exercise",
     "section": "",
     "text": "Grouping Shan State townships by household ICT access, then comparing ordinary clustering with SKATER and ClustGeo.\nView exercise →"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex06/In_Class_Ex6.html",
+    "href": "In-class_Ex/In-class_Ex06/In_Class_Ex6.html",
+    "title": "In-Class Exercise 6",
+    "section": "",
+    "text": "This exercise looks at where GDP per capita formed hot and cold spots in Hunan, and whether those patterns became stronger or weaker over time."
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex06/In_Class_Ex6.html#overview",
+    "href": "In-class_Ex/In-class_Ex06/In_Class_Ex6.html#overview",
+    "title": "In-Class Exercise 6",
+    "section": "1 Overview",
+    "text": "1 Overview\nEmerging Hot Spot Analysis combines two ideas. Local Gi* identifies clusters of high or low values in each year, while the Mann-Kendall test checks whether those clusters show a steady trend through time.\nThe analysis has four main steps:\n\nCreate a space-time cube.\nCalculate local Gi* for every county and year.\nTest each county for an upward or downward trend.\nClassify the resulting hot and cold spot patterns."
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex06/In_Class_Ex6.html#getting-started",
+    "href": "In-class_Ex/In-class_Ex06/In_Class_Ex6.html#getting-started",
+    "title": "In-Class Exercise 6",
+    "section": "2 Getting started",
+    "text": "2 Getting started\n\n2.1 Installing and Loading the R Packages\nThe packages below handle the spatial data, space-time analysis, maps and interactive chart.\n\npacman::p_load(sf, sfdep, tmap, \n               plotly, tidyverse, \n               Kendall)"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex06/In_Class_Ex6.html#the-data",
+    "href": "In-class_Ex/In-class_Ex06/In_Class_Ex6.html#the-data",
+    "title": "In-Class Exercise 6",
+    "section": "3 The Data",
+    "text": "3 The Data\nThe Hunan boundary layer contains 88 counties. The attribute table records GDP per capita for each county from 2005 to 2016.\n\n3.1 Importing geospatial data\nThe county boundaries are projected to EPSG 32650 so that distance-based calculations use metres.\n\nhunan &lt;- st_read(\n  dsn = \"data/geospatial\", \n  layer = \"Hunan\") %&gt;% \n  st_transform(crs = 32650)\n\nReading layer `Hunan' from data source \n  `D:\\smu\\study\\GIS\\In-class_Ex\\In-class_Ex06\\data\\geospatial' \n  using driver `ESRI Shapefile'\nSimple feature collection with 88 features and 7 fields\nGeometry type: POLYGON\nDimension:     XY\nBounding box:  xmin: 108.7831 ymin: 24.6342 xmax: 114.2544 ymax: 30.12812\nGeodetic CRS:  WGS 84\n\n\n\n\n3.2 Importing attribute table\n\nGDPPC &lt;- read_csv(\n  \"data/aspatial/Hunan_GDPPC.csv\")"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex06/In_Class_Ex6.html#creating-a-time-series-cube",
+    "href": "In-class_Ex/In-class_Ex06/In_Class_Ex6.html#creating-a-time-series-cube",
+    "title": "In-Class Exercise 6",
+    "section": "4 Creating a Time Series Cube",
+    "text": "4 Creating a Time Series Cube\nThe boundary and yearly GDP records are linked by county name. Each county-year combination becomes one observation in the cube.\n\nGDPPC_st &lt;- spacetime(GDPPC, hunan,\n                      .loc_col = \"County\",\n                      .time_col = \"Year\")\n\n\nis_spacetime_cube(GDPPC_st)\n\n[1] TRUE\n\n\nA TRUE result confirms that the county and yearly data form a valid space-time cube."
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex06/In_Class_Ex6.html#computing-gi",
+    "href": "In-class_Ex/In-class_Ex06/In_Class_Ex6.html#computing-gi",
+    "title": "In-Class Exercise 6",
+    "section": "5 Computing Gi*",
+    "text": "5 Computing Gi*\n\n5.1 Deriving the spatial weights\nCounties that share a boundary are treated as neighbours. Each county is also included as its own neighbour because Gi* measures a county together with its surroundings.\n\nGDPPC_nb &lt;- GDPPC_st %&gt;%\n  activate(\"geometry\") %&gt;%\n  mutate(nb = include_self(\n    st_contiguity(geometry)),\n    wt = st_inverse_distance(nb, \n                             geometry, \n                             scale = 1,\n                             alpha = 1),\n    .before = 1) %&gt;%\n  set_nbs(\"nb\") %&gt;%\n  set_wts(\"wt\")\n\nThe same neighbour and weight structure is copied to every year. Row order must remain unchanged after this step."
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex06/In_Class_Ex6.html#computing-gi-1",
+    "href": "In-class_Ex/In-class_Ex06/In_Class_Ex6.html#computing-gi-1",
+    "title": "In-Class Exercise 6",
+    "section": "6 Computing Gi*",
+    "text": "6 Computing Gi*\nLocal Gi* is calculated separately for each year. A positive value points towards a cluster of high GDP per capita, while a negative value points towards a cluster of low GDP per capita.\n\ngi_stars &lt;- GDPPC_nb %&gt;% \n  group_by(Year) %&gt;% \n  mutate(gi_star = local_gstar_perm(\n    GDPPC, nb, wt)) %&gt;% \n  tidyr::unnest(gi_star)"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex06/In_Class_Ex6.html#mann-kendall-test",
+    "href": "In-class_Ex/In-class_Ex06/In_Class_Ex6.html#mann-kendall-test",
+    "title": "In-Class Exercise 6",
+    "section": "7 Mann-Kendall Test",
+    "text": "7 Mann-Kendall Test\nThe Mann-Kendall test checks for a consistent trend without assuming that the values follow a normal distribution. Tau is positive for an upward trend and negative for a downward trend. A p-value below 0.05 indicates a statistically significant trend.\n\n7.1 Mann-Kendall Test on Gi\nChangsha is used as a simple example before the test is repeated for all counties.\n\ncbg &lt;- gi_stars %&gt;% \n  ungroup() %&gt;% \n  filter(County == \"Changsha\") |&gt; \n  select(County, Year, gi_star)\n\n\nggplot(data = cbg, \n       aes(x = Year, \n           y = gi_star)) +\n  geom_line() +\n  theme_light()\n\n\n\n\n\n\n\n\n\n\n\n\n7.2 Interactive Mann-Kendall Plot\nThe same series can be explored interactively by moving over the line.\n\np &lt;- ggplot(data = cbg, \n       aes(x = Year, \n           y = gi_star)) +\n  geom_line() +\n  theme_light()\n\nggplotly(p)\n\n\n\n\n\n\n\n\n\n7.3 Printing Mann-Kendall test report\n\ncbg %&gt;%\n  summarise(mk = list(\n    unclass(\n      Kendall::MannKendall(gi_star)))) %&gt;% \n  tidyr::unnest_wider(mk)\n\n# A tibble: 1 x 5\n    tau      sl     S     D  varS\n  &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;\n1 0.485 0.00742    66  136.  589.\n\n\nHere, tau gives the direction and strength of the trend, while sl is the p-value used to judge its significance.\n\n\n7.4 Mann-Kendall test data.frame\nThe same test is now applied to every county.\n\nehsa &lt;- gi_stars %&gt;%\n  group_by(County) %&gt;%\n  summarise(mk = list(\n    unclass(\n      Kendall::MannKendall(gi_star)))) %&gt;%\n  tidyr::unnest_wider(mk)\nhead(ehsa)\n\n# A tibble: 6 x 6\n  County        tau        sl     S     D  varS\n  &lt;chr&gt;       &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;\n1 Anhua      0.191  0.303        26  136.  589.\n2 Anren     -0.294  0.108       -40  136.  589.\n3 Anxiang    0      1             0  136.  589.\n4 Baojing   -0.691  0.000128    -94  136.  589.\n5 Chaling   -0.0882 0.650       -12  136.  589.\n6 Changning -0.750  0.0000318  -102  136.  589.\n\n\n\n\n7.5 Mann-Kendall test data.frame\nThe table below brings the strongest and most statistically significant trends to the top.\n\nemerging &lt;- ehsa %&gt;% \n  arrange(sl, abs(tau)) %&gt;% \n  slice(1:10)\nhead(emerging)\n\n# A tibble: 6 x 6\n  County        tau         sl     S     D  varS\n  &lt;chr&gt;       &lt;dbl&gt;      &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;\n1 Shuangfeng  0.868 0.00000143   118  136.  589.\n2 Xiangtan    0.868 0.00000143   118  136.  589.\n3 Xiangxiang  0.868 0.00000143   118  136.  589.\n4 Chengbu    -0.824 0.00000482  -112  136.  589.\n5 Dongan     -0.824 0.00000482  -112  136.  589.\n6 Wugang     -0.809 0.00000712  -110  136.  589."
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex06/In_Class_Ex6.html#performing-emerging-hotspot-analysis",
+    "href": "In-class_Ex/In-class_Ex06/In_Class_Ex6.html#performing-emerging-hotspot-analysis",
+    "title": "In-Class Exercise 6",
+    "section": "8 Performing Emerging Hotspot Analysis",
+    "text": "8 Performing Emerging Hotspot Analysis\nThe full analysis combines the yearly Gi* results with each county’s trend. One time lag is used, with 99 simulations for the significance test.\n\nehsa &lt;- emerging_hotspot_analysis(\n  x = GDPPC_st, \n  .var = \"GDPPC\", \n  k = 1, \n  nsim = 99\n)\n\n\n8.1 Visualising the distribution of EHSA classes\n\nggplot(data = ehsa,\n       aes(x = classification)) +\n  geom_bar()\n\n\n\n\n\n\n\n\nSporadic cold spots are the largest group, followed by sporadic hot spots. This means most detected counties move in and out of significance instead of remaining a hot or cold spot throughout the whole period.\n\n\n8.2 Visualising EHSA\nThe EHSA results are joined to the county boundaries. Only classes with a p-value below 0.05 are coloured on the final map.\n\nhunan_ehsa &lt;- hunan %&gt;%\n  left_join(ehsa,\n            by = join_by(County == location))\n\n\nehsa_sig &lt;- hunan_ehsa  %&gt;%\n  filter(p_value &lt; 0.05)\ntmap_mode(\"plot\")\ntm_shape(hunan_ehsa) +\n  tm_polygons() +\n  tm_borders(fill_alpha = 0.5) +\ntm_shape(ehsa_sig) +\n  tm_fill(\"classification\") + \n  tm_borders(fill_alpha = 0.4)\n\n\n\n\n\n\n\n\n\n\nThe significant classes are spread across Hunan rather than forming one single part of the province. The map also supports the bar chart: sporadic patterns are much more visible than long-lasting ones.\n\n\n8.3 Interpretation of EHSA classes\n\nPersistent: the county remained a statistically significant hot or cold spot for most of the period.\nIntensifying: the spatial pattern became stronger over time.\nDiminishing: the pattern remained present but became weaker.\nNew: the county became a hot or cold spot only near the end of the period.\nSporadic: the pattern appeared in some years but was not continuous."
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex06/In_Class_Ex6.html#takeaways",
+    "href": "In-class_Ex/In-class_Ex06/In_Class_Ex6.html#takeaways",
+    "title": "In-Class Exercise 6",
+    "section": "9 Takeaways",
+    "text": "9 Takeaways\nLooking at one year alone would miss how the spatial pattern developed. Gi* identifies where neighbouring counties share high or low GDP per capita in each year, while the Mann-Kendall test distinguishes a short-lived pattern from a consistent change through time."
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex06/In_Class_Ex6.html#references",
+    "href": "In-class_Ex/In-class_Ex06/In_Class_Ex6.html#references",
+    "title": "In-Class Exercise 6",
+    "section": "10 References",
+    "text": "10 References\n\nChapter 11: Emerging Hot Spot Analysis\nUnderstanding Emerging Hotspots with sfdep"
+  },
+  {
+    "objectID": "in-class-exercise.html#emerging-hot-spot-analysis",
+    "href": "in-class-exercise.html#emerging-hot-spot-analysis",
+    "title": "In-class exercise",
+    "section": "",
+    "text": "Tracing how GDP per capita hot and cold spots changed across Hunan from 2005 to 2016.\nView exercise →"
   }
 ]

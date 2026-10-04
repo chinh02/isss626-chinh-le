@@ -1,0 +1,300 @@
+---
+title: "In-Class Exercise 6"
+subtitle: "Emerging Hot Spot Analysis"
+author: "Le Truong Chinh"
+date: "3 October 2026"
+date-modified: "4 October 2026"
+description: "An ISSS626 in-class exercise tracing how GDP per capita hot and cold spots changed across Hunan from 2005 to 2016."
+title-block-banner: true
+page-layout: article
+toc: true
+toc-depth: 4
+number-sections: true
+code-overflow: wrap
+format:
+  html:
+    code-fold: false
+execute:
+  echo: true
+  eval: true
+  warning: false
+  message: false
+  freeze: true
+  fig-align: center
+---
+
+::: {.exercise-lead}
+This exercise looks at where GDP per capita formed hot and cold spots in Hunan, and whether those patterns became stronger or weaker over time.
+:::
+
+## Overview
+
+Emerging Hot Spot Analysis combines two ideas. Local Gi\* identifies clusters of high or low values in each year, while the Mann-Kendall test checks whether those clusters show a steady trend through time.
+
+The analysis has four main steps:
+
+1. Create a space-time cube.
+2. Calculate local Gi\* for every county and year.
+3. Test each county for an upward or downward trend.
+4. Classify the resulting hot and cold spot patterns.
+
+## Getting started
+
+### Installing and Loading the R Packages
+
+The packages below handle the spatial data, space-time analysis, maps and interactive chart.
+
+```{r}
+pacman::p_load(sf, sfdep, tmap, 
+               plotly, tidyverse, 
+               Kendall)
+```
+
+## The Data
+
+The Hunan boundary layer contains 88 counties. The attribute table records GDP per capita for each county from 2005 to 2016.
+
+### Importing geospatial data
+
+The county boundaries are projected to EPSG 32650 so that distance-based calculations use metres.
+
+```{r}
+hunan <- st_read(
+  dsn = "data/geospatial", 
+  layer = "Hunan") %>% 
+  st_transform(crs = 32650)
+```
+
+### Importing attribute table
+
+```{r}
+GDPPC <- read_csv(
+  "data/aspatial/Hunan_GDPPC.csv")
+```
+
+## Creating a Time Series Cube
+
+The boundary and yearly GDP records are linked by county name. Each county-year combination becomes one observation in the cube.
+
+```{r}
+GDPPC_st <- spacetime(GDPPC, hunan,
+                      .loc_col = "County",
+                      .time_col = "Year")
+```
+
+```{r}
+is_spacetime_cube(GDPPC_st)
+```
+
+A `TRUE` result confirms that the county and yearly data form a valid space-time cube.
+
+## Computing Gi\*
+
+### Deriving the spatial weights
+
+Counties that share a boundary are treated as neighbours. Each county is also included as its own neighbour because Gi\* measures a county together with its surroundings.
+
+```{r}
+GDPPC_nb <- GDPPC_st %>%
+  activate("geometry") %>%
+  mutate(nb = include_self(
+    st_contiguity(geometry)),
+    wt = st_inverse_distance(nb, 
+                             geometry, 
+                             scale = 1,
+                             alpha = 1),
+    .before = 1) %>%
+  set_nbs("nb") %>%
+  set_wts("wt")
+```
+
+The same neighbour and weight structure is copied to every year. Row order must remain unchanged after this step.
+
+## Computing Gi\*
+
+Local Gi\* is calculated separately for each year. A positive value points towards a cluster of high GDP per capita, while a negative value points towards a cluster of low GDP per capita.
+
+```{r}
+gi_stars <- GDPPC_nb %>% 
+  group_by(Year) %>% 
+  mutate(gi_star = local_gstar_perm(
+    GDPPC, nb, wt)) %>% 
+  tidyr::unnest(gi_star)
+```
+
+## Mann-Kendall Test
+
+The Mann-Kendall test checks for a consistent trend without assuming that the values follow a normal distribution. Tau is positive for an upward trend and negative for a downward trend. A p-value below 0.05 indicates a statistically significant trend.
+
+### Mann-Kendall Test on Gi
+
+Changsha is used as a simple example before the test is repeated for all counties.
+
+```{r}
+cbg <- gi_stars %>% 
+  ungroup() %>% 
+  filter(County == "Changsha") |> 
+  select(County, Year, gi_star)
+```
+
+```{r}
+#| eval: false
+ggplot(data = cbg, 
+       aes(x = Year, 
+           y = gi_star)) +
+  geom_line() +
+  theme_light()
+```
+
+```{r}
+#| echo: false
+ggplot(data = cbg, 
+       aes(x = Year, 
+           y = gi_star)) +
+  geom_line() +
+  theme_light()
+```
+
+### Interactive Mann-Kendall Plot
+
+The same series can be explored interactively by moving over the line.
+
+```{r}
+#| eval: false
+p <- ggplot(data = cbg, 
+       aes(x = Year, 
+           y = gi_star)) +
+  geom_line() +
+  theme_light()
+
+ggplotly(p)
+```
+
+```{r}
+#| echo: false
+p <- ggplot(data = cbg, 
+       aes(x = Year, 
+           y = gi_star)) +
+  geom_line() +
+  theme_light()
+
+ggplotly(p)
+```
+
+### Printing Mann-Kendall test report
+
+```{r}
+cbg %>%
+  summarise(mk = list(
+    unclass(
+      Kendall::MannKendall(gi_star)))) %>% 
+  tidyr::unnest_wider(mk)
+```
+
+Here, `tau` gives the direction and strength of the trend, while `sl` is the p-value used to judge its significance.
+
+### Mann-Kendall test data.frame
+
+The same test is now applied to every county.
+
+```{r}
+ehsa <- gi_stars %>%
+  group_by(County) %>%
+  summarise(mk = list(
+    unclass(
+      Kendall::MannKendall(gi_star)))) %>%
+  tidyr::unnest_wider(mk)
+head(ehsa)
+```
+
+### Mann-Kendall test data.frame
+
+The table below brings the strongest and most statistically significant trends to the top.
+
+```{r}
+emerging <- ehsa %>% 
+  arrange(sl, abs(tau)) %>% 
+  slice(1:10)
+head(emerging)
+```
+
+## Performing Emerging Hotspot Analysis
+
+The full analysis combines the yearly Gi\* results with each county's trend. One time lag is used, with 99 simulations for the significance test.
+
+```{r}
+ehsa <- emerging_hotspot_analysis(
+  x = GDPPC_st, 
+  .var = "GDPPC", 
+  k = 1, 
+  nsim = 99
+)
+```
+
+### Visualising the distribution of EHSA classes
+
+```{r}
+ggplot(data = ehsa,
+       aes(x = classification)) +
+  geom_bar()
+
+```
+
+Sporadic cold spots are the largest group, followed by sporadic hot spots. This means most detected counties move in and out of significance instead of remaining a hot or cold spot throughout the whole period.
+
+### Visualising EHSA
+
+The EHSA results are joined to the county boundaries. Only classes with a p-value below 0.05 are coloured on the final map.
+
+```{r}
+hunan_ehsa <- hunan %>%
+  left_join(ehsa,
+            by = join_by(County == location))
+
+```
+
+```{r}
+#| eval: false
+ehsa_sig <- hunan_ehsa  %>%
+  filter(p_value < 0.05)
+tmap_mode("plot")
+tm_shape(hunan_ehsa) +
+  tm_polygons() +
+  tm_borders(fill_alpha = 0.5) +
+tm_shape(ehsa_sig) +
+  tm_fill("classification") + 
+  tm_borders(fill_alpha = 0.4)
+```
+
+```{r}
+#| echo: false
+#| fig-height: 10
+ehsa_sig <- hunan_ehsa  %>%
+  filter(p_value < 0.05)
+tmap_mode("plot")
+tm_shape(hunan_ehsa) +
+  tm_polygons() +
+  tm_borders(fill_alpha = 0.5) +
+tm_shape(ehsa_sig) +
+  tm_fill("classification") + 
+  tm_borders(fill_alpha = 0.4)
+```
+
+The significant classes are spread across Hunan rather than forming one single part of the province. The map also supports the bar chart: sporadic patterns are much more visible than long-lasting ones.
+
+### Interpretation of EHSA classes
+
+- **Persistent:** the county remained a statistically significant hot or cold spot for most of the period.
+- **Intensifying:** the spatial pattern became stronger over time.
+- **Diminishing:** the pattern remained present but became weaker.
+- **New:** the county became a hot or cold spot only near the end of the period.
+- **Sporadic:** the pattern appeared in some years but was not continuous.
+
+## Takeaways
+
+Looking at one year alone would miss how the spatial pattern developed. Gi\* identifies where neighbouring counties share high or low GDP per capita in each year, while the Mann-Kendall test distinguishes a short-lived pattern from a consistent change through time.
+
+## References
+
+- [Chapter 11: Emerging Hot Spot Analysis](https://r4gdsa.netlify.app/chap11)
+- [Understanding Emerging Hotspots with sfdep](https://sfdep.josiahparry.com/articles/understanding-emerging-hotspots.html)
