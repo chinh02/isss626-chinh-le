@@ -1,0 +1,161 @@
+---
+title: "Conflict across Myanmar’s townships"
+subtitle: "January 2021–September 2025"
+author: "Le Truong Chinh · ISSS626"
+date: "5 October 2026"
+format:
+  revealjs:
+    theme: simple
+    css: take-home-01/slides.css
+    width: 1280
+    height: 800
+    margin: 0.07
+    center: false
+    transition: none
+    slide-number: c/t
+    footer: "Take-home Exercise 2 · Myanmar"
+    title-slide-attributes:
+      data-background-color: "#17333d"
+toc: false
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r}
+#| include: false
+if (.Platform$OS.type == "windows") invisible(Sys.setlocale("LC_CTYPE", "English_United States.utf8"))
+library(tidyverse)
+library(sf)
+a <- readRDS("data/take-home-02/derived/analysis.rds")
+fmt <- function(x) format(round(x), big.mark = ",", scientific = FALSE, trim = TRUE)
+hot <- a$local$gi_cluster == "Hotspot"
+civ_hot <- a$civilian$gi_cluster == "Hotspot"
+```
+
+## Where is conflict concentrated, and how has it changed?
+
+The study follows **330 Myanmar townships over 57 months**.
+
+- Local Moran’s I identifies clusters and outliers.
+- Gi* identifies hotspots and coldspots.
+- Mann–Kendall and EHSA examine their changes through time.
+- A separate comparison focuses on events targeting civilians.
+
+::: {.small-note}
+Sources: [ACLED Myanmar](https://acleddata.com/country/myanmar), supplied through eLearn; [MIMU v9.4](https://geonode.themimu.info/layers/geonode:mmr_polbnda_adm3_250k_mimu_1). Counts describe recorded events, not risk per person.
+:::
+
+## Preparing the township records
+
+::: {.columns}
+::: {.column width="42%"}
+::: {.key-number}
+53,805
+:::
+
+events retained from three categories: battles, explosions/remote violence and violence against civilians.
+:::
+::: {.column width="58%"}
+- The supplied file contains 87,109 records, including non-violent events.
+- 107 relevant records lack a named township; another 88 have only a broad location.
+- Months with no recorded event remain in the data.
+- Three island townships have no Queen neighbours and remain unclassified in those tests.
+:::
+:::
+
+## The monthly total peaks in late 2023
+
+![](take-home-02/figures/monthly.png){height=430 alt="Monthly conflict counts by event type."}
+
+January–September 2025 has **12.4% fewer events** than the same months of 2024. Explosions and remote violence remain the largest category.
+
+## Clusters and outliers
+
+::: {.columns}
+::: {.column width="67%"}
+![](take-home-02/figures/local-association.png){height=570 alt="Local Moran’s I and Gi-star results."}
+:::
+::: {.column width="33%"}
+Gi* identifies **38 hotspots**:
+
+- 18 in Sagaing;
+- seven in Mandalay;
+- six in Magway.
+
+Local Moran’s I finds 38 high–high clusters, 52 low–low clusters and four low–high outliers.
+
+::: {.small-note}
+Queen neighbours; 999 permutations; p < 0.05. Grey means no significant result.
+:::
+:::
+:::
+
+## Following concentrations through time
+
+::: {.columns}
+::: {.column width="67%"}
+![](take-home-02/figures/ehsa.png){height=570 alt="Mann–Kendall trends and emerging hotspot patterns."}
+:::
+::: {.column width="33%"}
+The full EHSA classification finds **26 oscillating** and **eight sporadic hotspots**.
+
+Of these, 23 also have significant trends and appear here.
+
+An area can have many earlier hot months without being a hotspot at the September 2025 endpoint.
+
+::: {.small-note}
+Current and preceding month; whole-cube Gi* reference. Map restricted to trend p < 0.05.
+:::
+:::
+:::
+
+## Different townships, different histories
+
+![](take-home-02/figures/township-stories.png){height=530 alt="Event counts and Gi-star histories for contrasting townships."}
+
+::: {.small-note}
+Examples: the largest-count township in each of two significant hotspot classes, plus Monywa, which has the highest overall count.
+:::
+
+## The civilian-targeting pattern
+
+::: {.columns}
+::: {.column width="67%"}
+![](take-home-02/figures/civilian-hotspots.png){height=570 alt="Gi-star maps for all retained records and the civilian-targeting subset."}
+:::
+::: {.column width="33%"}
+**16,391 events** in the retained data targeted civilians.
+
+Their map has **37 hotspots**, with 34 overlapping the overall conflict hotspots.
+
+Hakha, Tonzang and Nawnghkio appear only in the civilian-targeting hotspot map.
+
+::: {.small-note}
+These are events targeting civilians, not civilian deaths. The flag excludes incidental civilian harm.
+:::
+:::
+:::
+
+## How much confidence should we place in the maps?
+
+- Adjusting for multiple tests reduces the overall Gi* hotspots from **38 to 19**.
+- Gi* classifications agree in **87.2%** of townships under a different neighbour definition.
+- Checking related months reduces significant trends from **`r sum(a$ehsa$trend_p < .05, na.rm=TRUE)` to `r sum(a$ehsa$block_p < .05, na.rm=TRUE)`**; **`r sum(a$ehsa$block_q < .05, na.rm=TRUE)`** remain after also adjusting for multiple tests.
+- Kawkareik and Nawnghkio retain evidence of upward trends under the stronger checks.
+
+Reporting gaps, approximate locations and different township sizes remain limitations. A low count or grey area does not establish safety.
+
+## Recommended actions
+
+- In **Sagaing, Mandalay and Magway**, compare hotspot townships with aid coverage and identify communities still waiting for food, shelter or medical support.
+- In **Kawkareik and Nawnghkio**, ask local aid groups whether displacement has increased demand beyond what they can provide.
+- In **Monywa**, check displaced households’ housing, food and healthcare needs before reducing any existing aid.
+- In **Hakha, Tonzang and Nawnghkio**, review civilian-targeting incidents and neighbouring townships to locate the affected communities and check their needs.
+
+Update the records beyond September 2025 and confirm current needs with local aid groups before acting.
+
+::: {.small-note}
+[Full report, sources and code](take-home-exercise-02.qmd) · [Coursework repository](https://github.com/chinh02/isss626-chinh-le)
+:::

@@ -14,6 +14,20 @@ Extended assignments and spatial analysis completed during ISSS626.
 
 ::: {.exercise-list}
 ::: {.exercise-entry}
+<span>02</span>
+
+## Conflict across Myanmar’s townships
+
+Where recorded conflict concentrates, how hotspots change from 2021 to 2025, and how the pattern differs for events targeting civilians.
+
+[Read the technical report →](take-home-exercise-02.qmd){.section-link}
+
+[View the executive summary →](take-home-exercise-02-summary.qmd){.section-link}
+
+[GitHub project →](https://github.com/chinh02/isss626-chinh-le){.section-link}
+:::
+
+::: {.exercise-entry}
 <span>01</span>
 
 ## Road accidents in Greater Bangkok

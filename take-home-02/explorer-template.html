@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Myanmar conflict by month</title>
+<style>
+*{box-sizing:border-box}body{margin:0;padding:20px;font:15px/1.5 system-ui,sans-serif;color:#17333d;background:#faf9f5}h1{font-size:22px;margin:0}p{margin:5px 0 14px}.muted{color:#546b71;font-size:13px}.controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 0}button,select{font:inherit;padding:8px 10px;border:1px solid #b8c7c8;border-radius:5px;background:white;color:#17333d}button{cursor:pointer}input{flex:1;min-width:130px;accent-color:#ba4937}output{min-width:95px;font-weight:650}.layout{display:grid;grid-template-columns:minmax(230px,46%) 1fr;gap:24px}.map{height:490px;width:100%}.map path{stroke:#fff;stroke-width:.35;cursor:pointer}.map path:hover,.map path.selected{stroke:#17333d;stroke-width:1.5}.side{padding-top:15px}.number{font-size:42px;line-height:1.15;font-weight:700;margin-top:20px}.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;margin-bottom:14px}.swatch{display:inline-block;width:12px;height:12px;margin-right:4px;border:1px solid #ddd}.trend{width:100%;height:190px;margin-top:18px}.trend text{font:11px system-ui;fill:#536970}.hint{background:#eef1ed;padding:12px;border-radius:6px}select{max-width:100%;width:100%}a{color:#8b3c2d}@media(max-width:650px){body{padding:12px}.layout{grid-template-columns:1fr;gap:0}.map{height:350px}.side{padding:0}.number{font-size:30px}.trend{height:150px}}:focus-visible{outline:3px solid #237b88;outline-offset:2px}
+</style></head><body>
+<h1>Follow the changes month by month</h1>
+<p class="muted">Recorded conflict events, January 2021–September 2025. Colours use the same scale throughout.</p>
+<div class="controls"><button id="play" aria-label="Play monthly sequence">▶ Play</button><label for="month">Month</label><input id="month" type="range" min="0" max="56" value="0"><output id="date" for="month"></output></div>
+<div class="legend" id="legend"></div>
+<div class="layout"><svg id="map" class="map" role="img" aria-label="Township conflict counts for the selected month"></svg>
+<div class="side"><label for="town">Choose a township, or click the map</label><select id="town"><option value="">All Myanmar townships</option></select>
+<div id="count" class="number"></div><p id="detail"></p><svg id="trend" class="trend" viewBox="0 0 420 180" role="img" aria-label="Monthly event counts for the selected area"></svg>
+<p class="hint">The map shows event counts. The report’s statistical maps test whether those counts form hotspots or coldspots.</p>
+<p class="muted">Includes battles, explosions/remote violence and violence against civilians that could be assigned to a township. A zero means no qualifying event was recorded. Counts do not measure risk per person.</p>
+<p class="muted">Sources: ACLED course dataset; <a href="https://geonode.themimu.info/layers/geonode:mmr_polbnda_adm3_250k_mimu_1" target="_blank" rel="noopener">MIMU township boundaries v9.4</a>.</p></div></div>
+<script id="data" type="application/json">__DATA__</script>
+<script>
+const data=JSON.parse(document.getElementById('data').textContent), ns='http://www.w3.org/2000/svg';
+const slider=document.getElementById('month'), choice=document.getElementById('town'), map=document.getElementById('map');
+const colours=['#eeeae1','#f7d7b4','#edb07d','#db7954','#b94837','#7c1732'], labels=['0','1–4','5–14','15–29','30–59','60+'];
+let timer=null;
+const colour=n=>colours[n===0?0:n<5?1:n<15?2:n<30?3:n<60?4:5];
+map.setAttribute('viewBox',`0 0 ${data.width} 644`);
+document.getElementById('legend').innerHTML=colours.map((c,i)=>`<span><span class="swatch" style="background:${c}"></span>${labels[i]}</span>`).join('');
+data.towns.forEach(t=>{const path=document.createElementNS(ns,'path');path.setAttribute('d',t.path);path.setAttribute('fill-rule','evenodd');path.dataset.id=t.id;const title=document.createElementNS(ns,'title');path.append(title);path.addEventListener('click',()=>{choice.value=t.id;draw()});map.append(path);t.element=path;t.title=title});
+[...data.towns].sort((a,b)=>(a.state+a.name).localeCompare(b.state+b.name)).forEach(t=>{const o=document.createElement('option');o.value=t.id;o.textContent=`${t.name} · ${t.state}`;choice.append(o)});
+function draw(){const m=+slider.value,t=data.towns.find(t=>t.id===choice.value),series=t?t.events:data.months.map((_,j)=>data.towns.reduce((s,x)=>s+x.events[j],0));
+ document.getElementById('date').textContent=data.months[m];slider.setAttribute('aria-valuetext',data.months[m]);
+ data.towns.forEach(x=>{x.element.setAttribute('fill',colour(x.events[m]));x.element.classList.toggle('selected',x===t);x.title.textContent=`${x.name} (${x.state}): ${x.events[m]} events, ${data.months[m]}`});
+ document.getElementById('count').textContent=series[m].toLocaleString();
+ const civilians=t?t.civilian[m]:data.towns.reduce((s,x)=>s+x.civilian[m],0);
+ document.getElementById('detail').textContent=`events in ${data.months[m]}; ${civilians.toLocaleString()} targeted civilians.`;
+ const max=Math.max(1,...series),xx=i=>36+i/56*370,yy=v=>145-v/max*120;
+ const path=series.map((v,i)=>`${i?'L':'M'}${xx(i)},${yy(v)}`).join(' ');
+ document.getElementById('trend').innerHTML=`<title>${t?t.name:'All townships'}: monthly recorded events</title><path d="M36 25V145H410" fill="none" stroke="#c4cdcb"/><text x="30" y="29" text-anchor="end">${max}</text><text x="30" y="149" text-anchor="end">0</text><path d="${path}" fill="none" stroke="#237b88" stroke-width="2"/><line x1="${xx(m)}" x2="${xx(m)}" y1="20" y2="145" stroke="#ba4937" stroke-dasharray="3 3"/><circle cx="${xx(m)}" cy="${yy(series[m])}" r="4" fill="#ba4937"/><text x="36" y="168">Jan 2021</text><text x="410" y="168" text-anchor="end">Sep 2025</text>`;
+}
+function stop(){clearInterval(timer);timer=null;document.getElementById('play').textContent='▶ Play';document.getElementById('play').setAttribute('aria-label','Play monthly sequence')}
+document.getElementById('play').addEventListener('click',()=>{if(timer){stop();return}if(+slider.value===56)slider.value=0;draw();document.getElementById('play').textContent='Pause';document.getElementById('play').setAttribute('aria-label','Pause monthly sequence');timer=setInterval(()=>{slider.value=+slider.value+1;draw();if(+slider.value===56)stop()},900)});
+slider.addEventListener('input',()=>{stop();draw()});choice.addEventListener('change',draw);document.addEventListener('visibilitychange',()=>{if(document.hidden)stop()});draw();
+</script></body></html>
