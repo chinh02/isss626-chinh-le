@@ -72,6 +72,16 @@ Grouping Shan State townships by household ICT access, then comparing ordinary c
 
 [View exercise →](hands-on-exercise-06.qmd){.section-link}
 :::
+
+::: {.exercise-entry}
+<span>07</span>
+
+## Modelling Geographical Accessibility
+
+Comparing access to eldercare services across Singapore with the Hansen, KD2SFCA and SAM methods.
+
+[View exercise →](hands-on-exercise-07.qmd){.section-link}
+:::
 :::
 
 [← Back to home](index.qmd){.back-link}

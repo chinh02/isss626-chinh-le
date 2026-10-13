@@ -46,7 +46,7 @@
     "href": "hands-on-exercise.html",
     "title": "Hands-on exercise",
     "section": "",
-    "text": "SECTION 01\n\n\n\nPractical GIS workflows completed during ISSS626.\n\n\n01\n\n\nWorking with Singapore planning boundaries, public facilities, transport lines and population data in R.\nView exercise →\n\n\n\n02\n\n\nAnalysing childcare centre locations with nearest-neighbour tests, kernel density estimation and second-order spatial statistics.\nView exercise →\n\n\n\n03\n\n\nMapping 2023 forest fire events in Kepulauan Bangka Belitung and estimating how their density changes by month.\nView exercise →\n\n\n\n04\n\n\nBuilding contiguity, distance and nearest-neighbour relationships for Hunan counties, then using them to calculate spatial lags.\nView exercise →\n\n\n\n05\n\n\nTesting whether Hunan’s GDP per capita is spatially clustered, then locating clusters, outliers, hot spots and cold spots.\nView exercise →\n\n\n\n06\n\n\nGrouping Shan State townships by household ICT access, then comparing ordinary clustering with SKATER and ClustGeo.\nView exercise →\n\n\n\n← Back to home"
+    "text": "SECTION 01\n\n\n\nPractical GIS workflows completed during ISSS626.\n\n\n01\n\n\nWorking with Singapore planning boundaries, public facilities, transport lines and population data in R.\nView exercise →\n\n\n\n02\n\n\nAnalysing childcare centre locations with nearest-neighbour tests, kernel density estimation and second-order spatial statistics.\nView exercise →\n\n\n\n03\n\n\nMapping 2023 forest fire events in Kepulauan Bangka Belitung and estimating how their density changes by month.\nView exercise →\n\n\n\n04\n\n\nBuilding contiguity, distance and nearest-neighbour relationships for Hunan counties, then using them to calculate spatial lags.\nView exercise →\n\n\n\n05\n\n\nTesting whether Hunan’s GDP per capita is spatially clustered, then locating clusters, outliers, hot spots and cold spots.\nView exercise →\n\n\n\n06\n\n\nGrouping Shan State townships by household ICT access, then comparing ordinary clustering with SKATER and ClustGeo.\nView exercise →\n\n\n\n07\n\n\nComparing access to eldercare services across Singapore with the Hansen, KD2SFCA and SAM methods.\nView exercise →\n\n\n\n← Back to home"
   },
   {
     "objectID": "hands-on-exercise.html#geospatial-data-wrangling-and-choropleth-mapping",
@@ -1167,5 +1167,96 @@
     "title": "Conflict across Myanmar’s townships",
     "section": "Recommended actions",
     "text": "Recommended actions\n\nIn Sagaing, Mandalay and Magway, compare hotspot townships with aid coverage and identify communities still waiting for food, shelter or medical support.\nIn Kawkareik and Nawnghkio, ask local aid groups whether displacement has increased demand beyond what they can provide.\nIn Monywa, check displaced households’ housing, food and healthcare needs before reducing any existing aid.\nIn Hakha, Tonzang and Nawnghkio, review civilian-targeting incidents and neighbouring townships to locate the affected communities and check their needs.\n\nUpdate the records beyond September 2025 and confirm current needs with local aid groups before acting.\n\nFull report, sources and code · Coursework repository"
+  },
+  {
+    "objectID": "hands-on-exercise-07.html",
+    "href": "hands-on-exercise-07.html",
+    "title": "Hands-on Exercise 7",
+    "section": "",
+    "text": "This exercise measures how easily people across Singapore can reach eldercare services, then compares three ways of expressing accessibility."
+  },
+  {
+    "objectID": "hands-on-exercise-07.html#introduction",
+    "href": "hands-on-exercise-07.html#introduction",
+    "title": "Hands-on Exercise 7",
+    "section": "1 Introduction",
+    "text": "1 Introduction\nAccessibility depends on both the supply of services and the distance people need to travel. The analysis uses a common origin-destination matrix to compare the Hansen, KD2SFCA and SAM methods.\n\n1.1 Learning Outcome\nThis exercise covers importing and preparing spatial data, reshaping an origin-destination matrix, calculating three accessibility measures, and comparing their spatial patterns."
+  },
+  {
+    "objectID": "hands-on-exercise-07.html#the-data",
+    "href": "hands-on-exercise-07.html#the-data",
+    "title": "Hands-on Exercise 7",
+    "section": "2 The data",
+    "text": "2 The data\nFour datasets are used:\n\nMP14_SUBZONE_NO_SEA_PL: Singapore’s 2014 planning subzones.\nhexagons: 3,125 demand locations represented by 250-metre hexagons.\nELDERCARE: 120 eldercare service locations.\nOD_Matrix: travel costs between every hexagon and eldercare centre.\n\nThe supplied demand and capacity values are simplified for learning purposes. Each hexagon is assigned a demand of 100 and every eldercare centre a capacity of 100."
+  },
+  {
+    "objectID": "hands-on-exercise-07.html#getting-started",
+    "href": "hands-on-exercise-07.html#getting-started",
+    "title": "Hands-on Exercise 7",
+    "section": "3 Getting Started",
+    "text": "3 Getting Started\n\npacman::p_load(tmap, SpatialAcc, sf, \n               ggstatsplot, reshape2,\n               tidyverse)"
+  },
+  {
+    "objectID": "hands-on-exercise-07.html#geospatial-data-wrangling",
+    "href": "hands-on-exercise-07.html#geospatial-data-wrangling",
+    "title": "Hands-on Exercise 7",
+    "section": "4 Geospatial Data Wrangling",
+    "text": "4 Geospatial Data Wrangling\n\n4.1 Importing geospatial data\nThe planning subzones, demand hexagons and eldercare points are imported as simple-feature objects.\n\nmpsz &lt;- st_read(dsn = \"chap17/data/geospatial\", layer = \"MP14_SUBZONE_NO_SEA_PL\")\n\nReading layer `MP14_SUBZONE_NO_SEA_PL' from data source \n  `D:\\smu\\study\\GIS\\chap17\\data\\geospatial' using driver `ESRI Shapefile'\nSimple feature collection with 323 features and 15 fields\nGeometry type: MULTIPOLYGON\nDimension:     XY\nBounding box:  xmin: 2667.538 ymin: 15748.72 xmax: 56396.44 ymax: 50256.33\nProjected CRS: SVY21\n\nhexagons &lt;- st_read(dsn = \"chap17/data/geospatial\", layer = \"hexagons\") \n\nReading layer `hexagons' from data source \n  `D:\\smu\\study\\GIS\\chap17\\data\\geospatial' using driver `ESRI Shapefile'\nSimple feature collection with 3125 features and 6 fields\nGeometry type: POLYGON\nDimension:     XY\nBounding box:  xmin: 2667.538 ymin: 21506.33 xmax: 50010.26 ymax: 50256.33\nProjected CRS: SVY21 / Singapore TM\n\neldercare &lt;- st_read(dsn = \"chap17/data/geospatial\", layer = \"ELDERCARE\") \n\nReading layer `ELDERCARE' from data source \n  `D:\\smu\\study\\GIS\\chap17\\data\\geospatial' using driver `ESRI Shapefile'\nSimple feature collection with 120 features and 19 fields\nGeometry type: POINT\nDimension:     XY\nBounding box:  xmin: 14481.92 ymin: 28218.43 xmax: 41665.14 ymax: 46804.9\nProjected CRS: SVY21 / Singapore TM\n\n\n\n\n4.2 Updating CRS information\nAll layers are transformed to SVY21 / Singapore TM (EPSG:3414), which uses metres and matches the travel-cost data.\n\nmpsz &lt;- st_transform(mpsz, 3414)\neldercare &lt;- st_transform(eldercare, 3414)\nhexagons &lt;- st_transform(hexagons, 3414)\n\n\nst_crs(mpsz)\n\nCoordinate Reference System:\n  User input: EPSG:3414 \n  wkt:\nPROJCRS[\"SVY21 / Singapore TM\",\n    BASEGEOGCRS[\"SVY21\",\n        DATUM[\"SVY21\",\n            ELLIPSOID[\"WGS 84\",6378137,298.257223563,\n                LENGTHUNIT[\"metre\",1]]],\n        PRIMEM[\"Greenwich\",0,\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n        ID[\"EPSG\",4757]],\n    CONVERSION[\"Singapore Transverse Mercator\",\n        METHOD[\"Transverse Mercator\",\n            ID[\"EPSG\",9807]],\n        PARAMETER[\"Latitude of natural origin\",1.36666666666667,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8801]],\n        PARAMETER[\"Longitude of natural origin\",103.833333333333,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8802]],\n        PARAMETER[\"Scale factor at natural origin\",1,\n            SCALEUNIT[\"unity\",1],\n            ID[\"EPSG\",8805]],\n        PARAMETER[\"False easting\",28001.642,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8806]],\n        PARAMETER[\"False northing\",38744.572,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8807]]],\n    CS[Cartesian,2],\n        AXIS[\"northing (N)\",north,\n            ORDER[1],\n            LENGTHUNIT[\"metre\",1]],\n        AXIS[\"easting (E)\",east,\n            ORDER[2],\n            LENGTHUNIT[\"metre\",1]],\n    USAGE[\n        SCOPE[\"Cadastre, engineering survey, topographic mapping.\"],\n        AREA[\"Singapore - onshore and offshore.\"],\n        BBOX[1.13,103.59,1.47,104.07]],\n    ID[\"EPSG\",3414]]\n\n\n\n\n4.3 Cleaning and updating attribute fields of the geospatial data\nOnly the identifiers needed for the analysis are kept. The constant demand and capacity values allow the comparison to focus on distance.\n\neldercare &lt;- eldercare %&gt;%\n  select(fid, ADDRESSPOS) %&gt;%\n  mutate(capacity = 100)\n\n\nhexagons &lt;- hexagons %&gt;%\n  select(fid) %&gt;%\n  mutate(demand = 100)"
+  },
+  {
+    "objectID": "hands-on-exercise-07.html#apsaital-data-handling-and-wrangling",
+    "href": "hands-on-exercise-07.html#apsaital-data-handling-and-wrangling",
+    "title": "Hands-on Exercise 7",
+    "section": "5 Apsaital Data Handling and Wrangling",
+    "text": "5 Apsaital Data Handling and Wrangling\n\n5.1 Importing Distance Matrix\nThe origin-destination table contains one row for every hexagon-facility pair. total_cost combines the entry, road-network and exit distances.\n\nODMatrix &lt;- read_csv(\"chap17/data/aspatial/OD_Matrix.csv\", skip = 0)\n\n\n\n5.2 Tidying distance matrix\nThe long table is widened so each row represents one origin and each column one eldercare destination.\n\ndistmat &lt;- ODMatrix %&gt;%\n  select(origin_id, destination_id, total_cost) %&gt;%\n  spread(destination_id, total_cost)%&gt;%\n  select(c(-c('origin_id')))\n\nThe costs are converted from metres to kilometres before modelling.\n\ndistmat_km &lt;- as.matrix(distmat/1000)"
+  },
+  {
+    "objectID": "hands-on-exercise-07.html#modelling-and-visualising-accessibility-using-hansen-method",
+    "href": "hands-on-exercise-07.html#modelling-and-visualising-accessibility-using-hansen-method",
+    "title": "Hands-on Exercise 7",
+    "section": "6 Modelling and Visualising Accessibility using Hansen Method",
+    "text": "6 Modelling and Visualising Accessibility using Hansen Method\n\n6.1 Computing Hansen’s accessibility\nThe Hansen method considers every eldercare centre but reduces the contribution of facilities that are farther away.\n\nacc_Hansen &lt;- data.frame(ac(hexagons$demand,\n                            eldercare$capacity,\n                            distmat_km, \n                            #d0 = 50,\n                            power = 2, \n                            family = \"Hansen\"))\n\n\ncolnames(acc_Hansen) &lt;- \"accHansen\"\n\n\nacc_Hansen &lt;- as_tibble(acc_Hansen)\n\n\nhexagon_Hansen &lt;- bind_cols(hexagons, acc_Hansen)\n\nResults below use power = 2. The compact version is kept as an unexecuted example of a gentler distance decay (power = 0.5).\n\nacc_Hansen &lt;- data.frame(ac(hexagons$demand,\n                            eldercare$capacity,\n                            distmat_km, \n                            #d0 = 50,\n                            power = 0.5, \n                            family = \"Hansen\"))\n\ncolnames(acc_Hansen) &lt;- \"accHansen\"\nacc_Hansen &lt;- as_tibble(acc_Hansen)\nhexagon_Hansen &lt;- bind_cols(hexagons, acc_Hansen)\n\n\n\n6.2 Visualising Hansen’s accessibility\n\n6.2.1 Extracting map extend\n\nmapex &lt;- st_bbox(hexagons)\n\n\ntm_shape(hexagon_Hansen,\n         bbox = mapex) + \n  tm_polygons(fill = \"accHansen\", \n              fill.scale = tm_scale_intervals(\n                style = \"quantile\",\n                n = 10,\n                values = \"brewer.blues\")) +\ntm_shape(eldercare) +\n  tm_dots(size = 0.3,\n          fill = \"red\",\n          col = \"black\") +\n  tm_title(\"Accessibility to eldercare: Hansen method\") +\n  tm_layout(frame = TRUE) +\n  tm_compass(type=\"8star\", size = 2) +\n  tm_scalebar() +\n  tm_grid(alpha = 0.2)\n\n\n\n\n\n\n\n\n\n\n\n6.3 Statistical graphic visualisation\nThe planning-region field is added to each hexagon so the accessibility distributions can be compared by region.\n\nhexagon_Hansen &lt;- st_join(hexagon_Hansen, mpsz, \n                          join = st_intersects)\n\n\nggplot(data=hexagon_Hansen, \n       aes(y = log(accHansen), \n           x= REGION_N)) +\n  geom_boxplot() +\n  geom_point(stat=\"summary\", \n             fun.y=\"mean\", \n             colour =\"red\", \n             size=2)"
+  },
+  {
+    "objectID": "hands-on-exercise-07.html#modelling-and-visualising-accessibility-using-kd2sfca-method",
+    "href": "hands-on-exercise-07.html#modelling-and-visualising-accessibility-using-kd2sfca-method",
+    "title": "Hands-on Exercise 7",
+    "section": "7 Modelling and Visualising Accessibility using KD2SFCA Method",
+    "text": "7 Modelling and Visualising Accessibility using KD2SFCA Method\n\n7.1 Computing KD2SFCA’s accessibility\nKD2SFCA uses a five-kilometre catchment and balances service capacity against the demand that competes for it.\n\nacc_KD2SFCA &lt;- data.frame(ac(hexagons$demand,\n                            eldercare$capacity,\n                            distmat_km, \n                            d0 = 5,\n                            power = 2, \n                            family = \"KD2SFCA\"))\n\ncolnames(acc_KD2SFCA) &lt;- \"accKD2SFCA\"\nacc_KD2SFCA &lt;- as_tibble(acc_KD2SFCA)\nhexagon_KD2SFCA &lt;- bind_cols(hexagons, acc_KD2SFCA)\n\n\n\n7.2 Visualising KD2SFCA’s accessibility\n\ntm_shape(hexagon_KD2SFCA,\n         bbox = mapex) + \n  tm_polygons(fill = \"accKD2SFCA\", \n              fill.scale = tm_scale_intervals(\n                style = \"quantile\",\n                n = 10,\n                values = \"brewer.blues\")) +\ntm_shape(eldercare) +\n  tm_dots(size = 0.3,\n          fill = \"red\",\n          col = \"black\") +\n  tm_title(\"Accessibility to eldercare: KD2SFCA method\") +\n  tm_layout(frame = TRUE) +\n  tm_compass(type=\"8star\", size = 2) +\n  tm_scalebar() +\n  tm_grid(alpha = 0.2)\n\n\n\n\n\n\n\n\n\n\n7.3 Statistical graphic visualisation\n\nhexagon_KD2SFCA &lt;- st_join(hexagon_KD2SFCA, mpsz, \n                          join = st_intersects)\n\n\nggplot(data=hexagon_KD2SFCA, \n       aes(y = accKD2SFCA, \n           x= REGION_N)) +\n  geom_boxplot() +\n  geom_point(stat=\"summary\", \n             fun.y=\"mean\", \n             colour =\"red\", \n             size=2)"
+  },
+  {
+    "objectID": "hands-on-exercise-07.html#modelling-and-visualising-accessibility-using-spatial-accessibility-measure-sam-method",
+    "href": "hands-on-exercise-07.html#modelling-and-visualising-accessibility-using-spatial-accessibility-measure-sam-method",
+    "title": "Hands-on Exercise 7",
+    "section": "8 Modelling and Visualising Accessibility using Spatial Accessibility Measure (SAM) Method",
+    "text": "8 Modelling and Visualising Accessibility using Spatial Accessibility Measure (SAM) Method\n\n8.1 Computing SAM accessibility\nSAM also uses a five-kilometre catchment but applies its own adjustment for supply, demand and distance.\n\nacc_SAM &lt;- data.frame(ac(hexagons$demand,\n                         eldercare$capacity,\n                         distmat_km, \n                         d0 = 5,\n                         power = 2, \n                         family = \"SAM\"))\n\ncolnames(acc_SAM) &lt;- \"accSAM\"\nacc_SAM &lt;- as_tibble(acc_SAM)\nhexagon_SAM &lt;- bind_cols(hexagons, acc_SAM)\n\n\n\n8.2 Visualising SAM’s accessibility\n\ntm_shape(hexagon_SAM,\n         bbox = mapex) + \n  tm_polygons(fill = \"accSAM\", \n              fill.scale = tm_scale_intervals(\n                style = \"quantile\",\n                n = 10,\n                values = \"brewer.blues\")) +\ntm_shape(eldercare) +\n  tm_dots(size = 0.3,\n          fill = \"red\",\n          col = \"black\") +\n  tm_title(\"Accessibility to eldercare: SAM method\") +\n  tm_layout(frame = TRUE) +\n  tm_compass(type=\"8star\", size = 2) +\n  tm_scalebar() +\n  tm_grid(alpha = 0.2)\n\n\n\n\n\n\n\n\n\n\n8.3 Statistical graphic visualisation\n\nhexagon_SAM &lt;- st_join(hexagon_SAM, mpsz, \n                       join = st_intersects)\n\n\nggplot(data=hexagon_SAM, \n       aes(y = accSAM, \n           x= REGION_N)) +\n  geom_boxplot() +\n  geom_point(stat=\"summary\", \n             fun.y=\"mean\", \n             colour =\"red\", \n             size=2)"
+  },
+  {
+    "objectID": "hands-on-exercise-07.html#takeaways",
+    "href": "hands-on-exercise-07.html#takeaways",
+    "title": "Hands-on Exercise 7",
+    "section": "10 Takeaways",
+    "text": "10 Takeaways\nThe three methods start with the same facilities, demand points and travel distances. Their maps differ because they treat distance and competing demand differently. Hansen gives every facility a distance-based weight, while KD2SFCA and SAM use a five-kilometre catchment. Comparing the locations of high- and low-access areas is clearer than comparing the raw values."
+  },
+  {
+    "objectID": "hands-on-exercise-07.html#references",
+    "href": "hands-on-exercise-07.html#references",
+    "title": "Hands-on Exercise 7",
+    "section": "11 References",
+    "text": "11 References\n\nChapter 17: Modelling Geographical Accessibility"
+  },
+  {
+    "objectID": "hands-on-exercise.html#modelling-geographical-accessibility",
+    "href": "hands-on-exercise.html#modelling-geographical-accessibility",
+    "title": "Hands-on exercise",
+    "section": "",
+    "text": "Comparing access to eldercare services across Singapore with the Hansen, KD2SFCA and SAM methods.\nView exercise →"
+  },
+  {
+    "objectID": "hands-on-exercise-07.html#some-other-observations",
+    "href": "hands-on-exercise-07.html#some-other-observations",
+    "title": "Hands-on Exercise 7",
+    "section": "9 Some other observations",
+    "text": "9 Some other observations\n\nThe darkest hexagons appear mostly around groups of eldercare centres. The far western and eastern edges remain lighter across all three maps.\nKD2SFCA produces sharper local changes because a facility stops contributing once it falls outside the five-kilometre catchment.\nOne Central Region hexagon has a much larger SAM value than the rest. It stretches the vertical scale and makes the other regional boxes look flatter.\nEach map uses its own quantile breaks. The shades show relative ranking within a map, so the same blue does not represent the same accessibility value across methods."
   }
 ]
