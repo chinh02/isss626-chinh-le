@@ -71,6 +71,12 @@ events retained from three categories: battles, explosions/remote violence and v
 
 January–September 2025 has **12.4% fewer events** than the same months of 2024. Explosions and remote violence remain the largest category.
 
+## 127 townships recorded increases
+
+![](take-home-02/figures/recent-changes.png){height=480 alt="Map of changes between January to September 2024 and 2025, with the five largest township rises and falls."}
+
+Kawkareik, Kyaukpyu and Nawnghkio had the largest rises. Rakhine’s total fell by **734**, while Kyaukpyu, within Rakhine, added **207**.
+
 ## Clusters and outliers
 
 ::: {.columns}
@@ -132,6 +138,8 @@ Their map has **37 hotspots**, with 34 overlapping the overall conflict hotspots
 
 Hakha, Tonzang and Nawnghkio appear only in the civilian-targeting hotspot map.
 
+In the matched 2024 and 2025 periods, civilian-targeting events fell by only **2%**. In **26 townships**, they rose while total events fell.
+
 ::: {.small-note}
 These are events targeting civilians, not civilian deaths. The flag excludes incidental civilian harm.
 :::
@@ -150,9 +158,9 @@ Reporting gaps, approximate locations and different township sizes remain limita
 ## Recommended actions
 
 - In **Sagaing, Mandalay and Magway**, compare hotspot townships with aid coverage and identify communities still waiting for food, shelter or medical support.
-- In **Kawkareik and Nawnghkio**, ask local aid groups whether displacement has increased demand beyond what they can provide.
+- In **Kawkareik, Kyaukpyu and Nawnghkio**, ask local aid groups whether displacement has increased demand beyond what they can provide.
 - In **Monywa**, check displaced households’ housing, food and healthcare needs before reducing any existing aid.
-- In **Hakha, Tonzang and Nawnghkio**, review civilian-targeting incidents and neighbouring townships to locate the affected communities and check their needs.
+- In **Pakokku and Myaing**, follow up on rising civilian targeting despite falling total counts. Check incidents around **Hakha, Tonzang and Nawnghkio** as well.
 
 Update the records beyond September 2025 and confirm current needs with local aid groups before acting.
 
