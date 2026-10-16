@@ -238,7 +238,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#how-the-hotspots-changed" id="toc-how-the-hotspots-changed" class="nav-link" data-scroll-target="#how-the-hotspots-changed"><span class="header-section-number">5</span> How local patterns changed</a>
   <ul class="collapse">
   <li><a href="#following-hotspots-through-time" id="toc-following-hotspots-through-time" class="nav-link" data-scroll-target="#following-hotspots-through-time"><span class="header-section-number">5.1</span> Following hotspots through time</a></li>
-  <li><a href="#hotspots-came-and-went" id="toc-hotspots-came-and-went" class="nav-link" data-scroll-target="#hotspots-came-and-went"><span class="header-section-number">5.2</span> Hotspots came and went</a></li>
+  <li><a href="#hotspots-came-and-went" id="toc-hotspots-came-and-went" class="nav-link" data-scroll-target="#hotspots-came-and-went"><span class="header-section-number">5.2</span> How hotspot patterns changed</a></li>
   <li><a href="#coldspots-also-changed-through-time" id="toc-coldspots-also-changed-through-time" class="nav-link" data-scroll-target="#coldspots-also-changed-through-time"><span class="header-section-number">5.3</span> Coldspots also changed through time</a></li>
   <li><a href="#a-closer-look-at-contrasting-townships" id="toc-a-closer-look-at-contrasting-townships" class="nav-link" data-scroll-target="#a-closer-look-at-contrasting-townships"><span class="header-section-number">5.4</span> Three townships, three different histories</a></li>
   <li><a href="#checking-the-trend-results" id="toc-checking-the-trend-results" class="nav-link" data-scroll-target="#checking-the-trend-results"><span class="header-section-number">5.5</span> Do the trends hold up?</a></li>
@@ -247,7 +247,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul class="collapse">
   <li><a href="#what-the-civilian-records-include" id="toc-what-the-civilian-records-include" class="nav-link" data-scroll-target="#what-the-civilian-records-include"><span class="header-section-number">6.1</span> What the civilian records include</a></li>
   <li><a href="#three-hotspots-appear-only-in-the-civilian-map" id="toc-three-hotspots-appear-only-in-the-civilian-map" class="nav-link" data-scroll-target="#three-hotspots-appear-only-in-the-civilian-map"><span class="header-section-number">6.2</span> Three hotspots appear only in the civilian map</a></li>
-  <li><a href="#recent-civilian-targeting" id="toc-recent-civilian-targeting" class="nav-link" data-scroll-target="#recent-civilian-targeting"><span class="header-section-number">6.3</span> Civilian targeting barely fell</a></li>
+  <li><a href="#recent-civilian-targeting" id="toc-recent-civilian-targeting" class="nav-link" data-scroll-target="#recent-civilian-targeting"><span class="header-section-number">6.3</span> Little change in civilian targeting</a></li>
   </ul></li>
   <li><a href="#recommendations-and-limitations" id="toc-recommendations-and-limitations" class="nav-link" data-scroll-target="#recommendations-and-limitations"><span class="header-section-number">7</span> Priorities for civilian assistance</a>
   <ul class="collapse">
@@ -255,7 +255,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#further-study" id="toc-further-study" class="nav-link" data-scroll-target="#further-study"><span class="header-section-number">7.2</span> Further study</a></li>
   <li><a href="#limits-of-these-maps" id="toc-limits-of-these-maps" class="nav-link" data-scroll-target="#limits-of-these-maps"><span class="header-section-number">7.3</span> Limits of these maps</a></li>
   </ul></li>
-  <li><a href="#references-and-approach" id="toc-references-and-approach" class="nav-link" data-scroll-target="#references-and-approach"><span class="header-section-number">8</span> Sources and methods</a></li>
+  <li><a href="#references-and-approach" id="toc-references-and-approach" class="nav-link" data-scroll-target="#references-and-approach"><span class="header-section-number">8</span> Sources</a></li>
   </ul>
 </nav>
     </div>
@@ -275,10 +275,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="conflict-in-myanmar" class="level3" data-number="1.1">
 <h3 data-number="1.1" class="anchored" data-anchor-id="conflict-in-myanmar"><span class="header-section-number">1.1</span> Conflict in Myanmar</h3>
 <p>Myanmar’s armed conflicts predate the military coup of February 2021. For decades, ethnic armed organisations fought for greater autonomy. After the coup, new resistance groups emerged and fighting spread into central areas that had experienced relative peace. <a href="https://acleddata.com/report/between-cooperation-and-competition-struggle-resistance-groups-myanmar">ACLED’s background report</a> describes how these groups cooperate and compete across different regions.</p>
+<p>The consequences reach well beyond the places where fighting is recorded. In December 2024, OCHA estimated that almost <strong>3.5 million people were displaced within Myanmar</strong>. Its <a href="https://myanmar.un.org/en/286727-myanmar-humanitarian-needs-and-response-plan-2025-december-2024">2025 humanitarian response plan</a> describes families struggling to find food and shelter, with education and healthcare severely disrupted.</p>
+<p>Reading this background, I find it difficult to equate a fall in reported violence with recovery. Families may still be unable to return home or get the care they need. I want to keep those continuing needs in view as I compare the townships.</p>
 </section>
 <section id="what-this-study-examines" class="level3" data-number="1.2">
 <h3 data-number="1.2" class="anchored" data-anchor-id="what-this-study-examines"><span class="header-section-number">1.2</span> What this study examines</h3>
-<p>The <a href="https://isss626-ay2026-27aug.netlify.app/take-home_ex02">Geospatial Analytics for Peace assignment</a> asks us to examine where armed conflict clusters in Myanmar and how those patterns change over time. I combine ACLED’s event records with township boundaries, comparing each township with its neighbours and tracking changes month by month.</p>
+<p>For the <a href="https://isss626-ay2026-27aug.netlify.app/take-home_ex02">Geospatial Analytics for Peace assignment</a>, I combine ACLED’s event records with township boundaries. I start with the national timeline, then look more closely at individual townships and their neighbours. Returning to the monthly histories helps distinguish places with years of recorded fighting from those with a more recent increase.</p>
 <p>These comparisons can help aid organisations choose where to check for growing or continuing needs. I focus on three questions:</p>
 <ul>
 <li>Which townships form clusters of high recorded conflict, and which stand out from their neighbours?</li>
@@ -289,7 +291,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="national-trends-and-local-differences" class="level3" data-number="1.3">
 <h3 data-number="1.3" class="anchored" data-anchor-id="national-trends-and-local-differences"><span class="header-section-number">1.3</span> National trends and local differences</h3>
 <p>The national total fell by <strong>12.4%</strong> between January–September 2024 and the same months of 2025. Over that comparison, <strong>127 townships recorded increases</strong>. Events targeting civilians fell by only <strong>2%</strong>.</p>
-<p>Kawkareik and Nawnghkio each recorded more events by September 2025 than in all of 2024. Monywa has the largest total across the full study period.</p>
+<p>Kawkareik and Nawnghkio each recorded more events by September 2025 than in all of 2024. Monywa has the largest total across the full study period. These different histories are worth following separately when considering where support may still be needed.</p>
 </section>
 </section>
 <section id="data-and-study-area" class="level2" data-number="2">
@@ -431,6 +433,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="where-and-when-conflict-was-recorded" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="where-and-when-conflict-was-recorded"><span class="header-section-number">3</span> Where and when conflict was recorded</h2>
+<p>I first look at the timing of recorded violence across Myanmar. This gives some context for the township comparisons that follow.</p>
 <section id="changes-over-time" class="level3" data-number="3.1">
 <h3 data-number="3.1" class="anchored" data-anchor-id="changes-over-time"><span class="header-section-number">3.1</span> The monthly total peaked in late 2023</h3>
 <div class="cell">
@@ -484,11 +487,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </figure>
 </div>
 <p>The highest monthly total is <strong>November 2023, with 1,465 events</strong>, followed by December with 1,447. Counts remain high into early 2024. Explosions and remote violence account for the largest category in both 2024 and the available months of 2025.</p>
+<p>The peak came shortly after Operation 1027 began in northern Shan on 27 October 2023. <a href="https://acleddata.com/update/regional-overview-asia-pacific-october-2023">ACLED’s account of that month</a> describes a sharp escalation in fighting following the Brotherhood Alliance’s offensive.</p>
 <p>January–September 2025 has <strong>8,728 events</strong>, compared with <strong>9,961</strong> in the same months of 2024: a <strong>12.4% decline</strong>.</p>
 </section>
 <section id="recent-township-changes" class="level3" data-number="3.2">
 <h3 data-number="3.2" class="anchored" data-anchor-id="recent-township-changes"><span class="header-section-number">3.2</span> Where the national decline came from</h3>
-<p>I compare January to September in both years and map each township’s change. Keeping the same months gives each year an equal observation period.</p>
+<p>To see where the national decline came from, I compare January to September in both years and map each township’s change. Keeping the same months gives each year an equal observation period.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>recent_counts <span class="ot">&lt;-</span> a<span class="sc">$</span>cube <span class="sc">%&gt;%</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(lubridate<span class="sc">::</span><span class="fu">year</span>(month) <span class="sc">%in%</span> <span class="dv">2024</span><span class="sc">:</span><span class="dv">2025</span>,</span>
@@ -589,7 +593,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="events-and-reported-deaths" class="level3" data-number="3.4">
 <h3 data-number="3.4" class="anchored" data-anchor-id="events-and-reported-deaths"><span class="header-section-number">3.4</span> Maungdaw ranks much higher for reported deaths</h3>
-<p>An incident count gives every event the same weight. I also compare reported fatalities, following the idea of comparing several measures in <a href="https://isss626-camanafe.netlify.app/take_home_ex/take_home_ex02/take_home_ex02#feature-engineering">Christover Manafe’s study</a>. Here, the question is whether the places with the most incidents also have the highest death tolls.</p>
+<p>So far, every incident has counted equally. I also want to understand where the loss of life was greatest, since a smaller number of incidents can still have devastating consequences. Following the comparison of different measures in <a href="https://isss626-camanafe.netlify.app/take_home_ex/take_home_ex02/take_home_ex02#feature-engineering">Christover Manafe’s study</a>, I examine reported deaths alongside incident counts.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>fatality_counts <span class="ot">&lt;-</span> a<span class="sc">$</span>towns <span class="sc">%&gt;%</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span></span>
@@ -632,7 +636,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </figure>
 </div>
 <p><strong>Maungdaw ranks 17th by incidents but third by reported deaths:</strong> 599 events and 1,583 deaths. <strong>Kale has the highest reported death toll, at 1,877</strong>, although its 886 events place it fourth by incident count. Monywa leads the event count with 1,039 and ranks second for reported deaths, at 1,771.</p>
-<p>An assessment based only on the busiest townships could give Maungdaw less attention. The death totals add a reason to check local needs there and in Kale. These are reported estimates across all retained conflict events, including combatant deaths; they are not civilian death totals. ACLED records zero when no fatality information is available, so zero does not establish that nobody died. <a href="https://acleddata.com/methodology/acled-codebook">ACLED codebook</a></p>
+<p>This comparison makes me wary of using incident counts alone to decide where to assess needs first. Maungdaw could receive less attention that way, even with its high reported death toll. I would want local clinics and aid groups to help assess what affected households need there and in Kale.</p>
+<p>The reported death estimates cover all retained conflict events, including combatant deaths; they are not civilian death totals. ACLED records zero when no fatality information is available, so zero does not establish that nobody died. <a href="https://acleddata.com/methodology/acled-codebook">ACLED codebook</a></p>
 </section>
 <section id="explore-the-months" class="level3" data-number="3.5">
 <h3 data-number="3.5" class="anchored" data-anchor-id="explore-the-months"><span class="header-section-number">3.5</span> Follow a township through the months</h3>
@@ -666,7 +671,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="clusters-outliers-and-hotspots" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="clusters-outliers-and-hotspots"><span class="header-section-number">4</span> Where conflict forms clusters</h2>
-<p>Local Moran’s I distinguishes clusters from townships that stand out from their neighbours. Gi* identifies concentrations of high or low counts across a neighbourhood.</p>
+<p>The totals show which townships recorded more conflict. I next look at whether nearby townships share that pattern. Local Moran’s I distinguishes clusters from places that stand out from their neighbours, while Gi* identifies concentrations of high or low counts across a neighbourhood.</p>
 <section id="what-counts-as-a-neighbour" class="level3" data-number="4.1">
 <h3 data-number="4.1" class="anchored" data-anchor-id="what-counts-as-a-neighbour"><span class="header-section-number">4.1</span> What counts as a neighbour?</h3>
 <div class="cell">
@@ -857,7 +862,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>precise_x <span class="ot">&lt;-</span> <span class="fu">replace_na</span>(precise_totals<span class="sc">$</span>precise[<span class="fu">match</span>(towns<span class="sc">$</span>TS_PCODE, precise_totals<span class="sc">$</span>TS_PCODE)], <span class="dv">0</span>L)</span>
 <span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>precise_g <span class="ot">&lt;-</span> <span class="fu">gi_test</span>(precise_x, lw_star, supported, seed <span class="sc">+</span> <span class="dv">30</span>L)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>I repeat Gi* with a symmetric six-nearest-centroid neighbourhood and with only the more precisely located records. I also apply the Benjamini–Hochberg adjustment because testing many townships can produce chance discoveries.</p>
+<p>Before using these labels to shortlist townships, I check how much they depend on the analysis choices. I repeat Gi* with a symmetric six-nearest-centroid neighbourhood and with only the more precisely located records. I also apply the Benjamini–Hochberg adjustment because testing many townships can produce chance discoveries.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(<span class="at">Check =</span> <span class="fu">c</span>(<span class="st">"Queen neighbours"</span>, <span class="st">"Queen neighbours, multiple-test adjustment"</span>, <span class="st">"Six nearest neighbours"</span>, <span class="st">"Queen neighbours, precise locations only"</span>),</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>       <span class="at">Hotspots =</span> <span class="fu">c</span>(<span class="fu">sum</span>(hot), <span class="fu">sum</span>(hot <span class="sc">&amp;</span> a<span class="sc">$</span>local<span class="sc">$</span>gi_q <span class="sc">&lt;</span> .<span class="dv">05</span>, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
@@ -904,7 +909,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="changes-and-neighbours" class="level3" data-number="4.4">
 <h3 data-number="4.4" class="anchored" data-anchor-id="changes-and-neighbours"><span class="header-section-number">4.4</span> Some increases sit among declining neighbours</h3>
-<p>Each township’s recent change is compared with the average change among its Queen neighbours, excluding itself. The three island townships remain outside this comparison.</p>
+<p>Kyaukpyu’s rise within a declining region made me want to look more closely at its neighbours. I compare each township’s recent change with the average change among its Queen neighbours, excluding itself. The three island townships remain outside this comparison.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(spdep)</span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>change_weights <span class="ot">&lt;-</span> <span class="fu">nb2listw</span>(a<span class="sc">$</span>nb, <span class="at">style =</span> <span class="st">"W"</span>, <span class="at">zero.policy =</span> <span class="cn">TRUE</span>)</span>
@@ -947,11 +952,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </figure>
 </div>
 <p>The changes have positive spatial clustering overall: <strong>Moran’s I = 0.114</strong>, with permutation p = 0.001. Still, <strong>62 of the 126 rising townships with neighbours</strong> sit beside an average decline.</p>
-<p>Kyaukpyu added <strong>207 events</strong> while its neighbours averaged <strong>53 fewer</strong>. Nawnghkio also rose while its neighbours’ average fell. These places need attention at township level even when the surrounding region records fewer events. The dot colours describe the direction of change; the earlier LISA and Gi* tests use totals for the whole study period.</p>
+<p>Kyaukpyu added <strong>207 events</strong> while its neighbours averaged <strong>53 fewer</strong>. Nawnghkio also rose while its neighbours’ average fell. I would be cautious about assuming that the wider decline means less need for support in either township. The dot colours describe the direction of change; the earlier LISA and Gi* tests use totals for the whole study period.</p>
 </section>
 <section id="hotspots-in-two-periods" class="level3" data-number="4.5">
 <h3 data-number="4.5" class="anchored" data-anchor-id="hotspots-in-two-periods"><span class="header-section-number">4.5</span> New hotspots appear around Kawkareik</h3>
-<p>The full-period map combines several years of conflict. Taking the idea of comparing time windows from <a href="https://is415-gaa-matthew-ho.netlify.app/takehomeex/takehomeex2/the2#choosing-time-horizons">Matthew Ho</a>, I repeat Gi* for January–September 2024 and January–September 2025. Both use the same Queen neighbours and 9,999 two-sided permutations, with p &lt; 0.05. The extra permutations give finer p-values for this comparison.</p>
+<p>The whole-period map combines several years of conflict, so a recent increase can be hard to see. Following the comparison of time windows in <a href="https://is415-gaa-matthew-ho.netlify.app/takehomeex/takehomeex2/the2#choosing-time-horizons">Matthew Ho’s study</a>, I repeat Gi* for January–September 2024 and January–September 2025. Both use the same Queen neighbours and 9,999 two-sided permutations, with p &lt; 0.05. The extra permutations give finer p-values for this comparison.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>period_weights <span class="ot">&lt;-</span> spdep<span class="sc">::</span><span class="fu">nb2listw</span>(spdep<span class="sc">::</span><span class="fu">include.self</span>(a<span class="sc">$</span>nb), <span class="at">style =</span> <span class="st">"W"</span>, <span class="at">zero.policy =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>period_hotspots <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_dfr</span>(<span class="dv">2024</span><span class="sc">:</span><span class="dv">2025</span>, <span class="cf">function</span>(year) {</span>
@@ -1012,13 +1017,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </figure>
 </div>
 <p>The hotspot count falls from <strong>27 to 18</strong>. Eleven townships are hotspots in both periods, 16 only in 2024, and seven only in 2025. <strong>Five of those seven border Kawkareik</strong>, where events rose from 122 to 356. In neighbouring Hlaingbwe, counts rose from just one to 41; all four of its neighbours also recorded increases.</p>
-<p>This gives aid groups a reason to check needs across the surrounding townships as well as Kawkareik itself. The map describes a concentration across neighbours, which is why Kawkareik can sit beside hotspots without receiving the same label.</p>
+<p>For a needs assessment, I would include the surrounding townships as well as Kawkareik. The map describes a concentration across neighbours, which is why Kawkareik can sit beside hotspots without receiving the same label.</p>
 <p>After adjusting for multiple tests, four hotspots remain in 2024 and three in 2025. Hlaingbwe is a 2025-only hotspot under both versions. These are changes in classification, not a direct statistical test of the change between years.</p>
 </section>
 </section>
 <section id="how-the-hotspots-changed" class="level2" data-number="5">
 <h2 data-number="5" class="anchored" data-anchor-id="how-the-hotspots-changed"><span class="header-section-number">5</span> How local patterns changed</h2>
-<p>Similar totals can hide different histories: repeated conflict early in the study or a later surge. Monthly results show when each place became a hotspot.</p>
+<p>The two-year comparison shows where hotspot labels changed. I now follow the monthly histories to understand when those changes took place. Kawkareik’s later increase and Monywa’s longer history of high counts are especially useful examples to keep in mind.</p>
 <section id="following-hotspots-through-time" class="level3" data-number="5.1">
 <h3 data-number="5.1" class="anchored" data-anchor-id="following-hotspots-through-time"><span class="header-section-number">5.1</span> Following hotspots through time</h3>
 <div class="cell">
@@ -1100,7 +1105,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>EHSA then combines that trend with the months classified as hot or cold. A new hotspot appears at the end for the first time; a consecutive hotspot has an uninterrupted final run; a sporadic hotspot appears on and off. Persistent, intensifying and diminishing hotspots require at least 90% of months to be hot. I use the same rules with the signs reversed for coldspots. <a href="https://doc.esri.com/en/arcgis-pro/latest/tool-reference/space-time-pattern-mining/learnmoreemerging.html">Classification definitions</a></p>
 </section>
 <section id="hotspots-came-and-went" class="level3" data-number="5.2">
-<h3 data-number="5.2" class="anchored" data-anchor-id="hotspots-came-and-went"><span class="header-section-number">5.2</span> Hotspots came and went</h3>
+<h3 data-number="5.2" class="anchored" data-anchor-id="hotspots-came-and-went"><span class="header-section-number">5.2</span> How hotspot patterns changed</h3>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>ehsa <span class="ot">&lt;-</span> gi_series <span class="sc">%&gt;%</span> <span class="fu">left_join</span>(mk, <span class="at">by =</span> <span class="st">"TS_PCODE"</span>) <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(TS_PCODE) <span class="sc">%&gt;%</span></span>
 <span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">tau =</span> <span class="fu">first</span>(tau), <span class="at">trend_p =</span> <span class="fu">first</span>(trend_p), <span class="at">trend_q =</span> <span class="fu">first</span>(trend_q),</span>
@@ -1293,9 +1298,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <figcaption>Monthly event counts and corresponding space-time Gi-star histories for contrasting township examples.</figcaption>
 </figure>
 </div>
-<p><strong>Kawkareik, Kayin (oscillating hotspot).</strong> It had two cold months in 2021 and several later hot periods. By September 2025, it recorded <strong>356 events for the year</strong>, above the <strong>168 in all of 2024</strong>. Its upward Gi* trend survives the block-resampling check, capturing a later concentration that the whole-period map misses.</p>
-<p><strong>Nawnghkio, Shan (North) (sporadic hotspot).</strong> Counts rose from five events in 2021 to 310 in 2024 and 341 by September 2025. It has 18 hot months and no significant cold months. September had only four events, yet remained hot because the space–time Gi* also includes neighbours and the previous month.</p>
-<p><strong>Monywa, Sagaing (no EHSA pattern at the endpoint).</strong> It was hot throughout 2022–2024 and in three of the nine months of 2025. Its <strong>1,039 events</strong> give it the largest historical total. September’s permutation p-value of 0.066 falls outside the hotspot threshold, and its overall Mann–Kendall trend is also not significant.</p>
+<p><strong>Kawkareik, Kayin (oscillating hotspot).</strong> It had two coldspot months in 2021 before several later hotspot periods. By September 2025, it recorded <strong>356 events for the year</strong>, above the <strong>168 in all of 2024</strong>. Its rising Gi* trend passes the block-resampling check, showing a later concentration missed by the whole-period map.</p>
+<p><strong>Nawnghkio, Shan (North) (sporadic hotspot).</strong> Counts rose from five in 2021 to 310 in 2024 and 341 by September 2025. It has 18 hotspot months and no coldspot months. September had only four events, yet remained a hotspot because Gi* includes neighbours and the previous month.</p>
+<p><strong>Monywa, Sagaing (no EHSA pattern at the endpoint).</strong> It was a hotspot throughout 2022–2024 and in three of nine months in 2025. Its <strong>1,039 events</strong> are the largest historical total. September’s p-value of 0.066 misses the hotspot threshold; its Mann–Kendall trend is also not significant. I would still want to understand how households are recovering from the earlier violence.</p>
 </section>
 <section id="checking-the-trend-results" class="level3" data-number="5.5">
 <h3 data-number="5.5" class="anchored" data-anchor-id="checking-the-trend-results"><span class="header-section-number">5.5</span> Do the trends hold up?</h3>
@@ -1336,7 +1341,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="events-targeting-civilians" class="level2" data-number="6">
 <h2 data-number="6" class="anchored" data-anchor-id="events-targeting-civilians"><span class="header-section-number">6</span> Where civilians were targeted</h2>
-<p>I repeat the analysis for events targeting civilians to see which places the overall map may overlook.</p>
+<p>The earlier comparisons include battles as well as attacks on civilians. For civilian assistance, I also want to know whether events targeting civilians followed the overall decline. I repeat the analysis for that subset and compare the places it brings into view.</p>
 <section id="what-the-civilian-records-include" class="level3" data-number="6.1">
 <h3 data-number="6.1" class="anchored" data-anchor-id="what-the-civilian-records-include"><span class="header-section-number">6.1</span> What the civilian records include</h3>
 <div class="cell">
@@ -1378,7 +1383,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Tonzang has only <strong>two retained events targeting civilians</strong>. Its hotspot label mainly reflects nearby townships, so an assessment needs to check where those incidents occurred.</p>
 </section>
 <section id="recent-civilian-targeting" class="level3" data-number="6.3">
-<h3 data-number="6.3" class="anchored" data-anchor-id="recent-civilian-targeting"><span class="header-section-number">6.3</span> Civilian targeting barely fell</h3>
+<h3 data-number="6.3" class="anchored" data-anchor-id="recent-civilian-targeting"><span class="header-section-number">6.3</span> Little change in civilian targeting</h3>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>recent_totals <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
 <span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">Measure =</span> <span class="fu">c</span>(<span class="st">"All retained conflict events"</span>, <span class="st">"Events targeting civilians"</span>),</span>
@@ -1414,14 +1419,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>Events targeting civilians fell from <strong>2,911 to 2,854</strong>, a decline of just <strong>2%</strong>. Their share of retained events rose from <strong>29.2% to 32.7%</strong>. Most of the national reduction came from events outside the civilian-targeting subset.</p>
-<p>In <strong>26 townships</strong>, total events fell while civilian-targeting events rose. Pakokku’s total dropped from 171 to 116, but civilian targeting rose from 15 to 35. Myaing had a similar pattern: total events fell from 180 to 103 while civilian targeting rose from 13 to 30. Both belong on a follow-up list for civilian assistance despite their lower overall counts.</p>
+<p>In <strong>26 townships</strong>, total events fell while civilian-targeting events rose. Pakokku’s total dropped from 171 to 116, but civilian targeting rose from 15 to 35. Myaing had a similar pattern: total events fell from 180 to 103 while civilian targeting rose from 13 to 30. This is the finding that concerns me most when reading the national decline. I would keep both townships on the follow-up list for civilian assistance.</p>
 </section>
 </section>
 <section id="recommendations-and-limitations" class="level2" data-number="7">
 <h2 data-number="7" class="anchored" data-anchor-id="recommendations-and-limitations"><span class="header-section-number">7</span> Priorities for civilian assistance</h2>
 <section id="recommendations" class="level3" data-number="7.1">
 <h3 data-number="7.1" class="anchored" data-anchor-id="recommendations"><span class="header-section-number">7.1</span> Recommendations</h3>
-<p>For aid organisations, I would use the findings to narrow down these follow-up checks:</p>
+<p>The results draw attention to places where violence is increasing, as well as communities that have experienced years of conflict. I would use the maps to begin discussions with local aid groups about the following needs:</p>
 <ul>
 <li><strong>Find gaps in aid coverage in Sagaing, Mandalay and Magway.</strong> They contain 31 of the 38 hotspots. Compare these townships with areas served by local aid groups, then prioritise communities still waiting for requested food, shelter or medical support.</li>
 <li><strong>Check for growing needs in Kawkareik, Kyaukpyu and Nawnghkio.</strong> They had the three largest increases between the matched 2024 and 2025 periods. Include Hlaingbwe and the other townships bordering Kawkareik in these checks: the 2025 hotspot map points to a wider concentration there. Ask local groups whether displacement has increased demand for housing, food or care beyond what they can provide.</li>
@@ -1434,7 +1439,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="further-study" class="level3" data-number="7.2">
 <h3 data-number="7.2" class="anchored" data-anchor-id="further-study"><span class="header-section-number">7.2</span> Further study</h3>
 <p>Further study could follow Kyaukpyu and nearby townships month by month to see whether their rises and falls line up, while checking for changes in reporting. Comparing townships with similar totals could also reveal different patterns of violence and civilian targeting.</p>
-<p>Another useful step would be to compare rising civilian targeting with access to clinics and aid. This would need information on available services and travel times to identify communities facing both violence and difficulty getting help.</p>
+<p>I would also like to understand whether communities facing rising civilian targeting can reach clinics and aid. Adding information on available services and travel times would help identify places where people face both violence and difficulty getting support.</p>
 </section>
 <section id="limits-of-these-maps" class="level3" data-number="7.3">
 <h3 data-number="7.3" class="anchored" data-anchor-id="limits-of-these-maps"><span class="header-section-number">7.3</span> Limits of these maps</h3>
@@ -1442,16 +1447,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 </section>
 <section id="references-and-approach" class="level2" data-number="8">
-<h2 data-number="8" class="anchored" data-anchor-id="references-and-approach"><span class="header-section-number">8</span> Sources and methods</h2>
+<h2 data-number="8" class="anchored" data-anchor-id="references-and-approach"><span class="header-section-number">8</span> Sources</h2>
 <ul>
-<li><a href="https://isss626-ay2026-27aug.netlify.app/take-home_ex02">Exercise 2 handout</a>: study period, data and required methods.</li>
-<li><a href="https://acleddata.com/methodology/acled-codebook">ACLED codebook</a>: event definitions, reported fatalities, location precision and civilian targeting.</li>
-<li><a href="https://isss626-camanafe.netlify.app/take_home_ex/take_home_ex02/take_home_ex02#feature-engineering">Christover Manafe</a>: comparing several measures of the same problem inspired the event-count and fatality comparison.</li>
-<li><a href="https://geonode.themimu.info/layers/geonode:mmr_polbnda_adm3_250k_mimu_1">MIMU township boundaries v9.4</a>: boundaries and source conditions.</li>
-<li><a href="https://r4gdsa.netlify.app/chap10.html">R for Geospatial Data Science and Analytics, Chapter 10</a> and <a href="https://r4gdsa.netlify.app/chap11">Chapter 11</a>: local association and EHSA workflow.</li>
-<li><a href="https://r4gdsa.netlify.app/chap08.html">Chapter 8</a> and <a href="https://r4gdsa.netlify.app/chap09.html">Chapter 9</a>: neighbour averages and the global Moran’s I permutation test used for recent changes.</li>
-<li><a href="https://doc.esri.com/en/arcgis-pro/latest/tool-reference/space-time-pattern-mining/learnmoreemerging.html">ArcGIS EHSA definitions</a>: rules used to classify the monthly histories.</li>
-<li><a href="https://is415-gaa-matthew-ho.netlify.app/takehomeex/takehomeex2/the2">Matthew Ho</a> and <a href="https://is415-geospatial-with-khant.netlify.app/take-home_ex/take-home_ex02/take-home_ex02">Khant Min Naing</a>: examples of explaining time windows, checking methods and connecting maps with local histories. Their presentation informed the structure; the results here come from the Myanmar data.</li>
+<li><a href="https://isss626-ay2026-27aug.netlify.app/take-home_ex02">Exercise 2 handout</a></li>
+<li><a href="https://acleddata.com/country/myanmar">ACLED Myanmar data</a></li>
+<li><a href="https://acleddata.com/methodology/acled-codebook">ACLED codebook</a></li>
+<li><a href="https://acleddata.com/report/between-cooperation-and-competition-struggle-resistance-groups-myanmar">ACLED: Between cooperation and competition: The struggle of resistance groups in Myanmar</a></li>
+<li><a href="https://acleddata.com/update/regional-overview-asia-pacific-october-2023">ACLED’s October 2023 regional overview</a></li>
+<li><a href="https://myanmar.un.org/en/286727-myanmar-humanitarian-needs-and-response-plan-2025-december-2024">OCHA’s 2025 humanitarian response plan</a></li>
+<li><a href="https://geonode.themimu.info/layers/geonode:mmr_polbnda_adm3_250k_mimu_1">MIMU township boundaries v9.4</a></li>
+<li>R for Geospatial Data Science and Analytics: <a href="https://r4gdsa.netlify.app/chap08.html">Chapter 8</a>, <a href="https://r4gdsa.netlify.app/chap09.html">Chapter 9</a>, <a href="https://r4gdsa.netlify.app/chap10.html">Chapter 10</a> and <a href="https://r4gdsa.netlify.app/chap11">Chapter 11</a></li>
+<li><a href="https://doc.esri.com/en/arcgis-pro/latest/tool-reference/space-time-pattern-mining/learnmoreemerging.html">ArcGIS EHSA definitions</a></li>
+<li><a href="https://isss626-camanafe.netlify.app/take_home_ex/take_home_ex02/take_home_ex02#feature-engineering">Christover Manafe’s Take-home Exercise 2</a></li>
+<li><a href="https://is415-gaa-matthew-ho.netlify.app/takehomeex/takehomeex2/the2">Matthew Ho’s Take-home Exercise 2</a></li>
+<li><a href="https://is415-geospatial-with-khant.netlify.app/take-home_ex/take-home_ex02/take-home_ex02">Khant Min Naing’s Take-home Exercise 2</a></li>
 </ul>
 
 
