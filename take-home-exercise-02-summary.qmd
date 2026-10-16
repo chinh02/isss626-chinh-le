@@ -36,33 +36,15 @@ civ_hot <- a$civilian$gi_cluster == "Hotspot"
 
 ## Where is conflict concentrated, and how has it changed?
 
-The study follows **330 Myanmar townships over 57 months**.
+The study follows **53,805 conflict events across 330 Myanmar townships over 57 months**.
 
 - Local Moran’s I identifies clusters and outliers.
 - Gi* identifies hotspots and coldspots.
 - Mann–Kendall and EHSA examine their changes through time.
-- A separate comparison focuses on events targeting civilians.
+- Separate comparisons examine civilian targeting and reported deaths.
 
 ::: {.small-note}
 Sources: [ACLED Myanmar](https://acleddata.com/country/myanmar), supplied through eLearn; [MIMU v9.4](https://geonode.themimu.info/layers/geonode:mmr_polbnda_adm3_250k_mimu_1). Counts describe recorded events, not risk per person.
-:::
-
-## Preparing the township records
-
-::: {.columns}
-::: {.column width="42%"}
-::: {.key-number}
-53,805
-:::
-
-events retained from three categories: battles, explosions/remote violence and violence against civilians.
-:::
-::: {.column width="58%"}
-- The supplied file contains 87,109 records, including non-violent events.
-- 107 relevant records lack a named township; another 88 have only a broad location.
-- Months with no recorded event remain in the data.
-- Three island townships have no Queen neighbours and remain unclassified in those tests.
-:::
 :::
 
 ## The monthly total peaks in late 2023
@@ -76,6 +58,16 @@ January–September 2025 has **12.4% fewer events** than the same months of 2024
 ![](take-home-02/figures/recent-changes.png){height=480 alt="Map of changes between January to September 2024 and 2025, with the five largest township rises and falls."}
 
 Kawkareik, Kyaukpyu and Nawnghkio had the largest rises. Rakhine’s total fell by **734**, while Kyaukpyu, within Rakhine, added **207**.
+
+## Maungdaw ranks higher for reported deaths
+
+![](take-home-02/figures/events-and-deaths.png){height=450 alt="Reported deaths by township and comparison with event counts."}
+
+Maungdaw ranks **17th by incidents but third by reported deaths** (1,583). Kale has the highest reported death toll (1,877).
+
+::: {.small-note}
+Reported estimates across retained conflict events, including combatant deaths. These are not civilian death totals.
+:::
 
 ## Clusters and outliers
 
@@ -117,12 +109,14 @@ Current and preceding month; whole-cube Gi* reference. Map restricted to trend p
 :::
 :::
 
-## Different townships, different histories
+## New hotspots around Kawkareik
 
-![](take-home-02/figures/township-stories.png){height=530 alt="Event counts and Gi-star histories for contrasting townships."}
+![](take-home-02/figures/hotspots-two-periods.png){height=440 alt="Gi-star hotspots in matched January to September periods of 2024 and 2025."}
+
+Five of the seven 2025-only hotspots border Kawkareik. Hlaingbwe rises from **one to 41 events** and retains its hotspot status after the multiple-test adjustment.
 
 ::: {.small-note}
-Examples: the largest-count township in each of two significant hotspot classes, plus Monywa, which has the highest overall count.
+Same months and Queen neighbours; 9,999 permutations. A change in classification is not a direct test of change between years.
 :::
 
 ## The civilian-targeting pattern
@@ -158,7 +152,8 @@ Reporting gaps, approximate locations and different township sizes remain limita
 ## Recommended actions
 
 - In **Sagaing, Mandalay and Magway**, compare hotspot townships with aid coverage and identify communities still waiting for food, shelter or medical support.
-- In **Kawkareik, Kyaukpyu and Nawnghkio**, ask local aid groups whether displacement has increased demand beyond what they can provide.
+- In **Kawkareik, Kyaukpyu and Nawnghkio**, ask local aid groups whether displacement has increased demand beyond what they can provide. Include **Hlaingbwe** and the other neighbours of Kawkareik.
+- In **Kale and Maungdaw**, follow up on high reported death tolls with local clinics and aid groups to identify unmet household needs.
 - In **Monywa**, check displaced households’ housing, food and healthcare needs before reducing any existing aid.
 - In **Pakokku and Myaing**, follow up on rising civilian targeting despite falling total counts. Check incidents around **Hakha, Tonzang and Nawnghkio** as well.
 

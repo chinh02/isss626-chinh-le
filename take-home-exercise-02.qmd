@@ -69,7 +69,7 @@ These comparisons can help aid organisations choose where to check for growing o
 
 - Which townships form clusters of high recorded conflict, and which stand out from their neighbours?
 - Where have hotspots appeared, continued or weakened over the study period?
-- Does the pattern change when I focus on events targeting civilians?
+- Does the pattern change when I focus on civilian targeting or reported deaths?
 
 ### National trends and local differences
 
@@ -241,6 +241,50 @@ Sagaing accounts for **12,612 events**, or `r pct(12612/a$validation$retained)` 
 
 **`r town_results$TS[which.max(town_results$events)]`** has the highest township count, with **`r fmt(max(town_results$events))` events**. Local Moran’s I and Gi* show whether high counts also cluster across neighbouring townships.
 
+### Maungdaw ranks much higher for reported deaths {#events-and-reported-deaths}
+
+An incident count gives every event the same weight. I also compare reported fatalities, following the idea of comparing several measures in [Christover Manafe’s study](https://isss626-camanafe.netlify.app/take_home_ex/take_home_ex02/take_home_ex02#feature-engineering). Here, the question is whether the places with the most incidents also have the highest death tolls.
+
+```{r}
+#| label: th02-fatality-counts
+fatality_counts <- a$towns %>% st_drop_geometry() %>% as_tibble() %>%
+  select(TS_PCODE, TS, ST, events, fatalities) %>%
+  mutate(event_rank = min_rank(desc(events)),
+         fatality_rank = min_rank(desc(fatalities)))
+fatality_examples <- fatality_counts %>% filter(TS %in% c("Monywa", "Kale", "Maungdaw"))
+```
+
+```{r}
+#| label: th02-fatality-plot
+p_death_map <- ggplot(a$towns) +
+  geom_sf(aes(fill = fatalities), colour = "white", linewidth = .06) +
+  scale_fill_gradientn(colours = c("#faf5e9", "#edb07d", "#ca5941", "#7c1732"),
+                       trans = "sqrt", breaks = c(0, 500, 1800), labels = scales::comma,
+                       name = "Reported deaths") +
+  guides(fill = guide_colourbar(title.position = "top", barwidth = grid::unit(4.5, "cm"))) +
+  coord_sf(datum = NA) + theme_void() + theme(legend.position = "bottom") +
+  labs(title = "Where deaths were reported")
+p_death_comparison <- ggplot(fatality_counts, aes(events, fatalities)) +
+  geom_point(colour = "#a4b1b5", size = 1.8, alpha = .6) +
+  geom_point(data = fatality_examples, colour = "#ba4937", size = 3) +
+  geom_text(data = fatality_examples, aes(label = TS), hjust = 1.1, vjust = -.7, size = 3.5) +
+  scale_x_continuous(labels = scales::comma, expand = expansion(mult = c(.03, .12))) +
+  scale_y_continuous(labels = scales::comma, expand = expansion(mult = c(.03, .12))) +
+  labs(x = "Recorded events", y = "Reported deaths",
+       title = "Incidents and reported deaths", subtitle = "Each dot is one township")
+fatality_figure <- p_death_map + p_death_comparison +
+  patchwork::plot_layout(widths = c(1, 1.2)) +
+  patchwork::plot_annotation(subtitle = "January 2021 to September 2025")
+ggsave("take-home-02/figures/events-and-deaths.png", fatality_figure,
+       width = 11, height = 7, dpi = 170, bg = "white")
+```
+
+![Reported deaths by township, alongside the relationship between event counts and reported deaths. Monywa, Kale and Maungdaw are labelled.](take-home-02/figures/events-and-deaths.png)
+
+**Maungdaw ranks 17th by incidents but third by reported deaths:** 599 events and 1,583 deaths. **Kale has the highest reported death toll, at 1,877**, although its 886 events place it fourth by incident count. Monywa leads the event count with 1,039 and ranks second for reported deaths, at 1,771.
+
+An assessment based only on the busiest townships could give Maungdaw less attention. The death totals add a reason to check local needs there and in Kale. These are reported estimates across all retained conflict events, including combatant deaths; they are not civilian death totals. ACLED records zero when no fatality information is available, so zero does not establish that nobody died. [ACLED codebook](https://acleddata.com/methodology/acled-codebook)
+
 ### Follow a township through the months {#explore-the-months}
 
 
@@ -386,6 +430,71 @@ ggsave("take-home-02/figures/neighbour-changes.png", p_change_lag,
 The changes have positive spatial clustering overall: **Moran’s I = `r round(as.numeric(change_moran$statistic), 3)`**, with permutation p = `r formatC(change_moran$p.value, format = 'f', digits = 3)`. Still, **`r sum(recent$change > 0 & recent$neighbour_change < 0, na.rm = TRUE)` of the `r sum(recent$change > 0 & has_neighbours)` rising townships with neighbours** sit beside an average decline.
 
 Kyaukpyu added **207 events** while its neighbours averaged **53 fewer**. Nawnghkio also rose while its neighbours’ average fell. These places need attention at township level even when the surrounding region records fewer events. The dot colours describe the direction of change; the earlier LISA and Gi* tests use totals for the whole study period.
+
+### New hotspots appear around Kawkareik {#hotspots-in-two-periods}
+
+The full-period map combines several years of conflict. Taking the idea of comparing time windows from [Matthew Ho](https://is415-gaa-matthew-ho.netlify.app/takehomeex/takehomeex2/the2#choosing-time-horizons), I repeat Gi* for January–September 2024 and January–September 2025. Both use the same Queen neighbours and 9,999 two-sided permutations, with p < 0.05. The extra permutations give finer p-values for this comparison.
+
+```{r}
+#| label: th02-period-hotspots
+period_weights <- spdep::nb2listw(spdep::include.self(a$nb), style = "W", zero.policy = TRUE)
+period_hotspots <- purrr::map_dfr(2024:2025, function(year) {
+  counts <- recent[[paste0("events_", year)]]
+  g <- spdep::localG_perm(counts, period_weights, nsim = 9999,
+                        alternative = "two.sided", iseed = 62604,
+                        zero.policy = TRUE, no_repeat_in_row = TRUE)
+  p <- attr(g, "internals")[, "Pr(z != E(Gi)) Sim"]
+  p[spdep::card(a$nb) == 0] <- NA_real_
+  tibble(TS_PCODE = recent$TS_PCODE, year = year, events = counts,
+         gi = as.numeric(g), p = p, q = p.adjust(p, "BH")) %>%
+    mutate(hot = if_else(is.na(p), NA, gi > 0 & p < .05),
+           hot_adjusted = if_else(is.na(q), NA, gi > 0 & q < .05),
+           status = case_when(is.na(p) ~ "No Queen neighbour",
+                              hot ~ "Hotspot", TRUE ~ "Not a hotspot"))
+})
+hotspot_changes <- period_hotspots %>% select(TS_PCODE, year, hot, hot_adjusted) %>%
+  pivot_wider(names_from = year, values_from = c(hot, hot_adjusted)) %>%
+  left_join(recent %>% select(TS_PCODE, TS, ST), by = "TS_PCODE") %>%
+  mutate(change = case_when(
+    is.na(hot_2024) ~ "No Queen neighbour",
+    hot_2024 & hot_2025 ~ "Hotspot in both periods",
+    hot_2025 ~ "Hotspot in 2025 only",
+    hot_2024 ~ "Hotspot in 2024 only",
+    TRUE ~ "Not a hotspot in either period"))
+```
+
+```{r}
+#| label: th02-period-hotspot-maps
+period_map <- a$towns %>% select(TS_PCODE) %>%
+  left_join(period_hotspots, by = "TS_PCODE") %>%
+  group_by(year) %>%
+  mutate(period = paste0(year, ": ", sum(hot, na.rm = TRUE), " hotspots"),
+         status = factor(status, levels = c("Hotspot", "Not a hotspot", "No Queen neighbour")))
+period_map <- ungroup(period_map)
+kawkareik_point <- a$towns %>% filter(TS == "Kawkareik") %>% st_point_on_surface()
+p_periods <- ggplot(period_map) +
+  geom_sf(aes(fill = status), colour = "white", linewidth = .08) +
+  geom_sf(data = kawkareik_point, shape = 21, fill = "white", colour = "#17333d", size = 2) +
+  geom_sf_text(data = kawkareik_point, aes(label = TS), nudge_x = -45000,
+               hjust = 1, size = 3.2, colour = "#17333d") +
+  facet_wrap(~period, nrow = 1) +
+  scale_fill_manual(values = c("Hotspot" = "#ba4937", "Not a hotspot" = "#e7e7e5",
+                               "No Queen neighbour" = "#a4b1b5"), drop = FALSE, name = NULL) +
+  coord_sf(datum = NA) + theme_void(base_size = 12) +
+  theme(legend.position = "bottom", strip.text = element_text(face = "bold", size = 12)) +
+  labs(title = "Hotspots around Kawkareik become clearer in 2025",
+       subtitle = "January to September in each year · the circle marks Kawkareik")
+ggsave("take-home-02/figures/hotspots-two-periods.png", p_periods,
+       width = 10, height = 7.5, dpi = 170, bg = "white")
+```
+
+![Gi-star hotspots in January to September 2024 and the same months of 2025. Both maps use identical settings; Kawkareik is marked for orientation.](take-home-02/figures/hotspots-two-periods.png)
+
+The hotspot count falls from **27 to 18**. Eleven townships are hotspots in both periods, 16 only in 2024, and seven only in 2025. **Five of those seven border Kawkareik**, where events rose from 122 to 356. In neighbouring Hlaingbwe, counts rose from just one to 41; all four of its neighbours also recorded increases.
+
+This gives aid groups a reason to check needs across the surrounding townships as well as Kawkareik itself. The map describes a concentration across neighbours, which is why Kawkareik can sit beside hotspots without receiving the same label.
+
+After adjusting for multiple tests, four hotspots remain in 2024 and three in 2025. Hlaingbwe is a 2025-only hotspot under both versions. These are changes in classification, not a direct statistical test of the change between years.
 
 ## How local patterns changed {#how-the-hotspots-changed}
 
@@ -541,7 +650,8 @@ In **`r sum(recent$change < 0 & recent$civilian_change > 0)` townships**, total 
 For aid organisations, I would use the findings to narrow down these follow-up checks:
 
 - **Find gaps in aid coverage in Sagaing, Mandalay and Magway.** They contain 31 of the 38 hotspots. Compare these townships with areas served by local aid groups, then prioritise communities still waiting for requested food, shelter or medical support.
-- **Check for growing needs in Kawkareik, Kyaukpyu and Nawnghkio.** They had the three largest increases between the matched 2024 and 2025 periods. Ask local groups whether displacement has increased demand for housing, food or care beyond what they can provide.
+- **Check for growing needs in Kawkareik, Kyaukpyu and Nawnghkio.** They had the three largest increases between the matched 2024 and 2025 periods. Include Hlaingbwe and the other townships bordering Kawkareik in these checks: the 2025 hotspot map points to a wider concentration there. Ask local groups whether displacement has increased demand for housing, food or care beyond what they can provide.
+- **Include Kale and Maungdaw in local needs assessments.** They rank first and third for reported deaths. Ask local clinics and aid groups whether affected households have unmet care or support needs; Maungdaw would receive less attention on a list based only on incident counts.
 - **Review Monywa’s needs before reducing existing aid.** It was a hotspot throughout 2022–2024. Check whether displaced households have housing, food and medical care alongside the recent fall in recorded events.
 - **Follow up on civilian targeting in Pakokku and Myaing.** Their overall counts fell while events targeting civilians rose. Ask local groups whether affected households need medical care or shelter. For Hakha, Tonzang and Nawnghkio, also review neighbouring incidents behind the civilian hotspot labels.
 
@@ -566,7 +676,8 @@ Counts depend on reporting coverage, approximate locations and township size. Fi
 ## Sources and methods {#references-and-approach}
 
 - [Exercise 2 handout](https://isss626-ay2026-27aug.netlify.app/take-home_ex02): study period, data and required methods.
-- [ACLED codebook](https://acleddata.com/methodology/acled-codebook): event definitions, location precision and civilian targeting.
+- [ACLED codebook](https://acleddata.com/methodology/acled-codebook): event definitions, reported fatalities, location precision and civilian targeting.
+- [Christover Manafe](https://isss626-camanafe.netlify.app/take_home_ex/take_home_ex02/take_home_ex02#feature-engineering): comparing several measures of the same problem inspired the event-count and fatality comparison.
 - [MIMU township boundaries v9.4](https://geonode.themimu.info/layers/geonode:mmr_polbnda_adm3_250k_mimu_1): boundaries and source conditions.
 - [R for Geospatial Data Science and Analytics, Chapter 10](https://r4gdsa.netlify.app/chap10.html) and [Chapter 11](https://r4gdsa.netlify.app/chap11): local association and EHSA workflow.
 - [Chapter 8](https://r4gdsa.netlify.app/chap08.html) and [Chapter 9](https://r4gdsa.netlify.app/chap09.html): neighbour averages and the global Moran’s I permutation test used for recent changes.
