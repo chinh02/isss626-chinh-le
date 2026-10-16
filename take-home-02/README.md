@@ -36,7 +36,7 @@ Boundary source: https://geonode.themimu.info/layers/geonode:mmr_polbnda_adm3_25
 Use the **Zipped Shapefile** download. The raw data and event-level audit files
 remain under the repository's existing `/data/` ignore rule. MIMU's source page
 states an online-use restriction; confirm applicable course permission before
-publishing the maps. This implementation only prepares local outputs.
+publishing the maps. The rendered report and slides are served from `_site/`.
 
 ## Decisions
 

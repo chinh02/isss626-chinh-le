@@ -1,115 +1,218 @@
-# ---- th02-plot-style ----
-# Read the verified analytical outputs and create report figures.
 if (.Platform$OS.type == "windows") invisible(Sys.setlocale("LC_CTYPE", "English_United States.utf8"))
-suppressPackageStartupMessages({library(sf); library(tidyverse); library(patchwork); library(jsonlite)})
+# ---- th02-plot-style ----
+# Read the analysis results and set the chart style.
+library(sf)
+library(tidyverse)
+library(patchwork)
+library(jsonlite)
+library(RColorBrewer)
+
 a <- readRDS("data/take-home-02/derived/analysis.rds")
 dir.create("take-home-02/figures", recursive = TRUE, showWarnings = FALSE)
 towns <- a$towns
-states <- towns %>% group_by(ST) %>% summarise(.groups = "drop")
-ink <- "#17333d"; orange <- "#ba4937"; teal <- "#237b88"
+states <- towns %>%
+  group_by(ST) %>%
+  summarise(.groups = "drop")
+
 theme_set(theme_minimal(base_size = 12))
-theme_update(plot.title.position = "plot", plot.title = element_text(face = "bold", colour = ink),
-             panel.grid.minor = element_blank(), legend.position = "bottom",
-             plot.caption = element_text(hjust = 0, colour = "grey40", size = 9))
-save_plot <- function(p, name, width = 9, height = 5.5) {
-  ggsave(paste0("take-home-02/figures/", name, ".png"), p, width = width, height = height,
-         dpi = 170, bg = "white", limitsize = FALSE)
-}
-# ---- th02-map-helper ----
-palette <- c("High-high" = "#b32f34", "Low-low" = "#2875a2", "High-low" = "#e6a25c",
-             "Low-high" = "#79b5cc", "Hotspot" = "#b32f34", "Coldspot" = "#2875a2",
-             "Not significant" = "#e7e7e5", "No shared-boundary neighbour" = "#b6b4b0",
-             "No pattern detected" = "#e7e7e5", "Trend not significant" = "#e7e7e5",
-             "New hotspot" = "#ffb658", "Consecutive hotspot" = "#f16c47",
-             "Intensifying hotspot" = "#800f25", "Persistent hotspot" = "#bb2737",
-             "Diminishing hotspot" = "#d47d88", "Sporadic hotspot" = "#eaac96",
-             "Oscillating hotspot" = "#c57221", "Historical hotspot" = "#dcc2b6",
-             "New coldspot" = "#8ad5d8", "Consecutive coldspot" = "#4bacc3",
-             "Intensifying coldspot" = "#123e69", "Persistent coldspot" = "#2875a2",
-             "Diminishing coldspot" = "#80a6c6", "Sporadic coldspot" = "#bed9e8",
-             "Oscillating coldspot" = "#657bad", "Historical coldspot" = "#cbcbdc")
-map_plot <- function(d, column, title, subtitle = NULL) {
-  ggplot(d) + geom_sf(aes(fill = .data[[column]]), colour = "white", linewidth = .07) +
-    geom_sf(data = states, fill = NA, colour = "#596a6e", linewidth = .2) +
-    scale_fill_manual(values = palette, na.value = "#e7e7e5", name = NULL,
-                      labels = function(x) stringr::str_wrap(sub("No shared-boundary neighbour", "No Queen neighbour", x), 18)) +
-    coord_sf(datum = NA) + theme_void(base_size = 11) +
-    theme(legend.position = "bottom", plot.title = element_text(face = "bold", colour = ink),
-          plot.subtitle = element_text(colour = "#52676e", size = 10),
-          legend.text = element_text(size = 9), legend.key.size = grid::unit(.4, "cm"),
-          plot.margin = margin(10, 8, 10, 8)) +
-    guides(fill = guide_legend(ncol = 2, byrow = TRUE)) + labs(title = title, subtitle = subtitle)
-}
+theme_update(
+  plot.title.position = "plot",
+  plot.title = element_text(face = "bold"),
+  panel.grid.minor = element_blank(),
+  legend.position = "bottom"
+)
+
+# ---- th02-map-style ----
+# Use the same layout for the statistical maps.
+map_theme <- theme_void(base_size = 11) +
+  theme(
+    legend.position = "bottom",
+    legend.text = element_text(size = 9),
+    legend.key.size = grid::unit(.4, "cm"),
+    plot.title = element_text(face = "bold"),
+    plot.subtitle = element_text(size = 10),
+    plot.margin = margin(10, 8, 10, 8)
+  )
+
+# Put the neutral category in the middle of the red-to-blue palette.
+gi_levels <- c("Hotspot", "Not significant", "Coldspot")
 
 # ---- th02-monthly-plot ----
-type_palette <- c("Battles" = teal, "Explosions/Remote violence" = orange,
-                  "Violence against civilians" = "#9c813b")
-p <- ggplot(a$monthly, aes(month, events, colour = event_type)) + geom_line(linewidth = .8) +
-  scale_colour_manual(values = type_palette, name = NULL) +
-  scale_x_date(date_breaks = "1 year", date_labels = "%Y", expand = expansion(mult = c(.01,.02))) +
+monthly_plot <- ggplot(a$monthly, aes(month, events, colour = event_type)) +
+  geom_line(linewidth = .8) +
+  scale_colour_brewer(palette = "Dark2", name = NULL) +
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y",
+               expand = expansion(mult = c(.01, .02))) +
   scale_y_continuous(labels = scales::comma) +
-  labs(x = NULL, y = "Recorded events per month", title = "How the mix of violence changed",
+  labs(x = NULL, y = "Recorded events per month",
+       title = "How the mix of violence changed",
        subtitle = "Township-assigned records • January 2021–September 2025")
-save_plot(p, "monthly")
+ggsave("take-home-02/figures/monthly.png", monthly_plot,
+       width = 9, height = 5.5, dpi = 170, bg = "white")
 
 # ---- th02-distribution-plot ----
-pmap <- ggplot(towns) + geom_sf(aes(fill = events), colour = "white", linewidth = .06) +
-  geom_sf(data = states, fill = NA, colour = "#667779", linewidth = .2) +
-  scale_fill_gradientn(colours = c("#faf5e9", "#edb07d", "#ca5941", "#7c1732"),
-                       trans = "sqrt", breaks = c(0,100,500,1000,2000), name = "Events") +
-  coord_sf(datum = NA) + theme_void() + theme(legend.position = "bottom") + labs(title = "Recorded conflict by township")
-top <- towns %>% st_drop_geometry() %>% slice_max(events, n = 10) %>%
+count_map <- ggplot(towns) +
+  geom_sf(aes(fill = events), colour = "white", linewidth = .06) +
+  geom_sf(data = states, fill = NA, colour = "grey50", linewidth = .2) +
+  scale_fill_distiller(palette = "YlOrRd", direction = 1, trans = "sqrt",
+                       breaks = c(0, 100, 500, 1000), name = "Events") +
+  coord_sf(datum = NA) +
+  theme_void() +
+  theme(legend.position = "bottom") +
+  labs(title = "Recorded conflict by township")
+
+top <- towns %>%
+  st_drop_geometry() %>%
+  slice_max(events, n = 10) %>%
   mutate(label = paste0(TS, " · ", ST))
-pbar <- ggplot(top, aes(events, reorder(label, events))) + geom_col(fill = orange, width = .65) +
+
+count_bar <- ggplot(top, aes(events, reorder(label, events))) +
+  geom_col(fill = "steelblue", width = .65) +
   geom_text(aes(label = scales::comma(events)), hjust = -.15, size = 3.4) +
-  scale_x_continuous(expand = expansion(mult = c(0,.2)), labels = scales::comma) +
+  scale_x_continuous(expand = expansion(mult = c(0, .2)), labels = scales::comma) +
   labs(x = "Recorded events", y = NULL, title = "Ten highest counts") +
   theme(panel.grid.major.y = element_blank(), axis.text.y = element_text(size = 10))
-save_plot(pmap + pbar + plot_layout(widths = c(1,1.1)), "distribution", 10, 7)
+
+count_figure <- count_map + count_bar + plot_layout(widths = c(1, 1.1))
+ggsave("take-home-02/figures/distribution.png", count_figure,
+       width = 10, height = 7, dpi = 170, bg = "white")
 
 # ---- th02-local-plot ----
-local_map <- towns %>% left_join(a$local, by = "TS_PCODE")
-save_plot(map_plot(local_map, "lisa", "Local Moran’s I", "Clusters and outliers • permutation p < 0.05") +
-            map_plot(local_map, "gi_cluster", "Getis–Ord Gi*", "Hotspots and coldspots • permutation p < 0.05"),
-          "local-association", 10, 8)
+local_map <- towns %>%
+  left_join(a$local, by = "TS_PCODE") %>%
+  mutate(
+    lisa = factor(lisa, levels = c("High-high", "High-low", "Not significant",
+                                  "Low-high", "Low-low")),
+    gi_cluster = factor(gi_cluster, levels = gi_levels)
+  )
+
+lisa_map <- ggplot(local_map) +
+  geom_sf(aes(fill = lisa), colour = "white", linewidth = .07, show.legend = TRUE) +
+  geom_sf(data = states, fill = NA, colour = "grey50", linewidth = .2) +
+  scale_fill_brewer(palette = "RdBu", drop = FALSE, na.value = "grey70",
+                    labels = ~replace_na(.x, "No Queen neighbour"), name = NULL) +
+  guides(fill = guide_legend(ncol = 2, byrow = TRUE)) +
+  coord_sf(datum = NA) +
+  map_theme +
+  labs(title = "Local Moran’s I", subtitle = "Clusters and outliers • permutation p < 0.05")
+
+hotspot_map <- ggplot(local_map) +
+  geom_sf(aes(fill = gi_cluster), colour = "white", linewidth = .07) +
+  geom_sf(data = states, fill = NA, colour = "grey50", linewidth = .2) +
+  scale_fill_brewer(palette = "RdBu", drop = FALSE, na.value = "grey70",
+                    labels = ~replace_na(.x, "No Queen neighbour"), name = NULL) +
+  guides(fill = guide_legend(ncol = 2, byrow = TRUE)) +
+  coord_sf(datum = NA) +
+  map_theme +
+  labs(title = "Getis–Ord Gi*", subtitle = "Hotspots and coldspots • permutation p < 0.05")
+
+ggsave("take-home-02/figures/local-association.png", lisa_map + hotspot_map,
+       width = 10, height = 8, dpi = 170, bg = "white")
 
 # ---- th02-ehsa-plot ----
-ehsa_map <- towns %>% left_join(a$ehsa, by = "TS_PCODE")
-trend_map <- ehsa_map %>% mutate(trend = case_when(
-  is.na(trend_p) ~ "No shared-boundary neighbour", trend_p >= .05 ~ "Not significant",
-  tau > 0 ~ "Increasing Gi*", TRUE ~ "Decreasing Gi*"))
-palette <- c(palette, "Increasing Gi*" = "#b32f34", "Decreasing Gi*" = "#2875a2")
-save_plot(map_plot(trend_map, "trend", "Trend in space-time Gi*", "Mann–Kendall p < 0.05") +
-            map_plot(ehsa_map, "map_class", "How the hotspots changed", "EHSA classes shown where trend p < 0.05"),
-          "ehsa", 10, 8.2)
+ehsa_map <- towns %>%
+  left_join(a$ehsa, by = "TS_PCODE") %>%
+  mutate(trend = case_when(
+    is.na(trend_p) ~ NA_character_,
+    trend_p >= .05 ~ "Not significant",
+    tau > 0 ~ "Increasing Gi*",
+    TRUE ~ "Decreasing Gi*"
+  )) %>%
+  mutate(trend = factor(trend, levels = c("Increasing Gi*", "Not significant", "Decreasing Gi*")))
+
+trend_map <- ggplot(ehsa_map) +
+  geom_sf(aes(fill = trend), colour = "white", linewidth = .07) +
+  geom_sf(data = states, fill = NA, colour = "grey50", linewidth = .2) +
+  scale_fill_brewer(palette = "RdBu", drop = FALSE, na.value = "grey70",
+                    labels = ~replace_na(.x, "No Queen neighbour"), name = NULL) +
+  guides(fill = guide_legend(ncol = 2, byrow = TRUE)) +
+  coord_sf(datum = NA) +
+  map_theme +
+  labs(title = "Trend in space-time Gi*", subtitle = "Mann–Kendall p < 0.05")
+
+# Four coldspot classes use Blues; two hotspot classes use Reds.
+ehsa_levels <- c("Intensifying coldspot", "Consecutive coldspot", "Oscillating coldspot",
+                 "Sporadic coldspot", "Sporadic hotspot", "Oscillating hotspot",
+                 "No pattern detected", "Trend not significant", "No Queen neighbour")
+ehsa_map <- ehsa_map %>%
+  mutate(map_class = recode(map_class, "No shared-boundary neighbour" = "No Queen neighbour"),
+         map_class = factor(map_class, levels = ehsa_levels))
+
+pattern_map <- ggplot(ehsa_map) +
+  geom_sf(aes(fill = map_class), colour = "white", linewidth = .07) +
+  geom_sf(data = states, fill = NA, colour = "grey50", linewidth = .2) +
+  scale_fill_manual(
+    values = c(rev(brewer.pal(5, "Blues")[2:5]), brewer.pal(3, "Reds")[2:3],
+               "grey90", "grey90", "grey70"),
+    drop = FALSE, labels = ~str_wrap(.x, 18), name = NULL
+  ) +
+  guides(fill = guide_legend(ncol = 2, byrow = TRUE)) +
+  coord_sf(datum = NA) +
+  map_theme +
+  labs(title = "How the hotspots changed", subtitle = "EHSA classes shown where trend p < 0.05")
+
+ggsave("take-home-02/figures/ehsa.png", trend_map + pattern_map,
+       width = 10, height = 8.2, dpi = 170, bg = "white")
 
 # ---- th02-civilian-plot ----
-civil_map <- towns %>% left_join(a$civilian, by = "TS_PCODE")
-save_plot(map_plot(local_map, "gi_cluster", "All three conflict event types", "Same study period, boundaries and neighbours") +
-            map_plot(civil_map, "gi_cluster", "Events targeting civilians", "Subset of the same records • permutation p < 0.05"),
-          "civilian-hotspots", 10, 8)
+civil_map <- towns %>%
+  left_join(a$civilian, by = "TS_PCODE") %>%
+  mutate(gi_cluster = factor(gi_cluster, levels = gi_levels))
+
+civilian_hotspot_map <- ggplot(civil_map) +
+  geom_sf(aes(fill = gi_cluster), colour = "white", linewidth = .07) +
+  geom_sf(data = states, fill = NA, colour = "grey50", linewidth = .2) +
+  scale_fill_brewer(palette = "RdBu", drop = FALSE, na.value = "grey70",
+                    labels = ~replace_na(.x, "No Queen neighbour"), name = NULL) +
+  guides(fill = guide_legend(ncol = 2, byrow = TRUE)) +
+  coord_sf(datum = NA) +
+  map_theme +
+  labs(title = "Events targeting civilians", subtitle = "Subset of the same records • permutation p < 0.05")
+
+overall_hotspot_map <- hotspot_map +
+  labs(title = "All three conflict event types",
+       subtitle = "Same study period, boundaries and neighbours")
+
+ggsave("take-home-02/figures/civilian-hotspots.png", overall_hotspot_map + civilian_hotspot_map,
+       width = 10, height = 8, dpi = 170, bg = "white")
 
 # ---- th02-stories-plot ----
 # Select the highest count in each observed significant hotspot class (up to
 # two), alongside the highest-count township overall as a contrasting history.
-candidates <- ehsa_map %>% st_drop_geometry() %>%
+candidates <- ehsa_map %>%
+  st_drop_geometry() %>%
   filter(grepl("hotspot$", classification), trend_p < .05) %>%
-  arrange(desc(events)) %>% distinct(classification, .keep_all = TRUE) %>% slice_head(n = 2)
-candidates <- bind_rows(candidates, ehsa_map %>% st_drop_geometry() %>% slice_max(events, n = 1, with_ties = FALSE)) %>%
+  arrange(desc(events)) %>%
+  distinct(classification, .keep_all = TRUE) %>%
+  slice_head(n = 2)
+largest_township <- ehsa_map %>%
+  st_drop_geometry() %>%
+  slice_max(events, n = 1, with_ties = FALSE)
+candidates <- bind_rows(candidates, largest_township) %>%
   distinct(TS_PCODE, .keep_all = TRUE)
 stopifnot(nrow(candidates) == 3)
-case_series <- a$gi_series %>% inner_join(candidates %>% select(TS_PCODE, TS, ST, classification), by = "TS_PCODE") %>%
+case_series <- a$gi_series %>%
+  inner_join(select(candidates, TS_PCODE, TS, ST, classification), by = "TS_PCODE") %>%
   mutate(label = paste0(TS, " (", ST, ")\n", classification),
-         status = case_when(p >= .05 ~ "Not significant", gi > 0 ~ "Hotspot", TRUE ~ "Coldspot"))
-p1 <- ggplot(case_series, aes(month, events)) + geom_line(colour = ink, linewidth = .55) +
+         status = case_when(p >= .05 ~ "Not significant", gi > 0 ~ "Hotspot", TRUE ~ "Coldspot"),
+         status = factor(status, levels = gi_levels))
+p1 <- ggplot(case_series, aes(month, events)) +
+  geom_line(colour = "grey25", linewidth = .55) +
   facet_wrap(~label, ncol = 1, scales = "free_y") +
-  scale_x_date(date_breaks = "1 year", date_labels = "%Y") + labs(x = NULL, y = "Events / month", title = "Recorded events")
-p2 <- ggplot(case_series, aes(month, gi)) + geom_hline(yintercept = 0, colour = "#b5b5b5") +
-  geom_line(colour = "#647577", linewidth = .5) + geom_point(aes(colour = status), size = 1.5) +
-  facet_wrap(~label, ncol = 1, scales = "free_y") + scale_colour_manual(values = palette, name = NULL) +
-  scale_x_date(date_breaks = "1 year", date_labels = "%Y") + labs(x = NULL, y = "Space-time Gi*", title = "Neighbourhood concentration")
-save_plot(p1 + p2, "township-stories", 10, 8)
-write_csv(candidates %>% select(TS_PCODE, TS, ST, events, civilian, tau, trend_p, block_p, classification),
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
+  labs(x = NULL, y = "Events / month", title = "Recorded events")
+p2 <- ggplot(case_series, aes(month, gi)) +
+  geom_hline(yintercept = 0, colour = "grey70") +
+  geom_line(colour = "grey40", linewidth = .5) +
+  geom_point(aes(colour = status), size = 1.5) +
+  facet_wrap(~label, ncol = 1, scales = "free_y") +
+  scale_colour_brewer(palette = "RdBu", drop = FALSE, name = NULL) +
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
+  labs(x = NULL, y = "Space-time Gi*", title = "Neighbourhood concentration")
+ggsave("take-home-02/figures/township-stories.png", p1 + p2,
+       width = 10, height = 8, dpi = 170, bg = "white")
+write_csv(candidates %>%
+  select(TS_PCODE, TS, ST, events, civilian, tau, trend_p, block_p, classification),
           "data/take-home-02/derived/case-townships.csv")
 
 # ---- th02-explorer-code ----

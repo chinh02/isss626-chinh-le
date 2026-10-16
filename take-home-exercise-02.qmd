@@ -39,7 +39,9 @@ source("scripts/visualise-take-home-02.R", local = new.env(), encoding = "UTF-8"
 library(tidyverse)
 library(sf)
 a <- readRDS(result_path)
-town_results <- a$towns %>% st_drop_geometry() %>% left_join(a$local, by = "TS_PCODE") %>%
+town_results <- a$towns %>%
+  st_drop_geometry() %>%
+  left_join(a$local, by = "TS_PCODE") %>%
   left_join(a$ehsa, by = "TS_PCODE")
 cases <- read_csv("data/take-home-02/derived/case-townships.csv", show_col_types = FALSE)
 fmt <- function(x) format(round(x), big.mark = ",", scientific = FALSE, trim = TRUE)
@@ -172,7 +174,7 @@ January–September 2025 has **8,728 events**, compared with **9,961** in the sa
 
 ### Where the national decline came from {#recent-township-changes}
 
-I compare January to September in both years and map each township’s change, using the joins and choropleth mapping from [Hands-on 1](hands-on-exercise-01.qmd). Keeping the same months gives each year an equal observation period.
+I compare January to September in both years and map each township’s change. Keeping the same months gives each year an equal observation period.
 
 ```{r}
 #| label: th02-recent-counts
@@ -184,22 +186,29 @@ recent_counts <- a$cube %>%
   summarise(events = sum(events), civilian = sum(civilian), .groups = "drop") %>%
   pivot_wider(names_from = year, values_from = c(events, civilian))
 
-recent <- a$towns %>% st_drop_geometry() %>% as_tibble() %>%
-  select(TS_PCODE, TS, ST) %>% left_join(recent_counts, by = "TS_PCODE") %>%
+recent <- a$towns %>%
+  st_drop_geometry() %>%
+  as_tibble() %>%
+  select(TS_PCODE, TS, ST) %>%
+  left_join(recent_counts, by = "TS_PCODE") %>%
   mutate(change = events_2025 - events_2024,
          civilian_change = civilian_2025 - civilian_2024)
 ```
 
 ```{r}
 #| label: th02-recent-map
-change_map <- a$towns %>% select(TS_PCODE) %>% left_join(recent, by = "TS_PCODE")
+change_map <- a$towns %>%
+  select(TS_PCODE) %>%
+  left_join(recent, by = "TS_PCODE")
 change_limit <- ceiling(max(abs(recent$change)) / 50) * 50
 p_change_map <- ggplot(change_map) +
   geom_sf(aes(fill = change), colour = "white", linewidth = .08) +
-  scale_fill_gradient2(low = "#237b88", mid = "#f7f6f0", high = "#ba4937",
+  scale_fill_distiller(palette = "RdBu", direction = -1,
                        limits = c(-change_limit, change_limit),
                        breaks = c(-change_limit, 0, change_limit), name = "Change in events") +
-  coord_sf(datum = NA) + theme_void() + theme(legend.position = "bottom") +
+  coord_sf(datum = NA) +
+  theme_void() +
+  theme(legend.position = "bottom") +
   labs(title = "Where counts rose and fell")
 
 largest_changes <- bind_rows(
@@ -207,8 +216,9 @@ largest_changes <- bind_rows(
   slice_min(recent, change, n = 5, with_ties = FALSE)) %>%
   mutate(label = paste(TS, ST, sep = " · "))
 p_change_bar <- ggplot(largest_changes, aes(change, reorder(label, change))) +
-  geom_col(aes(fill = change > 0), width = .65, show.legend = FALSE) +
-  scale_fill_manual(values = c("FALSE" = "#237b88", "TRUE" = "#ba4937")) +
+  geom_col(aes(fill = change), width = .65, show.legend = FALSE) +
+  scale_fill_distiller(palette = "RdBu", direction = -1,
+                       limits = c(-change_limit, change_limit)) +
   geom_vline(xintercept = 0, colour = "grey55", linewidth = .3) +
   geom_text(aes(label = sprintf("%+d", change), hjust = if_else(change > 0, -.12, 1.12)),
             size = 3.3) +
@@ -221,7 +231,7 @@ ggsave("take-home-02/figures/recent-changes.png", change_figure,
        width = 11, height = 7, dpi = 170, bg = "white")
 ```
 
-![Changes in recorded events, comparing January to September 2024 with the same months of 2025. Orange indicates an increase; blue indicates a decrease.](take-home-02/figures/recent-changes.png)
+![Changes in recorded events, comparing January to September 2024 with the same months of 2025. Red indicates an increase; blue indicates a decrease.](take-home-02/figures/recent-changes.png)
 
 Counts rose in **`r sum(recent$change > 0)` townships**, fell in `r sum(recent$change < 0)`, and stayed the same in `r sum(recent$change == 0)`. The increases added `r fmt(sum(pmax(recent$change, 0)))` events; the decreases removed `r fmt(-sum(pmin(recent$change, 0)))`. Their difference produces the national fall of `r fmt(-sum(recent$change))`.
 
@@ -247,26 +257,31 @@ An incident count gives every event the same weight. I also compare reported fat
 
 ```{r}
 #| label: th02-fatality-counts
-fatality_counts <- a$towns %>% st_drop_geometry() %>% as_tibble() %>%
+fatality_counts <- a$towns %>%
+  st_drop_geometry() %>%
+  as_tibble() %>%
   select(TS_PCODE, TS, ST, events, fatalities) %>%
   mutate(event_rank = min_rank(desc(events)),
          fatality_rank = min_rank(desc(fatalities)))
-fatality_examples <- fatality_counts %>% filter(TS %in% c("Monywa", "Kale", "Maungdaw"))
+fatality_examples <- fatality_counts %>%
+  filter(TS %in% c("Monywa", "Kale", "Maungdaw"))
 ```
 
 ```{r}
 #| label: th02-fatality-plot
 p_death_map <- ggplot(a$towns) +
   geom_sf(aes(fill = fatalities), colour = "white", linewidth = .06) +
-  scale_fill_gradientn(colours = c("#faf5e9", "#edb07d", "#ca5941", "#7c1732"),
+  scale_fill_distiller(palette = "YlOrRd", direction = 1,
                        trans = "sqrt", breaks = c(0, 500, 1800), labels = scales::comma,
                        name = "Reported deaths") +
   guides(fill = guide_colourbar(title.position = "top", barwidth = grid::unit(4.5, "cm"))) +
-  coord_sf(datum = NA) + theme_void() + theme(legend.position = "bottom") +
+  coord_sf(datum = NA) +
+  theme_void() +
+  theme(legend.position = "bottom") +
   labs(title = "Where deaths were reported")
 p_death_comparison <- ggplot(fatality_counts, aes(events, fatalities)) +
-  geom_point(colour = "#a4b1b5", size = 1.8, alpha = .6) +
-  geom_point(data = fatality_examples, colour = "#ba4937", size = 3) +
+  geom_point(colour = "grey65", size = 1.8, alpha = .6) +
+  geom_point(data = fatality_examples, colour = "firebrick", size = 3) +
   geom_text(data = fatality_examples, aes(label = TS), hjust = 1.1, vjust = -.7, size = 3.5) +
   scale_x_continuous(labels = scales::comma, expand = expansion(mult = c(.03, .12))) +
   scale_y_continuous(labels = scales::comma, expand = expansion(mult = c(.03, .12))) +
@@ -334,7 +349,7 @@ Both tests use 999 conditional permutations: counts are shuffled among other tow
 ```
 
 ```{r}
-#| label: th02-map-helper
+#| label: th02-map-style
 #| eval: false
 ```
 
@@ -349,13 +364,25 @@ Local Moran’s I identifies **38 high–high townships, 52 low–low townships 
 
 **Sagaing has 18 Gi* hotspots, Mandalay seven and Magway six.** Both methods point to central Myanmar, though their different tests give slightly different low-count classifications.
 
+Of the **53 Gi* coldspots**, 13 are in Ayeyarwady, 11 in Yangon and ten in Shan (East). These neighbourhoods have relatively low recorded counts across the full study period. Local Moran’s I places most low–low clusters in the same areas.
+
 Kawkareik ranks second with **946 events**, yet its whole-period Gi* result is not significant. Much of its increase came late in the study.
 
 ```{r}
 #| label: th02-local-counts
-bind_rows(a$local %>% count(lisa, name = "Townships") %>% rename(Result = lisa) %>% mutate(Method = "Local Moran’s I"),
-          a$local %>% count(gi_cluster, name = "Townships") %>% rename(Result = gi_cluster) %>% mutate(Method = "Gi*")) %>%
-  select(Method, Result, Townships) %>% knitr::kable()
+lisa_counts <- a$local %>%
+  count(lisa, name = "Townships") %>%
+  rename(Result = lisa) %>%
+  mutate(Method = "Local Moran’s I")
+
+hotspot_counts <- a$local %>%
+  count(gi_cluster, name = "Townships") %>%
+  rename(Result = gi_cluster) %>%
+  mutate(Method = "Gi*")
+
+bind_rows(lisa_counts, hotspot_counts) %>%
+  select(Method, Result, Townships) %>%
+  knitr::kable()
 ```
 
 ### Which hotspots survive stricter checks? {#how-much-do-the-choices-matter}
@@ -374,7 +401,8 @@ tibble(Check = c("Queen neighbours", "Queen neighbours, multiple-test adjustment
        Hotspots = c(sum(hot), sum(hot & a$local$gi_q < .05, na.rm = TRUE),
                     sum(a$comparison$knn6[valid] == "Hotspot"), sum(a$comparison$precise_only == "Hotspot")),
        Coldspots = c(sum(a$local$gi_cluster == "Coldspot"), sum(a$local$gi_cluster == "Coldspot" & a$local$gi_q < .05, na.rm = TRUE),
-                     sum(a$comparison$knn6[valid] == "Coldspot"), sum(a$comparison$precise_only == "Coldspot"))) %>% knitr::kable()
+                     sum(a$comparison$knn6[valid] == "Coldspot"), sum(a$comparison$precise_only == "Coldspot"))) %>%
+  knitr::kable()
 ```
 
 The multiple-test adjustment reduces the hotspot count from **38 to 19**. I therefore treat the wider unadjusted hotspot map as exploratory. Across the 327 townships with Queen neighbours, the hotspot/coldspot/non-significant classifications agree in **87.2%** of cases with six-nearest neighbours and **91.7%** when only more precise locations are retained.
@@ -383,7 +411,7 @@ The broad pattern holds, though individual labels change and six-nearest neighbo
 
 ### Some increases sit among declining neighbours {#changes-and-neighbours}
 
-I apply the spatial lag from [Hands-on 4](hands-on-exercise-04.qmd#spatial-lag-with-row-standardized-weights) to the recent changes. Each township is compared with the average change among its Queen neighbours, excluding itself. The three island townships remain outside this comparison. The permutation test follows [Hands-on 5](hands-on-exercise-05.qmd).
+Each township’s recent change is compared with the average change among its Queen neighbours, excluding itself. The three island townships remain outside this comparison.
 
 ```{r}
 #| label: th02-change-lag
@@ -401,7 +429,8 @@ change_moran <- moran.mc(recent$change[has_neighbours],
 
 ```{r}
 #| label: th02-change-lag-plot
-neighbour_changes <- recent %>% filter(!is.na(neighbour_change)) %>%
+neighbour_changes <- recent %>%
+  filter(!is.na(neighbour_change)) %>%
   mutate(direction = case_when(
     change > 0 & neighbour_change > 0 ~ "Both increased",
     change > 0 & neighbour_change < 0 ~ "Township up, neighbours down",
@@ -414,9 +443,7 @@ p_change_lag <- ggplot(neighbour_changes, aes(change, neighbour_change)) +
   geom_point(aes(colour = direction), size = 2.1, alpha = .7) +
   geom_text(data = filter(neighbour_changes, TS %in% c("Kyaukpyu", "Kawkareik", "Nawnghkio")),
             aes(label = TS), hjust = 1.08, vjust = -.6, size = 3.4) +
-  scale_colour_manual(values = c("Both increased" = "#ba4937",
-    "Township up, neighbours down" = "#b77b16", "Township down, neighbours up" = "#8868a2",
-    "Both decreased" = "#237b88", "One or both unchanged" = "#929b9e"), name = NULL) +
+  scale_colour_brewer(palette = "Dark2", name = NULL) +
   labs(x = "Change in the township’s count", y = "Average change among its neighbours",
        title = "Township changes and their surroundings",
        subtitle = "January to September 2025 compared with the same months of 2024") +
@@ -452,9 +479,10 @@ period_hotspots <- purrr::map_dfr(2024:2025, function(year) {
            status = case_when(is.na(p) ~ "No Queen neighbour",
                               hot ~ "Hotspot", TRUE ~ "Not a hotspot"))
 })
-hotspot_changes <- period_hotspots %>% select(TS_PCODE, year, hot, hot_adjusted) %>%
+hotspot_changes <- period_hotspots %>%
+  select(TS_PCODE, year, hot, hot_adjusted) %>%
   pivot_wider(names_from = year, values_from = c(hot, hot_adjusted)) %>%
-  left_join(recent %>% select(TS_PCODE, TS, ST), by = "TS_PCODE") %>%
+  left_join(select(recent, TS_PCODE, TS, ST), by = "TS_PCODE") %>%
   mutate(change = case_when(
     is.na(hot_2024) ~ "No Queen neighbour",
     hot_2024 & hot_2025 ~ "Hotspot in both periods",
@@ -465,21 +493,24 @@ hotspot_changes <- period_hotspots %>% select(TS_PCODE, year, hot, hot_adjusted)
 
 ```{r}
 #| label: th02-period-hotspot-maps
-period_map <- a$towns %>% select(TS_PCODE) %>%
+period_map <- a$towns %>%
+  select(TS_PCODE) %>%
   left_join(period_hotspots, by = "TS_PCODE") %>%
   group_by(year) %>%
   mutate(period = paste0(year, ": ", sum(hot, na.rm = TRUE), " hotspots"),
          status = factor(status, levels = c("Hotspot", "Not a hotspot", "No Queen neighbour")))
 period_map <- ungroup(period_map)
-kawkareik_point <- a$towns %>% filter(TS == "Kawkareik") %>% st_point_on_surface()
+kawkareik_point <- a$towns %>%
+  filter(TS == "Kawkareik") %>%
+  st_point_on_surface()
 p_periods <- ggplot(period_map) +
   geom_sf(aes(fill = status), colour = "white", linewidth = .08) +
-  geom_sf(data = kawkareik_point, shape = 21, fill = "white", colour = "#17333d", size = 2) +
+  geom_sf(data = kawkareik_point, shape = 21, fill = "white", colour = "grey20", size = 2) +
   geom_sf_text(data = kawkareik_point, aes(label = TS), nudge_x = -45000,
-               hjust = 1, size = 3.2, colour = "#17333d") +
+               hjust = 1, size = 3.2, colour = "grey20") +
   facet_wrap(~period, nrow = 1) +
-  scale_fill_manual(values = c("Hotspot" = "#ba4937", "Not a hotspot" = "#e7e7e5",
-                               "No Queen neighbour" = "#a4b1b5"), drop = FALSE, name = NULL) +
+  scale_fill_manual(values = c(RColorBrewer::brewer.pal(3, "Reds")[3], "grey90", "grey70"),
+                    drop = FALSE, name = NULL) +
   coord_sf(datum = NA) + theme_void(base_size = 12) +
   theme(legend.position = "bottom", strip.text = element_text(face = "bold", size = 12)) +
   labs(title = "Hotspots around Kawkareik become clearer in 2025",
@@ -552,14 +583,26 @@ The full classification finds **26 oscillating hotspots and eight sporadic hotsp
 
 The September 2025 endpoint affects the labels. Earlier hot months can still end in “No pattern detected” if the final-month rules are not met, as Monywa shows below.
 
-Following the handout, the map shows **Mann–Kendall p < 0.05**. The table also includes classifications without a significant trend, which this filter hides.
+Following the handout, the map shows **Mann–Kendall p < 0.05**.
+
+### Coldspots also changed through time
+
+The table includes all classifications, including those without a significant trend.
 
 ```{r}
 #| label: th02-ehsa-counts
-a$ehsa %>% group_by(classification) %>%
+a$ehsa %>%
+  group_by(classification) %>%
   summarise(`All townships` = n(), `Trend p < 0.05` = sum(trend_p < .05, na.rm = TRUE), .groups = "drop") %>%
-  rename(Pattern = classification) %>% knitr::kable()
+  rename(Pattern = classification) %>%
+  knitr::kable()
 ```
+
+- **53 sporadic coldspots** include 20 in Yangon and 11 in Ayeyarwady. They were cold on and off, ended cold, and had no significant hot months.
+- **12 persistent coldspots**, including 11 in Shan, were cold in at least 90% of months without a significant trend. The trend filter leaves them off the map above.
+- **Matman, Mongping and Mongyawng are intensifying coldspots.** Their already low neighbourhood counts became more unusual relative to the whole study period as Gi* fell.
+- **Kutkai is a consecutive coldspot:** its only two cold months came at the end, in August and September 2025.
+- **Lashio, Tangyan and Laukkaing are oscillating coldspots.** They ended cold after earlier hot months. Only Laukkaing has a significant trend and appears in the map.
 
 ### Three townships, three different histories {#a-closer-look-at-contrasting-townships}
 
@@ -657,17 +700,11 @@ For aid organisations, I would use the findings to narrow down these follow-up c
 
 The event records end in September 2025. Update them and confirm current needs with local aid groups before acting on this shortlist.
 
-### Questions for further study {#further-study}
+### Further study {#further-study}
 
-The results leave a few explanations to test:
+Further study could follow Kyaukpyu and nearby townships month by month to see whether their rises and falls line up, while checking for changes in reporting. Comparing townships with similar totals could also reveal different patterns of violence and civilian targeting.
 
-| Question | How I would explore it |
-|---|---|
-| Did Kyaukpyu’s increase follow declines nearby? | Use monthly comparisons from [Hands-on 3](hands-on-exercise-03.qmd) and neighbour averages from [Hands-on 4](hands-on-exercise-04.qmd). Check whether the timing and event types fit a shift within Rakhine, and whether reporting sources changed. |
-| Do townships with similar totals have different conflict histories? | Use the standardisation and hierarchical clustering from [Hands-on 6](hands-on-exercise-06.qmd) to group townships by event frequency, civilian-targeting share and recent change. Check whether the groups remain similar when the number of clusters changes; interpret them from their measured profiles. |
-| Are communities with rising civilian targeting also hard to reach with aid? | Apply the accessibility methods from [Hands-on 7](hands-on-exercise-07.qmd) after adding facility locations, service capacity, population or displacement estimates, and usable travel times for the same period. Compare high conflict counts with low access to services. |
-
-The first two can start with the existing records. The accessibility question needs service and travel data before it can be tested.
+Another useful step would be to compare rising civilian targeting with access to clinics and aid. This would need information on available services and travel times to identify communities facing both violence and difficulty getting help.
 
 ### Limits of these maps
 

@@ -38,6 +38,8 @@ civ_hot <- a$civilian$gi_cluster == "Hotspot"
 
 The study follows **53,805 conflict events across 330 Myanmar townships over 57 months**.
 
+It covers battles, explosions/remote violence and violence against civilians, using monthly township counts.
+
 - Local Moran’s I identifies clusters and outliers.
 - Gi* identifies hotspots and coldspots.
 - Mann–Kendall and EHSA examine their changes through time.
@@ -76,11 +78,9 @@ Reported estimates across retained conflict events, including combatant deaths. 
 ![](take-home-02/figures/local-association.png){height=570 alt="Local Moran’s I and Gi-star results."}
 :::
 ::: {.column width="33%"}
-Gi* identifies **38 hotspots**:
+Gi* identifies **38 hotspots**: 18 in Sagaing, seven in Mandalay and six in Magway.
 
-- 18 in Sagaing;
-- seven in Mandalay;
-- six in Magway.
+Its **53 coldspots** include 13 in Ayeyarwady, 11 in Yangon and ten in Shan (East).
 
 Local Moran’s I finds 38 high–high clusters, 52 low–low clusters and four low–high outliers.
 
@@ -97,11 +97,11 @@ Queen neighbours; 999 permutations; p < 0.05. Grey means no significant result.
 ![](take-home-02/figures/ehsa.png){height=570 alt="Mann–Kendall trends and emerging hotspot patterns."}
 :::
 ::: {.column width="33%"}
-The full EHSA classification finds **26 oscillating** and **eight sporadic hotspots**.
+EHSA finds **26 oscillating** and **eight sporadic hotspots**. Of these, 23 pass the trend test and appear here, alongside 42 coldspots with significant trends.
 
-Of these, 23 also have significant trends and appear here.
+**Kawkareik and Nawnghkio** show rising neighbourhood concentrations.
 
-An area can have many earlier hot months without being a hotspot at the September 2025 endpoint.
+Monywa was hot throughout 2022–2024 but misses the September 2025 threshold. Its earlier concentration still warrants follow-up.
 
 ::: {.small-note}
 Current and preceding month; whole-cube Gi* reference. Map restricted to trend p < 0.05.
@@ -113,7 +113,7 @@ Current and preceding month; whole-cube Gi* reference. Map restricted to trend p
 
 ![](take-home-02/figures/hotspots-two-periods.png){height=440 alt="Gi-star hotspots in matched January to September periods of 2024 and 2025."}
 
-Five of the seven 2025-only hotspots border Kawkareik. Hlaingbwe rises from **one to 41 events** and retains its hotspot status after the multiple-test adjustment.
+Hotspots fall from **27 to 18** between the matched periods. Five of the seven 2025-only hotspots border Kawkareik. Hlaingbwe rises from **one to 41 events** and remains a 2025-only hotspot after the multiple-test adjustment.
 
 ::: {.small-note}
 Same months and Queen neighbours; 9,999 permutations. A change in classification is not a direct test of change between years.
