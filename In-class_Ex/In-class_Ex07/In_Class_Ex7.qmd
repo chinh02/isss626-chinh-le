@@ -27,9 +27,7 @@ execute:
 ## Getting Started
 
 ```{r echo=TRUE, eval=TRUE}
-pacman::p_load(tmap, SpatialAcc, catchment, sf, 
-               ggstatsplot, reshape2,
-               tidyverse)
+pacman::p_load(sf, tidyverse, tmap, accessibility, catchment)
 ```
 
 ## Geospatial Data Wrangling
@@ -37,43 +35,91 @@ pacman::p_load(tmap, SpatialAcc, catchment, sf,
 ### Importing geospatial data
 
 ```{r echo=TRUE, eval=TRUE}
-mpsz <- st_read(dsn = "data/geospatial", layer = "MP14_SUBZONE_NO_SEA_PL")
-hexagons <- st_read(dsn = "data/geospatial", layer = "hexagons") 
-eldercare <- st_read(dsn = "data/geospatial", layer = "ELDERCARE") 
-```
-
-### Updating CRS information
-
-```{r, echo=TRUE, eval=TRUE}
-mpsz <- st_transform(mpsz, 3414)
-eldercare <- st_transform(eldercare, 3414)
-hexagons <- st_transform(hexagons, 3414)
+mpsz <- st_read(dsn = "data/geospatial", 
+                layer = "MP14_SUBZONE_NO_SEA_PL") %>%
+  st_transform(crs = 3414)
 ```
 
 ```{r echo=TRUE, eval=TRUE}
-st_crs(mpsz)
+hexagons <- st_read(dsn = "data/geospatial", 
+                    layer = "hexagons") %>%
+  st_transform(crs = 3414)
+```
+
+```{r echo=TRUE, eval=TRUE}
+eldercare <- st_read(dsn = "data/geospatial", 
+                     layer = "ELDERCARE") %>%
+  st_transform(crs = 3414)
+```
+
+```{r echo=TRUE, eval=TRUE}
+ODMatrix <- read_csv("data/aspatial/OD_Matrix.csv", skip = 0)
 ```
 
 ### Cleaning and updating attribute fields of the geospatial data
 
 ```{r}
 eldercare <- eldercare %>%
-  select(fid, ADDRESSPOS) %>%
+  select(fid) %>%
   mutate(capacity = 100)
 ```
 
 ```{r}
 hexagons <- hexagons %>%
   select(fid) %>%
-  mutate(demand = 100)
+  mutate(demand = 100) %>%
+  rename(id = fid)
 ```
 
 ## Apsaital Data Handling and Wrangling
 
 ### Importing Distance Matrix
 
-```{r message=FALSE}
-ODMatrix <- read_csv("data/aspatial/OD_Matrix.csv", skip = 0)
+```{r}
+ODMatrix_tidied <- ODMatrix %>%
+  select(origin_id, destination_id, total_cost) %>%
+  rename(from_id = origin_id,
+         to_id = destination_id,
+         dist = total_cost)
+```
+
+```{r}
+dist2closest <- cost_to_closest(
+  travel_matrix = ODMatrix_tidied,
+  land_use_data = hexagons,
+  opportunity = "demand",
+  travel_cost = "dist",
+  n = 1,
+  group_by = character(0),
+  active = TRUE,
+  fill_missing_ids = TRUE
+)
+```
+
+```{r}
+hex_acc <- hexagons %>%
+  left_join(dist2closest) %>%
+  rename(dist2closest = dist)
+```
+
+```{r}
+mapex <- st_bbox(hex_acc)
+tm_shape(hex_acc,
+         bbox = mapex) + 
+  tm_polygons(fill = "dist2closest", 
+              fill.scale = tm_scale_intervals(
+                style = "quantile",
+                n = 10,
+                values = "-brewer.blues")) +
+tm_shape(eldercare) +
+  tm_dots(size = 0.3,
+          fill = "red",
+          col = "black") +
+  tm_title("Accessibility to the closest eldercare") +
+  tm_layout(frame = TRUE) +
+  tm_compass(type="8star", size = 2) +
+  tm_scalebar() +
+  tm_grid(alpha = 0.2)
 ```
 
 ### Tidying distance matrix
@@ -83,9 +129,7 @@ distmat <- ODMatrix %>%
   select(origin_id, destination_id, total_cost) %>%
   spread(destination_id, total_cost)%>%
   select(c(-c('origin_id')))
-```
 
-```{r}
 distmat_km <- as.matrix(distmat/1000)
 ```
 
@@ -102,14 +146,10 @@ df_2sfca <- catchment_ratio(
 
 ### Mapping 2SFCA
 ```{r}
-mapex <- st_bbox(hexagons)
-```
-
-```{r}
 hex_2SFCA <- bind_cols(hexagons, df_2sfca)
 tm_shape(hex_2SFCA,
-         bbox = mapex) +
-  tm_polygons(fill = "2SFCA",
+         bbox = mapex) + 
+  tm_polygons(fill = "2SFCA", 
               fill.scale = tm_scale_intervals(
                 style = "quantile",
                 n = 10,
@@ -118,42 +158,135 @@ tm_shape(eldercare) +
   tm_dots(size = 0.3,
           fill = "red",
           col = "black") +
-  tm_title("2SFCA Accessibility measures")+
+  tm_title("2SFCA Accessibility measures") +
   tm_layout(frame = TRUE) + 
-  tm_compass(type="8star", size=2) +
+  tm_compass(type="8star", size = 2) +
   tm_scalebar() +
   tm_grid(alpha = 0.2)
 ```
 
 ### Enhanced 2-step Floating Catchment 
 ```{r}
-step_weights <- list(c(5, .01), c(4, .05), c(3, .1), c(2, .4), c(1,1))
+step_weights <- list(c(5, .01), c(4, .05), c(3, .1), c(2, .4), c(1, 1))
 df_e2sfca <- catchment_ratio(
-  consumers = hexagons$demand,
+  consumers = hexagons$demand, 
   providers = eldercare$capacity,
   cost = distmat_km,
   weight = step_weights) %>%
   as.data.frame() %>%
-  rename("E2SFCA"=".")
+  rename("E2SFCA" = ".")
 ```
+
+```{r}
+hex_E2SFCA <- bind_cols(hexagons, df_e2sfca) 
+tm_shape(hex_E2SFCA,
+         bbox = mapex) + 
+  tm_polygons(fill = "E2SFCA", 
+              fill.scale = tm_scale_intervals(
+                style = "quantile",
+                n = 10,
+                values = "-brewer.blues")) +
+tm_shape(eldercare) +
+  tm_dots(size = 0.3,
+          fill = "red",
+          col = "black") +
+  tm_title("E2SFCA Accessibility measures") +
+  tm_layout(frame = TRUE) +
+  tm_compass(type="8star", size = 2) +
+  tm_scalebar() +
+  tm_grid(alpha = 0.2)
+```
+
 ### Kernel Density 2-step Floating Catchment Area
 ```{r}
 df_kd2sfca <- catchment_ratio(
-  consumers = hexagons$demand,
+  consumers = hexagons$demand, 
   providers = eldercare$capacity,
   cost = distmat_km,
   weight = "gaussian") %>%
   as.data.frame() %>%
-  rename("KD2SFCA"=".")
+  rename("KD2SFCA" = ".")
 ```
+
+```{r}
+hex_KD2SFCA <- bind_cols(hexagons, df_kd2sfca) 
+tm_shape(hex_KD2SFCA,
+         bbox = mapex) + 
+  tm_polygons(fill = "KD2SFCA", 
+              fill.scale = tm_scale_intervals(
+                style = "quantile",
+                n = 10,
+                values = "-brewer.blues")) +
+tm_shape(eldercare) +
+  tm_dots(size = 0.3,
+          fill = "red",
+          col = "black") +
+  tm_title("KDSFCA Accessibility measures") +
+  tm_layout(frame = TRUE) +
+  tm_compass(type="8star", size = 2) +
+  tm_scalebar() +
+  tm_grid(alpha = 0.2)
+```
+
 ### 3-step Floating Catchment Area
 ```{r}
 df_3sfca <- catchment_ratio(
-  consumers = hexagons$demand,
+  consumers = hexagons$demand, 
   providers = eldercare$capacity,
   cost = distmat_km,
-  step_weights,
+  step_weights, 
   normalize_weight = TRUE) %>%
   as.data.frame() %>%
-  rename("3SFCA"=".")
+  rename("3SFCA" = ".")
+```
+
+```{r}
+hex_3SFCA <- bind_cols(hexagons, df_3sfca) 
+tm_shape(hex_3SFCA,
+         bbox = mapex) + 
+  tm_polygons(fill = "3SFCA", 
+              fill.scale = tm_scale_intervals(
+                style = "quantile",
+                n = 10,
+                values = "-brewer.blues")) +
+tm_shape(eldercare) +
+  tm_dots(size = 0.3,
+          fill = "red",
+          col = "black") +
+  tm_title("3SFCA Accessibility measures") +
+  tm_layout(frame = TRUE) +
+  tm_compass(type="8star", size = 2) +
+  tm_scalebar() +
+  tm_grid(alpha = 0.2)
+```
+
+```{r}
+df_m2sfca <- catchment_ratio(
+  consumers = hexagons$demand, 
+  providers = eldercare$capacity,
+  cost = distmat_km,
+  step_weights, 
+  adjust_providers = function(w) w^2) %>%
+  as.data.frame() %>%
+  rename("M2SFCA" = ".")
+```
+
+```{r}
+hex_M2SFCA <- bind_cols(hexagons, df_m2sfca) 
+tm_shape(hex_M2SFCA,
+         bbox = mapex) + 
+  tm_polygons(fill = "M2SFCA", 
+              fill.scale = tm_scale_intervals(
+                style = "quantile",
+                n = 10,
+                values = "-brewer.blues")) +
+tm_shape(eldercare) +
+  tm_dots(size = 0.3,
+          fill = "red",
+          col = "black") +
+  tm_title("M2SFCA Accessibility measures") +
+  tm_layout(frame = TRUE) +
+  tm_compass(type="8star", size = 2) +
+  tm_scalebar() +
+  tm_grid(alpha = 0.2)
 ```
