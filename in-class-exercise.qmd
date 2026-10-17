@@ -42,6 +42,14 @@ Tracing how GDP per capita hot and cold spots changed across Hunan from 2005 to 
 
 [View exercise →](In-class_Ex/In-class_Ex06/In_Class_Ex6.qmd){.section-link}
 :::
+
+::: {.exercise-entry}
+<span>07</span>
+
+## Modelling Geographical Accessibility
+
+[View exercise →](In-class_Ex/In-class_Ex07/In_Class_Ex7.qmd){.section-link}
+:::
 :::
 
 [← Back to home](index.qmd){.back-link}
