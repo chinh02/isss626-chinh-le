@@ -28,34 +28,53 @@ if (!file.exists(csv) && file.exists(archive)) unzip(archive, exdir = dirname(cs
 stopifnot(file.exists(csv))
 raw <- read_csv(csv, col_types = cols(.default = col_character()), show_col_types = FALSE)
 stopifnot(nrow(problems(raw)) == 0, !anyDuplicated(raw$event_id_cnty))
-raw <- raw %>% mutate(event_date = as.Date(event_date),
-                      across(c(latitude, longitude, fatalities, geo_precision), as.numeric))
+raw <- raw %>%
+  mutate(event_date = as.Date(event_date),
+         across(c(latitude, longitude, fatalities, geo_precision), as.numeric))
 stopifnot(!anyNA(raw$event_date), !anyNA(raw$fatalities), all(raw$fatalities >= 0))
+# ---- th02-boundaries ----
 towns <- st_read(file.path(base, "raw/geospatial/mmr_polbnda_adm3_250k_mimu_1.shp"),
                  quiet = TRUE, options = "ENCODING=UTF-8") %>% arrange(TS_PCODE)
 stopifnot(nrow(towns) == 330, !anyDuplicated(towns$TS_PCODE),
           all(towns$PCode_V == 9.4), all(st_is_valid(towns)))
-# ---- th02-filter ----
+# ---- th02-township-key ----
 normalise <- function(x) gsub("[^a-z0-9]", "", tolower(x))
 town_key <- paste(normalise(towns$ST), normalise(towns$TS))
 stopifnot(!anyDuplicated(town_key))
+# ---- th02-filter ----
 core_types <- c("Battles", "Explosions/Remote violence", "Violence against civilians")
-core <- raw %>% filter(country == "Myanmar", event_date >= as.Date("2021-01-01"),
-                       event_date <= as.Date("2025-09-30"), event_type %in% core_types)
+core <- raw %>%
+  filter(
+    country == "Myanmar",
+    event_date >= as.Date("2021-01-01"),
+    event_date <= as.Date("2025-09-30"),
+    event_type %in% core_types
+  )
+# ---- th02-match-townships ----
 # One spelling alias, checked against the four corresponding coordinate matches.
-core <- core %>% mutate(town_name = if_else(admin3 == "Pangsang", "Pangsang (Panghkam)", admin3),
-                        town_index = match(paste(normalise(admin1), normalise(town_name)), town_key),
-                        exclusion = case_when(
-                          is.na(admin3) | trimws(admin3) == "" ~ "No named township",
-                          geo_precision == 3 ~ "Location only known to a wider area",
-                          is.na(town_index) ~ "Township name could not be matched",
-                          TRUE ~ "Retained"))
+core <- core %>%
+  mutate(
+    town_name = if_else(admin3 == "Pangsang", "Pangsang (Panghkam)", admin3),
+    town_index = match(paste(normalise(admin1), normalise(town_name)), town_key),
+    exclusion = case_when(
+      is.na(admin3) | trimws(admin3) == "" ~ "No named township",
+      geo_precision == 3 ~ "Location only known to a wider area",
+      is.na(town_index) ~ "Township name could not be matched",
+      TRUE ~ "Retained"
+    )
+  )
+# ---- th02-location-audit ----
 audit <- core %>% select(event_id_cnty, event_date, admin1, admin3, geo_precision,
                          latitude, longitude, town_index, exclusion)
 write_csv(audit, file.path(out, "location-audit.csv"))
-events <- core %>% filter(exclusion == "Retained") %>%
-  mutate(TS_PCODE = towns$TS_PCODE[town_index], month = as.Date(format(event_date, "%Y-%m-01")),
-         civilian = !is.na(civilian_targeting) & civilian_targeting == "Civilian targeting")
+# ---- th02-retain-events ----
+events <- core %>%
+  filter(exclusion == "Retained") %>%
+  mutate(
+    TS_PCODE = towns$TS_PCODE[town_index],
+    month = as.Date(format(event_date, "%Y-%m-01")),
+    civilian = !is.na(civilian_targeting) & civilian_targeting == "Civilian targeting"
+  )
 # ---- th02-coordinates ----
 # Use recorded township names for coastal and boundary cases; do not snap points.
 coord_key <- paste(events$longitude, events$latitude)
@@ -68,18 +87,23 @@ write_csv(events[!coord_match, ] %>% select(event_id_cnty, admin1, admin3, longi
           file.path(out, "coordinate-disagreements.csv"))
 
 # ---- th02-cube ----
-counts <- events %>% group_by(TS_PCODE, month) %>%
+counts <- events %>%
+  group_by(TS_PCODE, month) %>%
   summarise(events = n(), civilian = sum(civilian), fatalities = sum(fatalities), .groups = "drop")
+# ---- th02-fill-months ----
 cube_data <- expand_grid(month = months, TS_PCODE = towns$TS_PCODE) %>%
   left_join(counts, by = c("TS_PCODE", "month")) %>%
   mutate(across(c(events, civilian, fatalities), ~replace_na(.x, 0L)))
+# ---- th02-cube-checks ----
 cube <- sfdep::spacetime(cube_data, towns, .loc_col = "TS_PCODE", .time_col = "month")
 stopifnot(sfdep::is_spacetime_cube(cube), nrow(cube_data) == 330 * 57,
           sum(cube_data$events) == nrow(events), !anyNA(cube_data),
           identical(cube_data$TS_PCODE, rep(towns$TS_PCODE, length(months))))
 saveRDS(cube, file.path(out, "space-time-cube.rds"))
 write_csv(cube_data, file.path(out, "township-month-counts.csv"))
-totals <- cube_data %>% group_by(TS_PCODE) %>%
+# ---- th02-township-totals ----
+totals <- cube_data %>%
+  group_by(TS_PCODE) %>%
   summarise(across(c(events, civilian, fatalities), sum), .groups = "drop")
 towns <- towns %>% left_join(totals, by = "TS_PCODE") %>% st_transform(projection)
 
@@ -90,7 +114,7 @@ supported <- card(nb) > 0
 lw <- nb2listw(nb, style = "W", zero.policy = TRUE)
 nb_star <- include.self(nb)
 lw_star <- nb2listw(nb_star, style = "W", zero.policy = TRUE)
-# ---- th02-local-tests ----
+# ---- th02-lisa-labels ----
 class_lisa <- function(x, lag, p) case_when(
   is.na(p) ~ "No shared-boundary neighbour",
   p >= alpha ~ "Not significant",
@@ -98,19 +122,28 @@ class_lisa <- function(x, lag, p) case_when(
   x > mean(x) & lag <= mean(x) ~ "High-low",
   x <= mean(x) & lag > mean(x) ~ "Low-high",
   TRUE ~ "Low-low")
+# ---- th02-gi-test ----
 gi_test <- function(x, listw, tested, random_seed) {
   g <- localG_perm(x, listw, nsim = nsim, alternative = "two.sided",
                   iseed = random_seed, zero.policy = TRUE, no_repeat_in_row = TRUE)
   p <- attr(g, "internals")[, "Pr(z != E(Gi)) Sim"]
   p[!tested] <- NA_real_
-  tibble(gi = as.numeric(g), p = p, q = p.adjust(p, "BH"),
-         cluster = case_when(is.na(p) ~ "No shared-boundary neighbour", p >= alpha ~ "Not significant",
-                             as.numeric(g) > 0 ~ "Hotspot", TRUE ~ "Coldspot"))
+  tibble(
+    gi = as.numeric(g), p = p, q = p.adjust(p, "BH"),
+    cluster = case_when(
+      is.na(p) ~ "No shared-boundary neighbour",
+      p >= alpha ~ "Not significant",
+      as.numeric(g) > 0 ~ "Hotspot",
+      TRUE ~ "Coldspot"
+    )
+  )
 }
+# ---- th02-local-tests ----
 local_results <- function(x, random_seed) {
   m <- localmoran_perm(x, lw, nsim = nsim, alternative = "two.sided", iseed = random_seed,
                        zero.policy = TRUE, no_repeat_in_row = TRUE)
-  p <- m[, "Pr(z != E(Ii)) Sim"]; p[!supported] <- NA_real_
+  p <- m[, "Pr(z != E(Ii)) Sim"]
+  p[!supported] <- NA_real_
   lag <- lag.listw(lw, x, zero.policy = TRUE)
   g <- gi_test(x, lw_star, supported, random_seed + 1L)
   tibble(TS_PCODE = towns$TS_PCODE, moran_i = m[, "Ii"], moran_p = p,
@@ -128,6 +161,7 @@ centres <- st_coordinates(st_centroid(st_geometry(towns)))
 nb_knn <- knn2nb(knearneigh(centres, k = 6), sym = TRUE)
 knn_g <- gi_test(towns$events, nb2listw(include.self(nb_knn), style = "W"),
                  rep(TRUE, nrow(towns)), seed + 20L)
+# ---- th02-precise-check ----
 precise_totals <- events %>% filter(geo_precision == 1) %>% count(TS_PCODE, name = "precise")
 precise_x <- replace_na(precise_totals$precise[match(towns$TS_PCODE, precise_totals$TS_PCODE)], 0L)
 precise_g <- gi_test(precise_x, lw_star, supported, seed + 30L)
@@ -191,10 +225,12 @@ stopifnot(
   classify_ehsa(c(2,0,2,0,0), c(.01,1,.01,1,1), -.1,.5) == "No pattern detected",
   classify_ehsa(c(2,-2,0,2), c(.01,.01,1,.01), .1,.5) == "Oscillating hotspot")
 
-# ---- th02-time-gi ----
+# ---- th02-time-weights ----
 st_lw <- make_st_listw(nb_star, length(months))
+# ---- th02-time-weight-checks ----
 stopifnot(all(vapply(seq_along(st_lw$neighbours), function(i)
   i %in% st_lw$neighbours[[i]] && all((st_lw$neighbours[[i]] - 1L) %/% 330 <= (i - 1L) %/% 330), logical(1))))
+# ---- th02-time-cache ----
 message("Space-time Gi*: 18,810 bins, current/previous month, 999 permutations")
 gi_key <- digest(list(cube_data$events, st_lw, supported, seed, nsim, body(gi_test), packageVersion("spdep")))
 gi_cache_path <- file.path(out, "space-time-gi-cache.rds")
@@ -202,20 +238,29 @@ gi_cache <- if (file.exists(gi_cache_path)) readRDS(gi_cache_path) else NULL
 if (!is.null(gi_cache) && identical(gi_cache$key, gi_key)) {
   st_g <- gi_cache$result
 } else {
+# ---- th02-time-gi ----
   st_g <- gi_test(cube_data$events, st_lw, rep(supported, length(months)), seed + 40L)
+# ---- th02-time-cache-save ----
   saveRDS(list(key = gi_key, result = st_g), gi_cache_path)
 }
 # ---- th02-mann-kendall ----
 gi_series <- bind_cols(cube_data %>% select(TS_PCODE, month, events, civilian),
                        st_g %>% select(gi, p)) %>%
-  group_by(month) %>% mutate(q = p.adjust(p, "BH")) %>% ungroup()
-mk <- gi_series %>% group_by(TS_PCODE) %>% group_modify(~ {
+  group_by(month) %>%
+  mutate(q = p.adjust(p, "BH")) %>%
+  ungroup()
+# ---- th02-mk-test ----
+mk <- gi_series %>%
+  group_by(TS_PCODE) %>%
+  group_modify(~ {
   x <- .x$gi
   if (all(is.na(.x$p))) return(tibble(tau = NA_real_, trend_p = NA_real_, lag1 = NA_real_))
   m <- Kendall::MannKendall(x)
   tibble(tau = as.numeric(m$tau), trend_p = as.numeric(m$sl),
          lag1 = as.numeric(acf(x, lag.max = 1, plot = FALSE)$acf[2]))
-}) %>% ungroup() %>% mutate(trend_q = p.adjust(trend_p, "BH"))
+  }) %>%
+  ungroup() %>%
+  mutate(trend_q = p.adjust(trend_p, "BH"))
 
 # ---- th02-block-function ----
 # A secondary trend check preserves short runs of correlated months. Resample
@@ -245,16 +290,25 @@ block_p <- vapply(towns$TS_PCODE, function(id) {
 mk$block_p <- block_p[match(mk$TS_PCODE, towns$TS_PCODE)]
 mk$block_q <- p.adjust(mk$block_p, "BH")
 # ---- th02-classify ----
-ehsa <- gi_series %>% left_join(mk, by = "TS_PCODE") %>% group_by(TS_PCODE) %>%
-  summarise(tau = first(tau), trend_p = first(trend_p), trend_q = first(trend_q),
-            block_p = first(block_p), block_q = first(block_q), lag1 = first(lag1),
-            hot_months = sum(gi > 0 & p < alpha, na.rm = TRUE),
-            cold_months = sum(gi < 0 & p < alpha, na.rm = TRUE),
-            classification = classify_ehsa(gi, p, first(tau), first(trend_p)),
-            classification_fdr = classify_ehsa(gi, q, first(tau), first(trend_q)), .groups = "drop") %>%
-  mutate(map_class = case_when(is.na(trend_p) ~ "No shared-boundary neighbour",
-                              trend_p >= alpha ~ "Trend not significant",
-                              TRUE ~ classification))
+ehsa <- gi_series %>%
+  left_join(mk, by = "TS_PCODE") %>%
+  group_by(TS_PCODE) %>%
+  summarise(
+    tau = first(tau), trend_p = first(trend_p), trend_q = first(trend_q),
+    block_p = first(block_p), block_q = first(block_q), lag1 = first(lag1),
+    hot_months = sum(gi > 0 & p < alpha, na.rm = TRUE),
+    cold_months = sum(gi < 0 & p < alpha, na.rm = TRUE),
+    classification = classify_ehsa(gi, p, first(tau), first(trend_p)),
+    classification_fdr = classify_ehsa(gi, q, first(tau), first(trend_q)),
+    .groups = "drop"
+  )
+# ---- th02-classify-map ----
+ehsa <- ehsa %>%
+  mutate(map_class = case_when(
+    is.na(trend_p) ~ "No shared-boundary neighbour",
+    trend_p >= alpha ~ "Trend not significant",
+    TRUE ~ classification
+  ))
 
 # ---- th02-save-results ----
 comparison <- tibble(TS_PCODE = towns$TS_PCODE,
@@ -278,15 +332,91 @@ for (name in c("local_all", "local_civilian", "gi_series", "ehsa", "comparison")
 # ---- th02-descriptive-counts ----
 monthly <- events %>% count(month, event_type, name = "events") %>%
   complete(month = months, event_type = core_types, fill = list(events = 0))
+# ---- th02-other-totals ----
 annual <- events %>% mutate(year = lubridate::year(event_date)) %>%
   group_by(year) %>% summarise(events = n(), civilian = sum(civilian), fatalities = sum(fatalities),
                               jan_sep = sum(lubridate::month(event_date) <= 9), .groups = "drop")
 state_totals <- events %>% group_by(admin1) %>% summarise(events = n(), civilian = sum(civilian), .groups = "drop") %>% arrange(desc(events))
+# ---- th02-subtype-counts ----
+# Compare the same nine months, keeping every sub-event type in both years.
+recent_events <- events %>%
+  mutate(year = lubridate::year(event_date)) %>%
+  filter(year %in% 2024:2025, lubridate::month(event_date) <= 9)
+# ---- th02-subtype-totals ----
+subtype_levels <- sort(unique(events$sub_event_type))
+subtypes <- recent_events %>%
+  group_by(sub_event_type, year) %>%
+  summarise(events = n(), civilian = sum(civilian), .groups = "drop") %>%
+  complete(sub_event_type = subtype_levels, year = 2024:2025,
+           fill = list(events = 0L, civilian = 0L)) %>%
+  pivot_wider(names_from = year, values_from = c(events, civilian)) %>%
+  mutate(event_change = events_2025 - events_2024,
+         civilian_change = civilian_2025 - civilian_2024)
+
+# ---- th02-subtype-townships ----
+subtype_townships <- recent_events %>%
+  group_by(TS_PCODE, sub_event_type, year) %>%
+  summarise(events = n(), civilian = sum(civilian), .groups = "drop") %>%
+  complete(TS_PCODE = towns$TS_PCODE, sub_event_type = subtypes$sub_event_type,
+           year = 2024:2025, fill = list(events = 0L, civilian = 0L)) %>%
+  pivot_wider(names_from = year, values_from = c(events, civilian)) %>%
+  mutate(event_change = events_2025 - events_2024,
+         civilian_change = civilian_2025 - civilian_2024) %>%
+  left_join(st_drop_geometry(towns) %>% select(TS_PCODE, TS, ST), by = "TS_PCODE")
+
+# ---- th02-recurrence-counts ----
+# A month counts once when it contains at least one civilian-targeting event.
+recurrence <- cube_data %>%
+  group_by(TS_PCODE) %>%
+  summarise(civilian_total = sum(civilian), months_affected = sum(civilian > 0),
+            .groups = "drop")
+# ---- th02-recent-recurrence ----
+recent_recurrence <- cube_data %>%
+  mutate(year = lubridate::year(month)) %>%
+  filter(year %in% 2024:2025, lubridate::month(month) <= 9) %>%
+  group_by(TS_PCODE, year) %>%
+  summarise(months_affected = sum(civilian > 0), civilian = sum(civilian),
+            .groups = "drop") %>%
+  pivot_wider(names_from = year, values_from = c(civilian, months_affected))
+# ---- th02-join-recurrence ----
+recurrence <- recurrence %>%
+  left_join(recent_recurrence, by = "TS_PCODE") %>%
+  left_join(st_drop_geometry(towns) %>% select(TS_PCODE, TS, ST), by = "TS_PCODE")
+
+# ---- th02-followup-checks ----
+stopifnot(nrow(events) == 53805, nrow(recurrence) == 330,
+          !anyDuplicated(recurrence$TS_PCODE), !anyNA(recurrence),
+          all(recurrence$months_affected %in% 0:57),
+          all(recurrence$months_affected_2024 %in% 0:9),
+          all(recurrence$months_affected_2025 %in% 0:9),
+          sum(recurrence$civilian_total) == sum(events$civilian),
+          nrow(subtype_townships) == 330 * nrow(subtypes),
+          !anyDuplicated(subtype_townships[c("TS_PCODE", "sub_event_type")]),
+          !anyNA(subtype_townships))
+for (yr in 2024:2025) {
+  observed_months <- recent_events %>%
+    filter(year == yr, civilian) %>% distinct(TS_PCODE, month) %>%
+    count(TS_PCODE, name = "months")
+  stopifnot(all(recurrence[[paste0("months_affected_", yr)]] ==
+                  replace_na(observed_months$months[match(recurrence$TS_PCODE, observed_months$TS_PCODE)], 0L)))
+  stopifnot(sum(subtypes[[paste0("events_", yr)]]) == sum(recent_events$year == yr),
+            sum(subtypes[[paste0("civilian_", yr)]]) == sum(recent_events$civilian[recent_events$year == yr]))
+  for (measure in c("events", "civilian")) {
+    column <- paste0(measure, "_", yr)
+    national <- subtype_townships %>% group_by(sub_event_type) %>%
+      summarise(total = sum(.data[[column]]), .groups = "drop")
+    stopifnot(all(national$total[match(subtypes$sub_event_type, national$sub_event_type)] == subtypes[[column]]))
+  }
+}
+write_csv(subtypes, file.path(out, "subtype-comparison.csv"))
+write_csv(subtype_townships, file.path(out, "township-subtype-comparison.csv"))
+write_csv(recurrence, file.path(out, "civilian-recurrence.csv"))
 # ---- th02-save-analysis ----
 saveRDS(list(towns = towns, cube = cube_data, monthly = monthly, annual = annual,
              state_totals = state_totals, local = local_all, civilian = local_civilian,
              gi_series = gi_series, ehsa = ehsa, comparison = comparison,
-             validation = validation, nb = nb), file.path(out, "analysis.rds"))
+             validation = validation, nb = nb, subtypes = subtypes,
+             subtype_townships = subtype_townships, recurrence = recurrence), file.path(out, "analysis.rds"))
 writeLines(capture.output(sessionInfo()), file.path(out, "session-info.txt"))
 message("Analysis saved to ", out)
 print(validation)

@@ -32,59 +32,64 @@ a <- readRDS("data/take-home-02/derived/analysis.rds")
 fmt <- function(x) format(round(x), big.mark = ",", scientific = FALSE, trim = TRUE)
 hot <- a$local$gi_cluster == "Hotspot"
 civ_hot <- a$civilian$gi_cluster == "Hotspot"
+air <- a$subtypes %>% filter(sub_event_type == "Air/drone strike")
+abductions <- a$subtypes %>% filter(sub_event_type == "Abduction/forced disappearance")
+monywa <- a$recurrence %>% filter(TS == "Monywa")
 ```
 
 ## Conflict and continuing needs {#conflict-across-330-townships}
 
-Myanmar’s armed conflicts predate the February 2021 coup, after which fighting spread into more central areas. By December 2024, [OCHA](https://myanmar.un.org/en/286727-myanmar-humanitarian-needs-and-response-plan-2025-december-2024) estimated that almost **3.5 million people were displaced within the country**, with education and healthcare severely disrupted.
+After the February 2021 coup, fighting spread into central Myanmar alongside the long-running conflicts in border states. By September 2025, close to **3.6 million people were displaced**. Restrictions on movement and aid access disrupted daily life. [OCHA, September 2025](https://myanmar.un.org/en/302070-myanmar-humanitarian-update-no-49)
 
-This study follows **53,805 events across 330 townships over 57 months**, from January 2021 to September 2025. It covers battles, explosions/remote violence and violence against civilians.
+The report follows `r fmt(a$validation$retained)` recorded events across 330 townships over 57 months, from January 2021 to September 2025. It asks:
 
-I compare each township with its neighbours and follow changes month by month. Civilian targeting and reported deaths help identify places that incident totals alone could overlook.
-
-I want to keep continuing needs in view: families may still need support after recorded fighting has eased, as well as where violence is increasing.
+- Where did conflict cluster, and how did those concentrations change?
+- Which forms of violence increased, especially those targeting civilians?
+- Where did civilian targeting keep recurring?
 
 ::: {.small-note}
-Methods: Local Moran’s I and Gi* for clusters; Mann–Kendall and EHSA for changes through time. Data: [ACLED Myanmar](https://acleddata.com/country/myanmar), supplied through eLearn; [MIMU v9.4](https://geonode.themimu.info/layers/geonode:mmr_polbnda_adm3_250k_mimu_1). [Conflict background](https://acleddata.com/report/between-cooperation-and-competition-struggle-resistance-groups-myanmar).
+Includes battles, explosions/remote violence and violence against civilians. Data: [ACLED Myanmar](https://acleddata.com/country/myanmar), supplied through eLearn; [MIMU v9.4](https://geonode.themimu.info/layers/geonode:mmr_polbnda_adm3_250k_mimu_1). [Conflict background](https://acleddata.com/report/between-cooperation-and-competition-struggle-resistance-groups-myanmar).
 :::
 
 ## The monthly total peaked in late 2023
 
 ![](take-home-02/figures/monthly.png){height=430 alt="Monthly conflict counts by event type."}
 
-The total reached **1,465 events in November 2023**. January to September 2025 recorded **12.4% fewer events** than the same months of 2024. Explosions and remote violence remained the largest category.
+The monthly total peaked at 1,465 events in November 2023, shortly after [Operation 1027 began](https://acleddata.com/update/regional-overview-asia-pacific-october-2023).
+
+January to September 2025 recorded 8,728 events, compared with 9,961 in the same months of 2024: a **12.4% decline**. The township comparisons show how unevenly that decline was shared.
 
 ## 127 townships recorded increases
 
-![](take-home-02/figures/recent-changes.png){height=480 alt="Map of changes between January to September 2024 and 2025, with the five largest township rises and falls."}
+![](take-home-02/figures/recent-changes.png){height=470 alt="Township changes between January to September 2024 and 2025."}
 
-Kawkareik, Kyaukpyu and Nawnghkio had the largest rises. Rakhine’s total fell by **734**, while Kyaukpyu added **207**. Kyaukpyu’s neighbours averaged **53 fewer events**, so the regional decline hides a local increase.
+Kawkareik, Kyaukpyu and Nawnghkio had the largest rises. Kyaukpyu added **207 events**, while its neighbours averaged 53 fewer and Rakhine’s total fell by 734. Lower regional counts left this local increase easy to overlook.
 
 ## Maungdaw ranks higher for reported deaths
 
-![](take-home-02/figures/events-and-deaths.png){height=450 alt="Reported deaths by township and comparison with event counts."}
+![](take-home-02/figures/events-and-deaths.png){height=450 alt="Township incident counts compared with reported deaths."}
 
-Maungdaw ranks **17th by incidents but third by reported deaths** (1,583). Kale has the highest reported death toll (1,877). I would want local clinics and aid groups to help assess what affected households still need in both townships.
+Maungdaw ranks **17th by incidents but third by reported deaths**, with 599 events and 1,583 deaths. Kale has the highest reported death toll, at 1,877. Counting incidents alone would give Maungdaw much less attention.
 
 ::: {.small-note}
-These are estimated deaths reported across the included conflict events, covering civilians and combatants.
+Reported deaths include civilians and combatants. ACLED also records zero when fatality information is unavailable.
 :::
 
 ## Most hotspots are in central Myanmar
 
 ::: {.columns}
-::: {.column width="67%"}
-![](take-home-02/figures/local-association.png){height=570 alt="Local Moran’s I and Gi-star results."}
+::: {.column width="64%"}
+![](take-home-02/figures/local-association.png){height=540 alt="Local Moran’s I and Gi-star results."}
 :::
-::: {.column width="33%"}
-Gi* identifies **38 hotspots**: 18 in Sagaing, seven in Mandalay and six in Magway.
+::: {.column width="36%"}
+Gi* identifies neighbourhoods with unusually high or low counts: **38 hotspots and 53 coldspots**. Sagaing, Mandalay and Magway contain 31 of the hotspots.
 
-Its **53 coldspots** include 13 in Ayeyarwady, 11 in Yangon and ten in Shan (East).
+Local Moran’s I compares each township with its neighbours. It finds 38 high-count clusters, 52 low-count clusters and four low-count outliers beside higher-count neighbours.
 
-Local Moran’s I places 38 townships in high-count clusters and 52 in low-count clusters. Four have low counts despite higher counts nearby.
+The civilian map has 37 hotspots, including 34 from the overall map. Hakha, Tonzang and Nawnghkio appear only in the civilian map.
 
-::: {.small-note}
-Neighbours share an edge or corner. Hotspots and coldspots have unusually high or low neighbourhood counts (p < 0.05). Three island townships have no shared-boundary neighbours.
+::: {.small-note #stricter-checks-narrow-the-hotspot-list}
+Neighbours share an edge or corner; permutation p < 0.05. Adjustment for multiple tests reduces overall hotspots to 19. Six-nearest neighbours retains 87.2% of labels among the 327 townships with Queen neighbours; precise locations retain 91.7%. Tonzang has two civilian-targeting events, so its label mainly reflects neighbours.
 :::
 :::
 :::
@@ -92,18 +97,21 @@ Neighbours share an edge or corner. Hotspots and coldspots have unusually high o
 ## How hotspot patterns changed {#hotspots-came-and-went}
 
 ::: {.columns}
-::: {.column width="67%"}
-![](take-home-02/figures/ehsa.png){height=570 alt="Mann–Kendall trends and emerging hotspot patterns."}
+::: {.column width="64%"}
+![](take-home-02/figures/ehsa.png){height=540 alt="Trends in space-time Gi-star and emerging hotspot patterns."}
 :::
-::: {.column width="33%"}
-EHSA finds **26 oscillating hotspots**, which ended hot after earlier cold months, and **eight sporadic hotspots**, which were hot on and off without cold months.
+::: {.column width="36%"}
+EHSA follows neighbourhood concentrations through time:
 
-The EHSA map shows the **23 hotspots and 42 coldspots** that also pass the trend test. **Kawkareik and Nawnghkio** show rising concentrations.
+- 26 oscillating hotspots: ended hot after earlier cold months.
+- Eight sporadic hotspots: hot on and off, ended hot, and never cold.
 
-Monywa was a hotspot throughout 2022 to 2024, but no longer met the threshold in September 2025. I would still want its ongoing needs checked before reducing aid.
+The mapped **23 hotspots and 42 coldspots** also pass the trend test. Kawkareik and Nawnghkio retain rising trends under stronger checks.
+
+Monywa was hot throughout 2022 to 2024. It missed the September 2025 threshold, ending with “No pattern detected”.
 
 ::: {.small-note}
-Monthly results include neighbouring townships and the preceding month. The map shows significant trends only (p < 0.05).
+Scores include the current and previous month. Accounting for related months reduces significant trends from `r sum(a$ehsa$trend_p < .05, na.rm=TRUE)` to `r sum(a$ehsa$block_p < .05, na.rm=TRUE)`; `r sum(a$ehsa$block_q < .05, na.rm=TRUE)` remain after multiple-test adjustment.
 :::
 :::
 :::
@@ -112,56 +120,54 @@ Monthly results include neighbouring townships and the preceding month. The map 
 
 ![](take-home-02/figures/hotspots-two-periods.png){height=440 alt="Gi-star hotspots in matched January to September periods of 2024 and 2025."}
 
-Hotspots fell from **27 to 18** between the matched periods. Five of the seven townships that became hotspots in 2025 border Kawkareik. Hlaingbwe rose from **one to 41 events** and still qualifies after a stricter check for chance findings.
+The number of hotspots fell from 27 to 18. Yet **five of the seven appearing only in 2025 border Kawkareik**. Nearby Hlaingbwe rose from one to 41 events and still qualifies after adjustment for multiple tests. The increase extends across neighbouring townships.
 
 ::: {.small-note}
-Both maps use January to September and the same neighbours. They compare hotspot labels; the change between years has not been tested directly.
+Both maps use January to September and the same neighbours. They compare hotspot labels, without directly testing whether the change between years is significant.
 :::
 
-## Little change in civilian targeting {#civilian-targeting-barely-fell}
+## Air/drone events and abductions increased {#civilian-targeting-barely-fell}
 
-::: {.columns}
-::: {.column width="67%"}
-![](take-home-02/figures/civilian-hotspots.png){height=570 alt="Gi-star maps for all retained records and the civilian-targeting subset."}
-:::
-::: {.column width="33%"}
-**16,391 events** in the study targeted civilians.
+The four largest changes in civilian-targeting events, January to September:
 
-Their map has **37 hotspots**, with 34 overlapping the overall conflict hotspots.
+```{r}
+a$subtypes %>%
+  slice_max(abs(civilian_change), n = 4) %>%
+  arrange(desc(civilian_change)) %>%
+  transmute(`Sub-event type` = sub_event_type,
+            `2024` = civilian_2024, `2025` = civilian_2025,
+            Change = sprintf("%+d", civilian_change)) %>%
+  knitr::kable()
+```
 
-Hakha, Tonzang and Nawnghkio appear only in the civilian-targeting hotspot map.
+Civilian targeting fell only **2%**, from 2,911 to 2,854 events. Air/drone events rose from `r fmt(air$civilian_2024)` to `r fmt(air$civilian_2025)`, and abductions from `r fmt(abductions$civilian_2024)` to `r fmt(abductions$civilian_2025)`. Declines in shelling and other categories offset these increases.
 
-In January to September 2025, civilian-targeting events were only **2% lower** than in the same months of 2024. In **26 townships**, they rose while total events fell. This concerns me most when reading the national decline.
+Kyaukpyu had the largest civilian-targeting air/drone increase, from 6 to 40. In 26 townships, including Myaing and Pakokku, civilian targeting rose while total events fell.
 
 ::: {.small-note}
-Counts refer to events where civilians were targeted and exclude incidental civilian harm. Tonzang has only two such events; its hotspot label mainly reflects nearby townships.
-:::
-:::
+Both years cover the same nine months. Counts describe recorded events; one event can involve several strikes or people abducted. All recorded actors are included.
 :::
 
-## Stricter checks narrow the hotspot list
+## Civilian targeting kept recurring {#repeated-civilian-targeting}
 
-- Allowing for chance findings across many tests reduces the overall hotspot count from **38 to 19**.
-- Using the six nearest townships as neighbours keeps **87.2%** of classifications unchanged among townships with shared-boundary neighbours.
-- Accounting for similarities between nearby months reduces significant trends from **`r sum(a$ehsa$trend_p < .05, na.rm=TRUE)` to `r sum(a$ehsa$block_p < .05, na.rm=TRUE)`**. **`r sum(a$ehsa$block_q < .05, na.rm=TRUE)`** remain after also allowing for the number of tests.
-- Kawkareik and Nawnghkio still show rising concentrations after these checks.
+![](take-home-02/figures/civilian-recurrence-months.png){height=430 alt="Monthly civilian-targeting counts for eight townships, including zero-event months."}
 
-Reporting coverage, approximate locations and township size affect the counts. The maps show recorded conflict; assessing current safety also needs local information.
+Monywa recorded civilian targeting in **`r monywa$months_affected` of 57 months**. Its January to September count fell from `r monywa$civilian_2024` to `r monywa$civilian_2025`, yet events still covered `r monywa$months_affected_2025` of nine months in both years. Maungdaw also had eight affected months in each year. In Myaing, reports spread from `r a$recurrence$months_affected_2024[a$recurrence$TS == 'Myaing']` months to `r a$recurrence$months_affected_2025[a$recurrence$TS == 'Myaing']`.
+
+::: {.small-note}
+Grey cells mean no civilian-targeting event was recorded. Recurrence counts months with incidents; EHSA classifies neighbourhood clustering of all conflict events. This explains Monywa’s long recorded history alongside its “No pattern detected” endpoint label.
+:::
 
 ## Recommended actions
 
-I would use these findings to start discussions with local aid groups about where support is still missing.
+- Compare food, shelter and medical coverage with hotspots in Sagaing, Mandalay and Magway to identify communities with little support.
+- Check whether assistance in Kawkareik, its neighbours and Nawnghkio has kept pace with rising conflict.
+- Review routes to emergency care after aerial attacks in Kyaukpyu, Thabeikkyin and Wetlet. Arrange confidential support and referrals with local protection organisations in Wundwin and Minhla (Bago West).
+- Maintain contact with communities in Monywa and Maungdaw facing recurring civilian targeting. Assess household needs following the high reported death tolls in Kale and Maungdaw.
+- Check whether assistance reaches affected communities in Myaing and Pakokku, where civilian targeting rose despite lower total counts.
 
-- Check gaps in food, shelter and medical support in **Sagaing, Mandalay and Magway**, which contain 31 of the 38 hotspots.
-- Ask aid groups in **Kawkareik, Kyaukpyu and Nawnghkio** whether displacement has increased demand beyond their capacity. Include **Hlaingbwe** and Kawkareik’s other neighbours.
-- Contact clinics and aid groups in **Kale and Maungdaw** about household needs following the high reported death tolls.
-- Review displaced households’ housing, food and healthcare needs in **Monywa** before reducing existing aid.
-- Follow up on rising civilian targeting in **Pakokku and Myaing**. Check the incidents behind the civilian hotspots in **Hakha, Tonzang and Nawnghkio**, including nearby townships.
-
-Update the records beyond September 2025 and confirm current needs with local aid groups before acting.
-
-I would also like to compare nearby townships’ monthly changes and understand whether communities facing rising civilian targeting can reach clinics and aid.
+Local partners’ coverage and priorities should guide follow-up. Update records beyond September 2025 and confirm current conditions before operational use. Further study could examine event accounts and access to clinics and aid.
 
 ::: {.small-note}
-[Full report, sources and code](take-home-exercise-02.qmd) · [Coursework repository](https://github.com/chinh02/isss626-chinh-le)
+Reporting coverage and location accuracy affect the maps. [Full report, sources and code](take-home-exercise-02.qmd) · [Coursework repository](https://github.com/chinh02/isss626-chinh-le)
 :::
