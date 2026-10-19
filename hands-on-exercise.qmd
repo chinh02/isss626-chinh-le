@@ -82,6 +82,16 @@ Comparing access to eldercare services across Singapore with the Hansen, KD2SFCA
 
 [View exercise →](hands-on-exercise-07.qmd){.section-link}
 :::
+
+::: {.exercise-entry}
+<span>08</span>
+
+## Market Area Analysis using Huff model
+
+Estimating retail patronage probabilities and store market areas across Taichung.
+
+[View exercise →](hands-on-exercise-08.qmd){.section-link}
+:::
 :::
 
 [← Back to home](index.qmd){.back-link}
