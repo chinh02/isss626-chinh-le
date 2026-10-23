@@ -43,7 +43,7 @@ reference <- a$reference_comparison %>% filter(!is.na(trend_p_whole))
 
 ## Conflict and continuing needs {#conflict-across-330-townships}
 
-After the February 2021 coup, fighting spread into central Myanmar alongside the long-running conflicts in border states. By September 2025, close to **3.6 million people were displaced**. Restrictions on movement and aid access disrupted daily life. [OCHA, September 2025](https://myanmar.un.org/en/302070-myanmar-humanitarian-update-no-49)
+Myanmar’s military seized power in February 2021. Mass protests met violent repression, and new armed resistance groups formed. Fighting spread into central Myanmar alongside decades of conflict in the border states. By September 2025, close to **3.6 million people were displaced within the country**, with families struggling to reach essential services and aid. [OCHA, September 2025](https://myanmar.un.org/en/302070-myanmar-humanitarian-update-no-49)
 
 The report follows `r fmt(a$validation$retained)` recorded events across 330 townships over 57 months, from January 2021 to September 2025. It asks:
 
