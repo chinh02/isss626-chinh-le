@@ -3,6 +3,7 @@ title: "Conflict across Myanmar’s townships"
 subtitle: "January 2021–September 2025"
 author: "Le Truong Chinh · ISSS626"
 date: "5 October 2026"
+date-modified: "23 October 2026"
 format:
   revealjs:
     theme: simple
@@ -35,6 +36,9 @@ civ_hot <- a$civilian$gi_cluster == "Hotspot"
 air <- a$subtypes %>% filter(sub_event_type == "Air/drone strike")
 abductions <- a$subtypes %>% filter(sub_event_type == "Abduction/forced disappearance")
 monywa <- a$recurrence %>% filter(TS == "Monywa")
+civilian_ehsa <- a$civilian_time$ehsa %>%
+  left_join(st_drop_geometry(a$towns) %>% select(TS_PCODE, TS, ST), by = "TS_PCODE")
+reference <- a$reference_comparison %>% filter(!is.na(trend_p_whole))
 ```
 
 ## Conflict and continuing needs {#conflict-across-330-townships}
@@ -46,6 +50,8 @@ The report follows `r fmt(a$validation$retained)` recorded events across 330 tow
 - Where did conflict cluster, and how did those concentrations change?
 - Which forms of violence increased, especially those targeting civilians?
 - Where did civilian targeting keep recurring?
+
+Township maps locate clusters and outliers. Monthly hotspot histories follow changes in both total events and civilian targeting, with checks for different neighbours, comparison periods and related months.
 
 ::: {.small-note}
 Includes battles, explosions/remote violence and violence against civilians. Data: [ACLED Myanmar](https://acleddata.com/country/myanmar), supplied through eLearn; [MIMU v9.4](https://geonode.themimu.info/layers/geonode:mmr_polbnda_adm3_250k_mimu_1). [Conflict background](https://acleddata.com/report/between-cooperation-and-competition-struggle-resistance-groups-myanmar).
@@ -63,16 +69,14 @@ January to September 2025 recorded 8,728 events, compared with 9,961 in the same
 
 ![](take-home-02/figures/recent-changes.png){height=470 alt="Township changes between January to September 2024 and 2025."}
 
-Kawkareik, Kyaukpyu and Nawnghkio had the largest rises. Kyaukpyu added **207 events**, while its neighbours averaged 53 fewer and Rakhine’s total fell by 734. Lower regional counts left this local increase easy to overlook.
+Kawkareik, Kyaukpyu and Nawnghkio had the largest rises. Kyaukpyu added **207 events**, while its neighbours averaged 53 fewer and Rakhine’s total fell by 734.
 
-## Maungdaw ranks higher for reported deaths
+[]{#maungdaw-ranks-higher-for-reported-deaths}
 
-![](take-home-02/figures/events-and-deaths.png){height=450 alt="Township incident counts compared with reported deaths."}
-
-Maungdaw ranks **17th by incidents but third by reported deaths**, with 599 events and 1,583 deaths. Kale has the highest reported death toll, at 1,877. Counting incidents alone would give Maungdaw much less attention.
+Over the full study period, Maungdaw ranked **17th by incidents but third by reported deaths**: 599 events and 1,583 deaths. Kale had the highest reported death toll, at 1,877.
 
 ::: {.small-note}
-Reported deaths include civilians and combatants. ACLED also records zero when fatality information is unavailable.
+Reported deaths include civilians and combatants. Zero can mean that fatality information was unavailable. [Full fatality comparison](take-home-exercise-02.qmd#events-and-reported-deaths)
 :::
 
 ## Most hotspots are in central Myanmar
@@ -103,15 +107,15 @@ Neighbours share an edge or corner; permutation p < 0.05. Adjustment for multipl
 ::: {.column width="36%"}
 EHSA follows neighbourhood concentrations through time:
 
-- 26 oscillating hotspots: ended hot after earlier cold months.
+- 26 oscillating hotspots; `r sum(a$early_cold$last_cold <= as.Date('2021-04-01'))` had cold months only in early 2021.
 - Eight sporadic hotspots: hot on and off, ended hot, and never cold.
 
-The mapped **23 hotspots and 42 coldspots** also pass the trend test. Kawkareik and Nawnghkio retain rising trends under stronger checks.
+The mapped **23 hotspots and 42 coldspots** also pass the trend test. With the original reference, the stricter checks retain rising trends in Kawkareik and Nawnghkio.
 
-Monywa was hot throughout 2022 to 2024. It missed the September 2025 threshold, ending with “No pattern detected”.
+Monywa missed the September 2025 threshold, ending with “No pattern detected” after many hot months.
 
 ::: {.small-note}
-Scores include the current and previous month. Accounting for related months reduces significant trends from `r sum(a$ehsa$trend_p < .05, na.rm=TRUE)` to `r sum(a$ehsa$block_p < .05, na.rm=TRUE)`; `r sum(a$ehsa$block_q < .05, na.rm=TRUE)` remain after multiple-test adjustment.
+Accounting for related months reduces significant trends from `r sum(a$ehsa$trend_p < .05, na.rm=TRUE)` to `r sum(a$ehsa$block_p < .05, na.rm=TRUE)`; `r sum(a$ehsa$block_q < .05, na.rm=TRUE)` survive multiple-test adjustment. Comparing against the same two months retains `r scales::percent(mean(reference$classification_whole[reference$measure == 'All events'] == reference$classification_window[reference$measure == 'All events']), accuracy=.1)` of EHSA classes. [Reference check](take-home-exercise-02.qmd#ehsa-reference-check)
 :::
 :::
 :::
@@ -124,6 +128,27 @@ The number of hotspots fell from 27 to 18. Yet **five of the seven appearing onl
 
 ::: {.small-note}
 Both maps use January to September and the same neighbours. They compare hotspot labels, without directly testing whether the change between years is significant.
+:::
+
+## Civilian hotspots have different histories {#civilian-hotspot-histories}
+
+::: {.columns}
+::: {.column width="48%"}
+![](take-home-02/figures/civilian-ehsa-patterns.png){height=580 alt="Civilian EHSA classes shown where the trend test is significant."}
+:::
+::: {.column width="52%"}
+The civilian map shows **`r sum(grepl('hotspot$', civilian_ehsa$map_class))` hotspot townships** with a significant trend. Mandalay and Magway contain `r sum(grepl('hotspot$', civilian_ehsa$map_class) & civilian_ehsa$ST %in% c('Mandalay', 'Magway'))` of them.
+
+Nawnghkio is a sporadic hotspot in both the overall and civilian analyses.
+
+Kawkareik’s civilian history ends with “No pattern detected”, despite its overall hotspot label. Its civilian trend also depends on the comparison period.
+
+Kyaukpyu’s upward civilian trend survives both references and the stricter trend tests. Nawnghkio’s rise becomes less certain when those checks are applied together.
+
+::: {.small-note}
+The two-month reference retains `r scales::percent(mean(reference$classification_whole[reference$measure == 'Civilian targeting'] == reference$classification_window[reference$measure == 'Civilian targeting']), accuracy=.1)` of civilian EHSA classes. With the whole-period reference, allowing for related months reduces significant trends from `r sum(civilian_ehsa$trend_p < .05, na.rm=TRUE)` to `r sum(civilian_ehsa$block_p < .05, na.rm=TRUE)`; `r sum(civilian_ehsa$block_q < .05, na.rm=TRUE)` survive multiple-test adjustment. [Full comparison](take-home-exercise-02.qmd#civilian-hotspot-histories)
+:::
+:::
 :::
 
 ## Air/drone events and abductions increased {#civilian-targeting-barely-fell}
@@ -155,7 +180,7 @@ Both years cover the same nine months. Counts describe recorded events; one even
 Monywa recorded civilian targeting in **`r monywa$months_affected` of 57 months**. Its January to September count fell from `r monywa$civilian_2024` to `r monywa$civilian_2025`, yet events still covered `r monywa$months_affected_2025` of nine months in both years. Maungdaw also had eight affected months in each year. In Myaing, reports spread from `r a$recurrence$months_affected_2024[a$recurrence$TS == 'Myaing']` months to `r a$recurrence$months_affected_2025[a$recurrence$TS == 'Myaing']`.
 
 ::: {.small-note}
-Grey cells mean no civilian-targeting event was recorded. Recurrence counts months with incidents; EHSA classifies neighbourhood clustering of all conflict events. This explains Monywa’s long recorded history alongside its “No pattern detected” endpoint label.
+Grey cells mean no civilian-targeting event was recorded. Monywa had `r civilian_ehsa$hot_months[civilian_ehsa$TS == 'Monywa']` civilian hotspot months but ended with “No pattern detected”. Recurrence counts any recorded incident; EHSA tests whether neighbourhood counts are unusually high or low.
 :::
 
 ## Recommended actions

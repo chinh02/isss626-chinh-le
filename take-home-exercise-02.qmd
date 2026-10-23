@@ -3,6 +3,7 @@ title: "Take-home Exercise 2"
 subtitle: "Conflict across Myanmar’s townships, 2021–2025"
 author: "Le Truong Chinh"
 date: "5 October 2026"
+date-modified: "23 October 2026"
 description: "Where recorded conflict concentrates in Myanmar, how township hotspots change, and how the pattern differs for events targeting civilians."
 title-block-banner: true
 page-layout: article
@@ -58,6 +59,8 @@ air <- results$subtypes %>% filter(sub_event_type == "Air/drone strike")
 abductions <- results$subtypes %>% filter(sub_event_type == "Abduction/forced disappearance")
 shelling <- results$subtypes %>% filter(sub_event_type == "Shelling/artillery/missile attack")
 monywa <- results$recurrence %>% filter(TS == "Monywa")
+civilian_ehsa <- results$civilian_time$ehsa %>%
+  left_join(st_drop_geometry(results$towns) %>% select(TS_PCODE, TS, ST), by = "TS_PCODE")
 kyaukpyu_air <- results$subtype_townships %>%
   filter(TS == "Kyaukpyu", sub_event_type == "Air/drone strike")
 aerial_places <- results$subtype_townships %>% filter(sub_event_type == "Air/drone strike")
@@ -139,6 +142,17 @@ A lower event count therefore leaves questions about people’s daily circumstan
 
 The supplied file contains 87,109 records from January 2021 to September 2025. The analysis follows the same 330 townships throughout these 57 months.
 
+```{r}
+#| label: th02-place-map
+#| eval: false
+#| code-fold: true
+#| code-summary: "Label the states, regions and case townships"
+```
+
+![States and regions of Myanmar, with six township examples located on a second map.](take-home-02/figures/study-area.png)
+
+Sagaing, Mandalay and Magway cover much of the central area discussed in the report. Kawkareik is in Kayin near the Thai border; Nawnghkio is in northern Shan. Kyaukpyu and Maungdaw lie in Rakhine on the western side of the country.
+
 The packages below handle the data, maps and spatial tests.
 
 ```{r}
@@ -204,9 +218,9 @@ Keep the matched records, then add a month and a civilian-targeting flag to each
 #| eval: false
 ```
 
-The study includes three ACLED event types: battles, explosions/remote violence, and violence against civilians. Protests, strategic developments and six records assigned to “Indian Ocean” are excluded.
+The study follows battles, explosions/remote violence, and violence against civilians. It excludes protests, riots and strategic developments to keep the comparison focused on these three forms of conflict. This also leaves out violence coded under protests or riots, including excessive force against protesters. The totals therefore cover a narrower set of events than ACLED’s full definition of political violence. Six records assigned to “Indian Ocean” are outside the study area.
 
-Of the 54,000 qualifying records, 107 have no named township and 88 have only a broad location. Removing these leaves `r fmt(results$validation$retained)` events, with no duplicate IDs.
+Of the 54,000 qualifying records, 107 have no named township and 88 have only a broad location. The latter can be placed at a regional centre rather than where the event occurred, so assigning them to a township would be misleading. Removing these leaves `r fmt(results$validation$retained)` events, with no duplicate IDs.
 
 
 ```{r}
@@ -218,7 +232,24 @@ Of the 54,000 qualifying records, 107 have no named township and 88 have only a 
 
 Events are assigned using the recorded township and state or region. Spelling and punctuation differences, such as “Pangsang (Panghkam)”, are resolved before matching. This keeps a report covering a city in its named township, even when its coordinates point to the city centre.
 
-For `r results$validation$coordinate_disagreements` records, the coordinates fall outside the named township. The analysis keeps the named township and records these differences for review; the raw data are unchanged.
+The coordinates agree with the named township for `r round(100 * (1 - results$validation$coordinate_disagreements / results$validation$retained), 2)`% of retained records. For the remaining `r results$validation$coordinate_disagreements`, the analysis keeps the named township and records the disagreement for review.
+
+Location precision is still uneven: `r fmt(results$validation$geo_precision_2)` records (`r pct(results$validation$geo_precision_2 / results$validation$retained)`) refer to an area near a place rather than that place itself. The precise-location check later in the report tests how much this affects the overall hotspot map.
+
+### How precise are the dates?
+
+```{r}
+#| label: th02-date-precision
+#| eval: false
+```
+
+```{r}
+results$date_precision %>%
+  select(`Date known to` = precision, Events = events) %>%
+  knitr::kable()
+```
+
+Most events have an exact date. Month-level dates are retained because the analysis groups events by month. Week-level dates need more care: `r results$validation$week_dates_near_boundary` lie close enough to a month boundary that a three-day shift would change their month. A small monthly peak or a final-month hotspot label can be sensitive to this uncertainty. The three-day screen flags possible boundary crossings; it does not reconstruct the dates from the original reports. [ACLED’s date definitions](https://acleddata.com/methodology/acled-codebook)
 
 ::: {.callout-note title="What the counts mean"}
 The counts describe reported events. Reporting coverage varies, and these totals do not measure risk per person. ACLED’s civilian-targeting flag identifies events where civilians were the main or only target; civilians can also be harmed in other events. [ACLED codebook](https://acleddata.com/methodology/acled-codebook)
@@ -886,6 +917,13 @@ Run one Mann–Kendall test per township. `tau` gives the trend direction; `lag1
 ```{r}
 #| label: th02-mk-test
 #| eval: false
+#| code-fold: true
+#| code-summary: "Define the township trend test"
+```
+
+```{r}
+#| label: th02-mk-run
+#| eval: false
 ```
 
 The Mann–Kendall test checks whether Gi* scores tend to rise or fall over time. A rising score means the neighbourhood is becoming a stronger concentration of recorded conflict. The event timelines separately show each township’s own count.
@@ -915,6 +953,8 @@ Coldspot labels use the same rules with high and low reversed. The final month i
 ```{r}
 #| label: th02-classify
 #| eval: false
+#| code-fold: true
+#| code-summary: "Summarise each township’s hotspot history"
 ```
 
 For the map, keep the EHSA class where the trend passes the 0.05 threshold.
@@ -963,7 +1003,7 @@ Map the EHSA history on the right. Reds represent hotspot classes and blues repr
 
 Across all townships, EHSA identifies 26 oscillating and eight sporadic hotspots. The map shows the 16 oscillating and seven sporadic hotspots whose trends also pass the Mann–Kendall test, giving 23 mapped hotspots.
 
-No township meets the new, consecutive, persistent or intensifying hotspot rules in this run. The hotspot histories are therefore mostly intermittent, with some neighbourhoods having earlier cold periods.
+For `r sum(results$early_cold$last_cold <= as.Date('2021-04-01'))` of the `r nrow(results$early_cold)` oscillating hotspots, all cold months fall in January to April 2021. Here, the label usually describes low early counts followed by later hotspots. It need not mean repeated swings between high and low conflict. The mapped oscillating hotspots include `r sum(town_results$map_class == 'Oscillating hotspot' & town_results$ST == 'Magway')` in Magway and `r sum(town_results$map_class == 'Oscillating hotspot' & town_results$ST == 'Tanintharyi')` in Tanintharyi; `r sum(town_results$map_class == 'Sporadic hotspot' & town_results$ST == 'Shan (North)')` sporadic hotspots are in northern Shan.
 
 Monywa illustrates how the ending affects the label: it had many hot months but ends with “No pattern detected”. Its timeline below explains the result.
 
@@ -1055,6 +1095,13 @@ Monywa, Sagaing, was hot throughout 2022 to 2024 and in three months of 2025. It
 ```{r}
 #| label: th02-block-run
 #| eval: false
+#| code-fold: true
+#| code-summary: "Apply the same block check to each township"
+```
+
+```{r}
+#| label: th02-block-apply
+#| eval: false
 ```
 
 Successive months often resemble each other, especially because Gi* includes the preceding month. To account for this, the check resamples six-month blocks 999 times after removing the estimated trend. A further adjustment accounts for testing many townships.
@@ -1070,6 +1117,63 @@ The median correlation between successive Gi* scores is `r round(median(results$
 Kawkareik and Nawnghkio retain upward trends under the stronger checks. Yesagyo’s p-value rises from about 0.006 to `r round(town_results$block_p[town_results$TS == 'Yesagyo'], 3)` in the block check, so its apparent rise has weaker support.
 
 Adjusting both the monthly hotspot tests and the township trend tests changes `r sum(results$ehsa$classification != results$ehsa$classification_fdr)` EHSA labels. Individual classifications depend on the thresholds, neighbours and final month used. The block check accounts approximately for related months; seasonal patterns and changes in reporting remain possible influences.
+
+### Does the comparison period change the result? {#ehsa-reference-check}
+
+The main analysis compares each neighbourhood with one fixed baseline covering all 57 months. That makes early 2021 look quiet against the much higher counts later on. A second calculation asks how unusual each neighbourhood was compared with Myanmar at the time, using the current and previous month as its reference.
+
+```{r}
+#| label: th02-window-gi
+#| eval: false
+#| code-fold: true
+#| code-summary: "Compare each neighbourhood with its two-month window"
+```
+
+```{r}
+#| label: th02-reference-run
+#| eval: false
+```
+
+Both versions use the same events, Queen neighbours, 999 permutations, seeds, trend tests and EHSA rules. The reference changes together with the pool of counts used in the permutations: 18,810 township-months in the main analysis, 660 in each two-month window, and 330 for January 2021.
+
+```{r}
+#| label: th02-reference-comparison
+#| eval: false
+#| code-fold: true
+#| code-summary: "Match the two sets of township results"
+```
+
+```{r}
+reference_summary <- results$reference_comparison %>%
+  filter(!is.na(trend_p_whole)) %>%
+  group_by(measure) %>%
+  summarise(`Same EHSA class` = scales::percent(mean(classification_whole == classification_window), accuracy = .1),
+            `Rising: whole period` = sum(tau_whole > 0 & trend_p_whole < .05),
+            `Rising: two-month window` = sum(tau_window > 0 & trend_p_window < .05),
+            .groups = "drop")
+knitr::kable(reference_summary, col.names = c("Records", names(reference_summary)[-1]))
+```
+
+The agreement is calculated across the 327 townships with Queen neighbours. The civilian comparison uses the same procedure and is discussed in the next section.
+
+```{r}
+trend_label <- function(tau, p) {
+  case_when(p >= .05 ~ "No clear trend", tau > 0 ~ "Rising", TRUE ~ "Falling")
+}
+reference_cases <- results$reference_comparison %>%
+  filter(measure == "All events",
+         TS %in% c("Kawkareik", "Nawnghkio", "Kyaukpyu", "Monywa", "Hlaingbwe", "Yesagyo", "Matman")) %>%
+  transmute(Township = TS,
+            `Whole-period trend` = trend_label(tau_whole, trend_p_whole),
+            `Two-month trend` = trend_label(tau_window, trend_p_window))
+knitr::kable(reference_cases)
+```
+
+Kawkareik, Nawnghkio and Kyaukpyu retain rising Gi* trends with the two-month reference. Kawkareik’s class changes from oscillating to sporadic: its early cold months no longer qualify under this comparison. The later concentration remains, while the description of its history changes.
+
+Hlaingbwe and Yesagyo lose their significant upward trends. Their recent increases still appear in the counts, but evidence for a rise across the full 57 months depends on the reference used. Matman and Mongping become persistent coldspots instead of intensifying coldspots. Their neighbourhood counts remain low compared with other places at the time, without a significant trend towards a stronger coldspot.
+
+Using the two-month reference and allowing for related months and multiple tests still leaves rising trends in Nawnghkio and Kyaukpyu. Kawkareik’s adjusted p-value reaches `r round(results$reference_comparison$block_q_window[results$reference_comparison$measure == 'All events' & results$reference_comparison$TS == 'Kawkareik'], 3)`, so support for its rising trend weakens. Monywa’s falling trend in the table also loses significance once related months are taken into account.
 
 ## Where civilians were targeted {#events-targeting-civilians}
 
@@ -1117,6 +1221,65 @@ The civilian-targeting map has 37 hotspots, with 34 also appearing in the overal
 | The overall map | Myawaddy, Kyainseikgyi, Seikphyu, Mogoke |
 
 Tonzang itself has only two retained civilian-targeting events. Its hotspot label mainly reflects neighbouring townships. Following up this result means locating the incidents across that neighbourhood.
+
+### How civilian hotspots changed {#civilian-hotspot-histories}
+
+The whole-period civilian map combines nearly five years of events. EHSA adds the monthly history, using civilian-targeting counts in the same 330-township, 57-month cube.
+
+```{r}
+#| label: th02-followup-trends
+#| eval: false
+#| code-fold: true
+#| code-summary: "Apply the same trend and classification steps"
+```
+
+```{r}
+#| label: th02-civilian-ehsa
+#| eval: false
+```
+
+```{r}
+#| label: th02-civilian-time-map
+#| eval: false
+#| code-fold: true
+#| code-summary: "Join the civilian histories to township boundaries"
+```
+
+```{r}
+#| label: th02-civilian-time-plot
+#| eval: false
+```
+
+![Trends and emerging hotspot classes for events targeting civilians. The pattern map shows classes with a significant Mann–Kendall trend.](take-home-02/figures/civilian-ehsa.png)
+
+The civilian map shows `r sum(grepl('hotspot$', civilian_ehsa$map_class))` hotspot townships with a significant trend, including `r sum(grepl('hotspot$', civilian_ehsa$map_class) & civilian_ehsa$ST == 'Mandalay')` in Mandalay and `r sum(grepl('hotspot$', civilian_ehsa$map_class) & civilian_ehsa$ST == 'Magway')` in Magway. Saw is a new hotspot; Hkamti ends with its first run of `r civilian_ehsa$hot_months[civilian_ehsa$TS == 'Hkamti']` hot months. These labels describe neighbourhood concentrations in the final months of the dataset.
+
+Nawnghkio is a sporadic hotspot in both the overall and civilian analyses. Kawkareik differs: its civilian series has only `r civilian_ehsa$hot_months[civilian_ehsa$TS == 'Kawkareik']` hot months and ends with “No pattern detected”, even though its Gi* trend rises. Its overall hotspot history therefore gives an incomplete picture of events targeting civilians.
+
+```{r}
+results$civilian_time$ehsa %>%
+  group_by(classification) %>%
+  summarise(`All townships` = n(), `Trend p < 0.05` = sum(trend_p < .05, na.rm = TRUE),
+            .groups = "drop") %>%
+  rename(Pattern = classification) %>%
+  knitr::kable()
+```
+
+The table keeps classes without a significant trend, including any persistent concentrations. The map follows the handout’s requirement to show trend-significant results.
+
+```{r}
+civilian_checks <- tibble(
+  Check = c("Ordinary trend test", "Allow for related months", "Also adjust for multiple tests"),
+  `Townships with a significant trend` = c(
+    sum(civilian_ehsa$trend_p < .05, na.rm = TRUE),
+    sum(civilian_ehsa$block_p < .05, na.rm = TRUE),
+    sum(civilian_ehsa$block_q < .05, na.rm = TRUE)))
+knitr::kable(civilian_checks)
+```
+
+With the two-month reference, `r pct(mean(results$reference_comparison$classification_whole[results$reference_comparison$measure == 'Civilian targeting' & !is.na(results$reference_comparison$trend_p_whole)] == results$reference_comparison$classification_window[results$reference_comparison$measure == 'Civilian targeting' & !is.na(results$reference_comparison$trend_p_whole)]))` of civilian EHSA classes stay the same. Nawnghkio and Kyaukpyu retain significant upward trends. Kawkareik’s civilian trend no longer passes the 0.05 threshold; Saw and Hkamti keep their new and consecutive labels, but their trends also stop qualifying for the filtered map.
+
+The combined checks narrow the civilian findings further. Nawnghkio’s upward trend weakens when the two-month reference, related months and multiple tests are all considered (adjusted p = `r round(results$reference_comparison$block_q_window[results$reference_comparison$measure == 'Civilian targeting' & results$reference_comparison$TS == 'Nawnghkio'], 3)`). Kyaukpyu remains significant (`r round(results$reference_comparison$block_q_window[results$reference_comparison$measure == 'Civilian targeting' & results$reference_comparison$TS == 'Kyaukpyu'], 3)`), despite having no final EHSA pattern. Its rising trajectory is worth following alongside the increase in civilian-targeting air/drone events below.
 
 ### Little change in civilian targeting {#recent-civilian-targeting}
 
@@ -1298,12 +1461,13 @@ Draw every month in grey first, then colour the months with recorded events.
 
 Monywa recorded civilian targeting in `r monywa$months_affected` of the 57 months, Kale in `r results$recurrence$months_affected[results$recurrence$TS == 'Kale']`, and Pakokku in `r results$recurrence$months_affected[results$recurrence$TS == 'Pakokku']`. These histories extend across most of the study period. Kyaukpyu had `r results$recurrence$months_affected[results$recurrence$TS == 'Kyaukpyu']` affected months overall, including all nine months of 2025.
 
-Monywa’s “No pattern detected” EHSA label and its repeated civilian targeting describe different things:
+Monywa’s civilian series had `r civilian_ehsa$hot_months[civilian_ehsa$TS == 'Monywa']` hot months, compared with `r monywa$months_affected` months containing a recorded event. It ended with “No pattern detected” in both the overall and civilian analyses.
 
 | Measure | What it tells us about Monywa |
 |---|---|
-| Months with civilian targeting | Incidents recurred through much of the study period. |
-| EHSA for all conflict events | Its neighbourhood’s sequence of hot and cold months did not meet a class at the September 2025 endpoint. |
+| Months with civilian targeting | Any recorded incident makes a month count, giving `r monywa$months_affected` affected months. |
+| Civilian hotspot months | The neighbourhood had unusually high counts in `r civilian_ehsa$hot_months[civilian_ehsa$TS == 'Monywa']` months under the whole-period reference. |
+| Final EHSA class | September 2025 was not a hotspot month, and the preceding sequence did not meet another class. |
 
 A grey heatmap cell means no civilian-targeting event was recorded that month. [OCHA’s September update](https://myanmar.un.org/en/302070-myanmar-humanitarian-update-no-49) describes continuing restrictions on movement and aid access, hardships that can persist between recorded incidents.
 
@@ -1341,6 +1505,8 @@ The three study questions lead to the following findings:
 
 The national decline was uneven in both place and form. Fewer total events could coexist with rising civilian targeting, as in Myaing and Pakokku. A falling count could also leave incidents recurring through most months, as in Monywa.
 
+The monthly civilian analysis adds another distinction. Nawnghkio is a hotspot in both histories, while Kawkareik’s overall and civilian histories end differently. The reference check also changes some labels, including Kawkareik’s, even where the rising trend remains. Reading these labels alongside the counts gives a clearer account of what changed locally.
+
 The published accounts help place these findings in context. ACLED describes changing tactics and armed-group relationships; the Rakhine fieldwork and OCHA reports describe daily restrictions and interrupted services. Together, they give a reason to consider the type and timing of violence when following up local needs. The event maps locate recorded changes, while local accounts are needed to understand their consequences for households.
 
 ## Priorities for civilian assistance {#recommendations-and-limitations}
@@ -1367,6 +1533,8 @@ A further study could compare these histories with displacement, functioning cli
 
 Reporting coverage, approximate locations and township size affect the counts. Fixed boundaries also leave out population movements and differences in exposure. These maps identify concentrations of recorded events. Explaining their causes or assessing present-day safety requires current local evidence.
 
+Some hotspot histories change with the comparison period, the final month and the treatment of related months. The report keeps these checks beside the results so that a changing label can be read alongside the event history. Week-level dates near month boundaries add uncertainty to individual monthly classifications.
+
 ## Sources {#references-and-approach}
 
 - [Exercise 2 handout](https://isss626-ay2026-27aug.netlify.app/take-home_ex02)
@@ -1383,6 +1551,7 @@ Reporting coverage, approximate locations and township size affect the counts. F
 - [MIMU township boundaries v9.4](https://geonode.themimu.info/layers/geonode:mmr_polbnda_adm3_250k_mimu_1)
 - R for Geospatial Data Science and Analytics: [Chapter 8](https://r4gdsa.netlify.app/chap08.html), [Chapter 9](https://r4gdsa.netlify.app/chap09.html), [Chapter 10](https://r4gdsa.netlify.app/chap10.html) and [Chapter 11](https://r4gdsa.netlify.app/chap11)
 - [ArcGIS EHSA definitions](https://doc.esri.com/en/arcgis-pro/latest/tool-reference/space-time-pattern-mining/learnmoreemerging.html)
+- [spdep: Getis–Ord G and Gi* statistics](https://r-spatial.github.io/spdep/reference/localG.html)
 - [Christover Manafe’s Take-home Exercise 2](https://isss626-camanafe.netlify.app/take_home_ex/take_home_ex02/take_home_ex02#feature-engineering)
 - [Matthew Ho’s Take-home Exercise 2](https://is415-gaa-matthew-ho.netlify.app/takehomeex/takehomeex2/the2)
 - [Khant Min Naing’s Take-home Exercise 2](https://is415-geospatial-with-khant.netlify.app/take-home_ex/take-home_ex02/take-home_ex02)

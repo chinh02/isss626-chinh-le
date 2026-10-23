@@ -30,7 +30,7 @@ raw <- read_csv(csv, col_types = cols(.default = col_character()), show_col_type
 stopifnot(nrow(problems(raw)) == 0, !anyDuplicated(raw$event_id_cnty))
 raw <- raw %>%
   mutate(event_date = as.Date(event_date),
-         across(c(latitude, longitude, fatalities, geo_precision), as.numeric))
+         across(c(latitude, longitude, fatalities, geo_precision, time_precision), as.numeric))
 stopifnot(!anyNA(raw$event_date), !anyNA(raw$fatalities), all(raw$fatalities >= 0))
 # ---- th02-boundaries ----
 towns <- st_read(file.path(base, "raw/geospatial/mmr_polbnda_adm3_250k_mimu_1.shp"),
@@ -75,6 +75,16 @@ events <- core %>%
     month = as.Date(format(event_date, "%Y-%m-01")),
     civilian = !is.na(civilian_targeting) & civilian_targeting == "Civilian targeting"
   )
+# ---- th02-date-precision ----
+date_precision <- events %>%
+  count(time_precision, name = "events") %>%
+  mutate(precision = c("Exact day", "Within a week", "Within a month")[time_precision])
+# A three-day shift could cross a month boundary for these week-level dates.
+boundary_dates <- events %>%
+  filter(time_precision == 2,
+         format(event_date - 3, "%Y-%m") != format(event_date + 3, "%Y-%m"))
+stopifnot(sum(date_precision$events) == nrow(events),
+          all(events$time_precision %in% 1:3))
 # ---- th02-coordinates ----
 # Use recorded township names for coastal and boundary cases; do not snap points.
 coord_key <- paste(events$longitude, events$latitude)
@@ -168,8 +178,8 @@ precise_g <- gi_test(precise_x, lw_star, supported, seed + 30L)
 
 # ---- th02-time-neighbours ----
 # EHSA uses an explicit space-time neighbourhood. The same and previous month
-# are included, with Gi* standardised against the entire cube. Unlike calling
-# local_gstar_perm() separately by month, this is a space-time Gi* statistic.
+# are included, with Gi* standardised against the entire cube. The reference
+# check below keeps these neighbours and compares against a two-month window.
 make_st_listw <- function(spatial_nb, n_times, lag = 1L) {
   n <- length(spatial_nb)
   neighbours <- lapply(seq_len(n * n_times), function(i) {
@@ -250,17 +260,21 @@ gi_series <- bind_cols(cube_data %>% select(TS_PCODE, month, events, civilian),
   mutate(q = p.adjust(p, "BH")) %>%
   ungroup()
 # ---- th02-mk-test ----
-mk <- gi_series %>%
-  group_by(TS_PCODE) %>%
-  group_modify(~ {
-  x <- .x$gi
-  if (all(is.na(.x$p))) return(tibble(tau = NA_real_, trend_p = NA_real_, lag1 = NA_real_))
-  m <- Kendall::MannKendall(x)
-  tibble(tau = as.numeric(m$tau), trend_p = as.numeric(m$sl),
-         lag1 = as.numeric(acf(x, lag.max = 1, plot = FALSE)$acf[2]))
-  }) %>%
-  ungroup() %>%
-  mutate(trend_q = p.adjust(trend_p, "BH"))
+mk_tests <- function(series) {
+  series %>%
+    group_by(TS_PCODE) %>%
+    group_modify(~ {
+      x <- .x$gi
+      if (all(is.na(.x$p))) return(tibble(tau = NA_real_, trend_p = NA_real_, lag1 = NA_real_))
+      m <- Kendall::MannKendall(x)
+      tibble(tau = as.numeric(m$tau), trend_p = as.numeric(m$sl),
+             lag1 = as.numeric(acf(x, lag.max = 1, plot = FALSE)$acf[2]))
+    }) %>%
+    ungroup() %>%
+    mutate(trend_q = p.adjust(trend_p, "BH"))
+}
+# ---- th02-mk-run ----
+mk <- mk_tests(gi_series)
 
 # ---- th02-block-function ----
 # A secondary trend check preserves short runs of correlated months. Resample
@@ -281,34 +295,116 @@ block_trend_p <- function(x, B = 999L, block = 6L) {
   (1 + sum(abs(reps) >= abs(obs))) / (B + 1)
 }
 # ---- th02-block-run ----
+add_block_tests <- function(mk, series, random_seed) {
+  set.seed(random_seed)
+  block_p <- vapply(towns$TS_PCODE, function(id) {
+    x <- series[series$TS_PCODE == id, ]
+    if (all(is.na(x$p))) NA_real_ else block_trend_p(x$gi)
+  }, numeric(1))
+  mk$block_p <- block_p[match(mk$TS_PCODE, towns$TS_PCODE)]
+  mk$block_q <- p.adjust(mk$block_p, "BH")
+  mk
+}
+# ---- th02-block-apply ----
 message("Checking the effect of correlated months on trend tests")
-set.seed(seed + 50L)
-block_p <- vapply(towns$TS_PCODE, function(id) {
-  x <- gi_series[gi_series$TS_PCODE == id, ]
-  if (all(is.na(x$p))) NA_real_ else block_trend_p(x$gi)
-}, numeric(1))
-mk$block_p <- block_p[match(mk$TS_PCODE, towns$TS_PCODE)]
-mk$block_q <- p.adjust(mk$block_p, "BH")
+mk <- add_block_tests(mk, gi_series, seed + 50L)
 # ---- th02-classify ----
-ehsa <- gi_series %>%
-  left_join(mk, by = "TS_PCODE") %>%
-  group_by(TS_PCODE) %>%
-  summarise(
-    tau = first(tau), trend_p = first(trend_p), trend_q = first(trend_q),
-    block_p = first(block_p), block_q = first(block_q), lag1 = first(lag1),
-    hot_months = sum(gi > 0 & p < alpha, na.rm = TRUE),
-    cold_months = sum(gi < 0 & p < alpha, na.rm = TRUE),
-    classification = classify_ehsa(gi, p, first(tau), first(trend_p)),
-    classification_fdr = classify_ehsa(gi, q, first(tau), first(trend_q)),
-    .groups = "drop"
-  )
+classify_series <- function(series, mk) {
+  series %>%
+    left_join(mk, by = "TS_PCODE") %>%
+    group_by(TS_PCODE) %>%
+    summarise(
+      tau = first(tau), trend_p = first(trend_p), trend_q = first(trend_q),
+      block_p = first(block_p), block_q = first(block_q), lag1 = first(lag1),
+      hot_months = sum(gi > 0 & p < alpha, na.rm = TRUE),
+      cold_months = sum(gi < 0 & p < alpha, na.rm = TRUE),
+      classification = classify_ehsa(gi, p, first(tau), first(trend_p)),
+      classification_fdr = classify_ehsa(gi, q, first(tau), first(trend_q)),
+      .groups = "drop"
+    ) %>%
+    mutate(map_class = case_when(
+      is.na(trend_p) ~ "No shared-boundary neighbour",
+      trend_p >= alpha ~ "Trend not significant",
+      TRUE ~ classification
+    ))
+}
 # ---- th02-classify-map ----
-ehsa <- ehsa %>%
-  mutate(map_class = case_when(
-    is.na(trend_p) ~ "No shared-boundary neighbour",
-    trend_p >= alpha ~ "Trend not significant",
-    TRUE ~ classification
-  ))
+ehsa <- classify_series(gi_series, mk)
+
+# ---- th02-window-gi ----
+window_gi <- function(x, random_seed) {
+  two_month_weights <- make_st_listw(nb_star, 2L)
+  map_dfr(seq_along(months), function(t) {
+    times <- seq.int(max(1L, t - 1L), t)
+    rows <- unlist(lapply(times, function(j) (j - 1L) * nrow(towns) + seq_len(nrow(towns))))
+    weights <- if (t == 1L) lw_star else two_month_weights
+    g <- gi_test(x[rows], weights, rep(supported, length(times)), random_seed)
+    tail(g, nrow(towns))
+  })
+}
+# ---- th02-followup-cache ----
+# Cache only the expensive permutations; all summaries are rebuilt below.
+cached_gi <- function(x, reference, random_seed) {
+  path <- file.path(out, paste0("gi-", reference, "-", random_seed, ".rds"))
+  key <- digest(list(x, reference, st_lw, supported, random_seed, nsim,
+                     body(gi_test), body(window_gi), packageVersion("spdep")))
+  cached <- if (file.exists(path)) readRDS(path) else NULL
+  if (!is.null(cached) && identical(key, cached$key)) return(cached$result)
+  message("Gi* reference: ", reference, "; seed: ", random_seed)
+  g <- if (reference == "whole") {
+    gi_test(x, st_lw, rep(supported, length(months)), random_seed)
+  } else window_gi(x, random_seed)
+  saveRDS(list(key = key, result = g), path)
+  g
+}
+# ---- th02-followup-trends ----
+analyse_series <- function(g, random_seed) {
+  series <- bind_cols(cube_data %>% select(TS_PCODE, month, events, civilian),
+                      g %>% select(gi, p)) %>%
+    group_by(month) %>% mutate(q = p.adjust(p, "BH")) %>% ungroup()
+  trends <- mk_tests(series)
+  trends <- add_block_tests(trends, series, random_seed)
+  list(series = series, ehsa = classify_series(series, trends))
+}
+# ---- th02-civilian-ehsa ----
+civilian_g <- cached_gi(cube_data$civilian, "whole", seed + 140L)
+civilian_time <- analyse_series(civilian_g, seed + 150L)
+# ---- th02-reference-run ----
+# Same counts, neighbours, 999 permutations, two-sided test and classification.
+# Only the reference population changes: all 57 months versus current/previous.
+# Both standardisation and the pool of possible permutation values use it.
+window_all <- analyse_series(cached_gi(cube_data$events, "window", seed + 40L), seed + 50L)
+window_civilian <- analyse_series(cached_gi(cube_data$civilian, "window", seed + 140L), seed + 150L)
+# ---- th02-reference-comparison ----
+reference_comparison <- bind_rows(
+  ehsa %>% mutate(measure = "All events"),
+  civilian_time$ehsa %>% mutate(measure = "Civilian targeting")
+) %>%
+  select(TS_PCODE, measure, classification, tau, trend_p, block_p, block_q) %>%
+  left_join(bind_rows(
+    window_all$ehsa %>% mutate(measure = "All events"),
+    window_civilian$ehsa %>% mutate(measure = "Civilian targeting")
+  ) %>% select(TS_PCODE, measure, classification, tau, trend_p, block_p, block_q),
+  by = c("TS_PCODE", "measure"), suffix = c("_whole", "_window")) %>%
+  left_join(st_drop_geometry(towns) %>% select(TS_PCODE, TS, ST), by = "TS_PCODE")
+# ---- th02-early-cold ----
+early_cold <- gi_series %>%
+  filter(TS_PCODE %in% ehsa$TS_PCODE[ehsa$classification == "Oscillating hotspot"],
+         gi < 0, p < alpha) %>%
+  group_by(TS_PCODE) %>% summarise(last_cold = max(month), .groups = "drop")
+# ---- th02-ehsa-checks ----
+for (run in list(civilian_time, window_all, window_civilian)) {
+  stopifnot(nrow(run$series) == 330 * 57, nrow(run$ehsa) == 330,
+            !anyDuplicated(run$series[c("TS_PCODE", "month")]),
+            !anyDuplicated(run$ehsa$TS_PCODE), !anyNA(run$ehsa$classification),
+            sum(is.na(run$ehsa$trend_p)) == sum(!supported),
+            all(run$ehsa$hot_months %in% 0:57), all(run$ehsa$cold_months %in% 0:57))
+}
+stopifnot(nrow(reference_comparison) == 660,
+          !anyDuplicated(reference_comparison[c("TS_PCODE", "measure")]))
+write_csv(civilian_time$ehsa, file.path(out, "civilian-ehsa.csv"))
+write_csv(reference_comparison, file.path(out, "ehsa-reference-comparison.csv"))
+write_csv(date_precision, file.path(out, "date-precision.csv"))
 
 # ---- th02-save-results ----
 comparison <- tibble(TS_PCODE = towns$TS_PCODE,
@@ -320,6 +416,7 @@ validation <- list(
   rows_supplied = nrow(raw), country_counts = as.list(table(raw$country)),
   core_rows = nrow(core), retained = nrow(events), exclusions = as.list(table(core$exclusion)),
   civilian_records = sum(events$civilian), coordinate_disagreements = sum(!coord_match),
+  geo_precision_2 = sum(events$geo_precision == 2), week_dates_near_boundary = nrow(boundary_dates),
   months = length(months), bins = nrow(cube_data), zero_event_bins = sum(cube_data$events == 0),
   islands = as.list(towns$TS[!supported]), neighbours = as.list(summary(card(nb)[supported])),
   queen_knn_agreement = mean(comparison$queen[supported] == comparison$knn6[supported]),
@@ -415,6 +512,9 @@ write_csv(recurrence, file.path(out, "civilian-recurrence.csv"))
 saveRDS(list(towns = towns, cube = cube_data, monthly = monthly, annual = annual,
              state_totals = state_totals, local = local_all, civilian = local_civilian,
              gi_series = gi_series, ehsa = ehsa, comparison = comparison,
+             civilian_time = civilian_time, window_all = window_all,
+             window_civilian = window_civilian, reference_comparison = reference_comparison,
+             early_cold = early_cold, date_precision = date_precision,
              validation = validation, nb = nb, subtypes = subtypes,
              subtype_townships = subtype_townships, recurrence = recurrence), file.path(out, "analysis.rds"))
 writeLines(capture.output(sessionInfo()), file.path(out, "session-info.txt"))

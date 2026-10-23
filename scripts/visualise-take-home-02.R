@@ -37,6 +37,29 @@ map_theme <- theme_void(base_size = 11) +
 # Put the neutral category in the middle of the red-to-blue palette.
 gi_levels <- c("Hotspot", "Not significant", "Coldspot")
 
+# ---- th02-place-map ----
+state_labels <- st_point_on_surface(states)
+state_labels <- bind_cols(st_drop_geometry(state_labels), as_tibble(st_coordinates(state_labels)))
+case_places <- towns %>% filter(TS %in% c("Monywa", "Kale", "Kawkareik", "Nawnghkio",
+                                        "Kyaukpyu", "Maungdaw")) %>%
+  st_point_on_surface()
+case_labels <- bind_cols(st_drop_geometry(case_places), as_tibble(st_coordinates(case_places)))
+state_map <- ggplot(states) +
+  geom_sf(fill = "grey96", colour = "grey60", linewidth = .25) +
+  ggrepel::geom_text_repel(data = state_labels, aes(X, Y, label = str_wrap(ST, 11)),
+                          size = 3, seed = 62602, box.padding = .35,
+                          min.segment.length = 0, segment.colour = "grey60") +
+  coord_sf(datum = NA) + map_theme + labs(title = "States and regions")
+case_map <- ggplot(states) +
+  geom_sf(fill = "grey96", colour = "grey65", linewidth = .25) +
+  geom_sf(data = case_places, colour = "firebrick", size = 2) +
+  ggrepel::geom_label_repel(data = case_labels, aes(X, Y, label = TS), size = 3,
+                           seed = 62602, nudge_x = 180000, min.segment.length = 0,
+                           box.padding = .4, segment.colour = "grey40") +
+  coord_sf(datum = NA) + map_theme + labs(title = "Townships discussed below")
+ggsave("take-home-02/figures/study-area.png", state_map + case_map,
+       width = 10, height = 7.8, dpi = 170, bg = "white")
+
 # ---- th02-monthly-plot ----
 monthly_plot <- ggplot(results$monthly, aes(month, events, colour = event_type)) +
   geom_line(linewidth = .8) +
@@ -130,17 +153,23 @@ trend_map <- ggplot(ehsa_map) +
   geom_sf(aes(fill = trend), colour = "white", linewidth = .07) +
   geom_sf(data = states, fill = NA, colour = "grey50", linewidth = .2) +
   scale_fill_brewer(palette = "RdBu", drop = FALSE, na.value = "grey70",
-                    labels = ~replace_na(.x, "No Queen neighbour"), name = NULL) +
+                    labels = ~str_wrap(replace_na(.x, "No Queen neighbour"), 16), name = NULL) +
   guides(fill = guide_legend(ncol = 2, byrow = TRUE)) +
   coord_sf(datum = NA) +
   map_theme +
   labs(title = "Trend in space-time Gi*", subtitle = "Mann–Kendall p < 0.05")
 
 # ---- th02-ehsa-labels ----
-# Four coldspot classes use Blues; two hotspot classes use Reds.
-ehsa_levels <- c("Intensifying coldspot", "Consecutive coldspot", "Oscillating coldspot",
-                 "Sporadic coldspot", "Sporadic hotspot", "Oscillating hotspot",
-                 "No pattern detected", "Trend not significant", "No Queen neighbour")
+# Use matching colours in the overall and civilian maps.
+present <- union(results$ehsa$map_class, results$civilian_time$ehsa$map_class)
+cold_levels <- sort(present[grepl("coldspot$", present)])
+hot_levels <- sort(present[grepl("hotspot$", present)])
+ehsa_levels <- c(cold_levels, hot_levels, "No pattern detected",
+                 "Trend not significant", "No Queen neighbour")
+ehsa_colours <- setNames(c(
+  rev(tail(brewer.pal(max(3, length(cold_levels) + 1), "Blues"), length(cold_levels))),
+  tail(brewer.pal(max(3, length(hot_levels) + 1), "Reds"), length(hot_levels)),
+  "grey65", "grey94", "grey30"), ehsa_levels)
 ehsa_map <- ehsa_map %>%
   mutate(map_class = recode(map_class, "No shared-boundary neighbour" = "No Queen neighbour"),
          map_class = factor(map_class, levels = ehsa_levels))
@@ -150,9 +179,7 @@ pattern_map <- ggplot(ehsa_map) +
   geom_sf(aes(fill = map_class), colour = "white", linewidth = .07) +
   geom_sf(data = states, fill = NA, colour = "grey50", linewidth = .2) +
   scale_fill_manual(
-    values = c(rev(brewer.pal(5, "Blues")[2:5]), brewer.pal(3, "Reds")[2:3],
-               "grey90", "grey90", "grey70"),
-    drop = FALSE, labels = ~str_wrap(.x, 18), name = NULL
+    values = ehsa_colours, drop = TRUE, labels = ~str_wrap(.x, 18), name = NULL
   ) +
   guides(fill = guide_legend(ncol = 2, byrow = TRUE)) +
   coord_sf(datum = NA) +
@@ -162,6 +189,26 @@ pattern_map <- ggplot(ehsa_map) +
 # ---- th02-ehsa-save ----
 ggsave("take-home-02/figures/ehsa.png", trend_map + pattern_map,
        width = 10, height = 8.2, dpi = 170, bg = "white")
+
+# ---- th02-civilian-time-map ----
+civilian_time_map <- towns %>%
+  left_join(results$civilian_time$ehsa, by = "TS_PCODE") %>%
+  mutate(trend = case_when(is.na(trend_p) ~ NA_character_,
+                           trend_p >= .05 ~ "Not significant",
+                           tau > 0 ~ "Increasing Gi*", TRUE ~ "Decreasing Gi*"),
+         trend = factor(trend, levels = levels(ehsa_map$trend)),
+         map_class = recode(map_class, "No shared-boundary neighbour" = "No Queen neighbour"),
+         map_class = factor(map_class, levels = ehsa_levels))
+# ---- th02-civilian-time-plot ----
+# Reuse the same scales and layout, replacing only the township results.
+civilian_trend_map <- trend_map %+% civilian_time_map +
+  labs(title = "Civilian-targeting trends")
+civilian_pattern_map <- pattern_map %+% civilian_time_map +
+  labs(title = "Civilian hotspot histories")
+ggsave("take-home-02/figures/civilian-ehsa.png", civilian_trend_map + civilian_pattern_map,
+       width = 10, height = 8.2, dpi = 170, bg = "white")
+ggsave("take-home-02/figures/civilian-ehsa-patterns.png", civilian_pattern_map,
+       width = 5.2, height = 7.3, dpi = 170, bg = "white")
 
 # ---- th02-civilian-plot ----
 civil_map <- towns %>%
@@ -358,3 +405,11 @@ payload <- list(months = format(sort(unique(results$cube$month)), "%b %Y"), town
 template <- readLines("take-home-02/explorer-template.html", warn = FALSE, encoding = "UTF-8")
 template <- sub("__DATA__", toJSON(payload, auto_unbox = TRUE, digits = 3), template, fixed = TRUE)
 writeLines(template, "take-home-02/conflict-explorer.html", useBytes = TRUE)
+
+# ---- th02-package-record ----
+packages <- c("sf", "tidyverse", "spdep", "sfdep", "Kendall", "jsonlite", "digest",
+              "patchwork", "RColorBrewer", "ggrepel", "knitr", "rmarkdown")
+versions <- data.frame(package = packages,
+                       version = vapply(packages, function(x) as.character(packageVersion(x)), character(1)))
+writeLines(c(capture.output(sessionInfo()), "", "Direct dependencies:",
+             capture.output(print(versions, row.names = FALSE))), "take-home-02/session-info.txt")

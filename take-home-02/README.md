@@ -20,7 +20,17 @@ rebuilds the outputs, reusing space-time permutations only when the data,
 neighbourhood, function, parameters and package version match their cache key.
 Named chunks in the scripts supply the visible code beside each part of the
 report, so the displayed code stays in sync with the calculations and figures.
-Read the generated session-info.txt for package versions.
+The R/package versions used for the latest checked run are recorded in
+`take-home-02/session-info.txt`. On a fresh R installation, install the direct
+dependencies before running the commands above:
+
+```r
+install.packages(c("sf", "tidyverse", "spdep", "sfdep", "Kendall", "jsonlite",
+                   "digest", "patchwork", "RColorBrewer", "ggrepel", "knitr", "rmarkdown"))
+```
+
+This installs current releases; compare them with the recorded versions if a
+result differs. The raw inputs remain course-provided files, not part of Git.
 
 ## Inputs
 
@@ -41,6 +51,11 @@ publishing the maps. The rendered report and slides are served from `_site/`.
 ## Decisions
 
 - Retain Myanmar battles, explosions/remote violence and violence against civilians.
+- Exclude protests, riots and strategic developments. This is narrower than all
+  ACLED political violence, including violence coded under protests and riots.
+- Keep month-level dates for monthly aggregation. Report all three date-precision
+  categories and flag week-level dates whose month changes under a three-day
+  shift in either direction. This is a boundary screen, not reconstructed dates.
 - Match the named township and state/region. Drop unnamed townships and precision-3
   locations. Apply only the verified Pangsang spelling alias. Retain reported
   township names in a small number of coordinate disagreements; save their IDs.
@@ -60,6 +75,19 @@ publishing the maps. The rendered report and slides are served from `_site/`.
   serial dependence. It does not remove reporting changes or establish that
   seasonal effects are absent. BH adjustments are across township trend tests;
   bin-level adjustments are within each month.
+- Repeat EHSA for civilian-targeting events on the same cube and with the same
+  tests. Each measure has a fixed random seed and a separate permutation cache.
+- Check both measures against a current/previous-month reference: 660 bins, or
+  330 in January 2021. Neighbours, row weights, 999 permutations, two-sided
+  p-values, seeds, trend tests, block checks and classification rules stay the
+  same. Both the standardisation population and the permutation pool change
+  together. This tests the reference/null population, not centring alone, and
+  is not a claim to reproduce sfdep's month-standardised implementation.
+- Reference agreement compares all EHSA classes over the 327 supported townships,
+  before filtering the map to significant trends. Keep the original whole-cube
+  results as the main analysis and interpret reference-dependent labels alongside
+  the monthly counts. Record how many oscillating hotspots have no cold months
+  after April 2021.
 - EHSA rules follow the ArcGIS reference, coded explicitly to preserve the sign,
   final-month and 90% conditions. Synthetic histories check those conditions.
   The handout's trend-significant map is accompanied by the complete category
