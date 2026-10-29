@@ -92,6 +92,16 @@ Estimating retail patronage probabilities and store market areas across Taichung
 
 [View exercise →](hands-on-exercise-08.qmd){.section-link}
 :::
+
+::: {.exercise-entry}
+<span>09</span>
+
+## Calibrating a Hedonic Pricing Model with GWR
+
+Modelling condominium resale prices in Singapore and examining how price relationships vary across space.
+
+[View exercise →](hands-on-exercise-09.qmd){.section-link}
+:::
 :::
 
 [← Back to home](index.qmd){.back-link}
