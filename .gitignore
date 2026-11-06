@@ -23,3 +23,6 @@
 /Hands-on Exercise 7.zip
 /Hands-on Exercise 8.zip
 /output/pdf/
+
+# Local API credentials
+/.env

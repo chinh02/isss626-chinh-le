@@ -1,0 +1,232 @@
+---
+title: "New rail stations and neighbourhood access"
+subtitle: "JRL and CRL Phase 1 · Take-home Exercise 3"
+author: "Le Truong Chinh · ISSS626"
+date: "6 November 2026"
+format:
+  revealjs:
+    theme: simple
+    css: take-home-01/slides.css
+    width: 1280
+    height: 800
+    margin: 0.07
+    center: false
+    transition: none
+    slide-number: c/t
+    footer: "Take-home Exercise 3 · Singapore"
+    title-slide-attributes:
+      data-background-color: "#17333d"
+toc: false
+execute:
+  echo: false
+  warning: false
+  message: false
+  freeze: auto
+---
+
+```{r}
+#| include: false
+library(tidyverse)
+analysis <- readRDS("data/take-home-03/derived/analysis.rds")
+prepared <- analysis$prepared
+ridership <- analysis$ridership
+details <- analysis$details
+review <- readRDS("data/take-home-03/derived/review.rds")
+stopifnot(identical(review$baseline_sha256,
+  digest::digest(file = "data/take-home-03/derived/analysis.rds", algo = "sha256")))
+diagnostics <- readRDS("data/take-home-03/derived/station-diagnostics.rds")
+office_check <- ridership$fold_sensitivity %>% group_by(model) %>%
+  summarise(WAPE = sum(abs(predicted - observed)) / sum(observed), .groups = "drop")
+fmt <- function(x) scales::comma(round(x))
+estimate <- function(x) scales::comma(round(x, -2))
+pct <- function(x) scales::percent(x, accuracy = 0.1)
+coverage <- prepared$coverage %>% filter(threshold == 800)
+before <- coverage$share[coverage$scenario == "Existing"]
+after <- coverage$share[coverage$scenario == "Both"]
+top <- details$top_access
+older <- prepared$equity %>% filter(scenario == "Both", age_group == "Highest older share")
+younger <- prepared$equity %>% filter(scenario == "Both", age_group == "Lowest older share")
+selected <- ridership$performance %>% filter(model == ridership$fit$model)
+combined <- details$scenarios %>% filter(scenario == "Both")
+new_top <- ridership$predictions %>% filter(scenario == "Both", !existing) %>%
+  slice_max(predicted, n = 1, with_ties = FALSE)
+largest_change <- details$change_station
+largest_gain <- ridership$predictions %>% filter(scenario == "Both", existing) %>%
+  slice_max(change, n = 1, with_ties = FALSE)
+pioneer <- details$local_choices %>% filter(station_id == largest_change$station_id)
+local_leader <- details$local_choices %>% filter(scenario == "Both") %>%
+  slice_max(probability, n = 1, with_ties = FALSE)
+main_sensitivity <- details$sensitivity %>% filter(check != "Residential demand only")
+residential_sensitivity <- details$sensitivity %>% filter(check == "Residential demand only")
+hougang_check <- review$interchanges %>% filter(station_id == "HOUGANG")
+recent_tel <- review$recent_groups %>% filter(startsWith(recent_group, "TEL4"))
+age_coverage <- review$age_coverage %>%
+  select(age_group, scenario, share) %>% pivot_wider(names_from = scenario, values_from = share)
+age_gap_before <- age_coverage$Existing[age_coverage$age_group == "Lowest older share"] -
+  age_coverage$Existing[age_coverage$age_group == "Highest older share"]
+age_gap_after <- age_coverage$Both[age_coverage$age_group == "Lowest older share"] -
+  age_coverage$Both[age_coverage$age_group == "Highest older share"]
+```
+
+## What changes when a new station opens? {#study-question}
+
+::: {.columns}
+::: {.column width="42%"}
+A closer station may change where people enter the railway, even if they make the same number of journeys.
+
+- What explains weekday boardings?
+- Which neighbourhoods might switch stations?
+- Which neighbourhoods gain closer access?
+
+The scenario adds the handout's 24 JRL and 12 CRL Phase 1 stations.
+:::
+::: {.column width="58%"}
+![](take-home-03/network-summary.png)
+:::
+:::
+
+## Start with September's journeys and today's surroundings {#data}
+
+- `r nrow(prepared$stations$Existing)` existing stations, counting each interchange once.
+- `r nrow(prepared$stations$Both) - nrow(prepared$stations$Existing)` new locations with both lines; seven existing stations gain connections.
+- `r nrow(prepared$origins)` subzones, with June 2026 residents, mapped facilities and 2025 worker counts.
+- `r fmt(prepared$hdb_match$matched_dwellings)` HDB homes located on the map: `r pct(prepared$hdb_match$matched_dwellings / prepared$hdb_match$total_dwellings)` of the property-table total.
+
+September 2026 weekday entries are the starting point; August provides another check. Every network comparison uses the same population, activities and total journeys.
+
+::: {.smaller}
+Subzone names match between the 2026 population data and the older 2019 map. Some homes could not be located: the mapped sample covers `r pct(review$housing_quality$share[review$housing_quality$bldg_contract_town == "TG"])` of Tengah homes and `r pct(review$housing_quality$share[review$housing_quality$bldg_contract_town == "BM"])` of Bukit Merah homes. [Data sources](take-home-exercise-03.qmd#data-and-study-area)
+:::
+
+## Busy stations serve homes and workplaces {#current-boardings}
+
+::: {.columns}
+::: {.column width="40%"}
+September averages **`r fmt(sum(ridership$observed$entries))` weekday entries**.
+
+Jurong East leads, followed by Raffles Place. Yishun is also among the busiest despite having one line.
+
+Counting the whole day captures people leaving homes, workplaces and other activities. Each journey is counted once, where it enters the railway. This is why the model needs more than residential population.
+:::
+::: {.column width="60%"}
+![](take-home-03/observed-summary.png)
+:::
+:::
+
+## Estimate the choice between nearby stations {#model}
+
+The Huff model gives each station a share of journeys from nearby places. Closer stations usually receive a larger share; transport connections can increase their appeal.
+
+| Improvement | What changes |
+|---|---|
+| Use more detailed starting locations | Place HDB residents at mapped blocks and activities at facility locations |
+| Distinguish MRT and LRT-only stops | Let the model learn how their appeal differs, alongside rail and bus connections |
+| Use worker counts | Spread each planning area's employed residents across its facility locations |
+
+To test it, I divide stations into five geographical groups. The model learns from four groups and predicts the fifth without using its entry counts. Every model uses the same tests.
+
+::: {.smaller}
+Worker counts cover employed residents in 44 planning areas. Exact workplaces are estimated using facility locations; nearby starting points are grouped in 500-metre cells. [Model and validation](take-home-exercise-03.qmd#estimating-station-choice)
+:::
+
+## Predictions improve, but recent stations are overestimated {#validation}
+
+::: {.columns}
+::: {.column width="44%"}
+Total absolute error is **`r pct(selected$WAPE)`** of recorded entries (WAPE), versus `r pct(review$benchmarks$WAPE[review$benchmarks$model == "Training mean within MRT / LRT"])` using separate MRT/LRT averages. Busier and quieter stations are generally ranked correctly (correlation `r round(review$rank_correlation, 2)`).
+
+Leaving all eleven recent stations' counts out of fitting, the model predicts `r round(recent_tel$group_holdout / recent_tel$observed, 1)` times TEL4's recorded entries. Hume and CCL6 are also too high. [Recent-station check](take-home-exercise-03.qmd#recent-station-check)
+
+The new-line estimates therefore need better checking before use in capacity planning.
+
+::: {.smaller}
+August error is `r pct(ridership$temporal$WAPE)` at the same stations. Regrouping stations geographically gives `r pct(office_check$WAPE[office_check$model == 8])`. Both groupings helped choose the model; errors still vary by area.
+:::
+:::
+::: {.column width="56%"}
+![](take-home-03/validation-summary.png)
+:::
+:::
+
+## `r new_top$station` leads the new locations {#new-stations}
+
+::: {.columns}
+::: {.column width="39%"}
+With both lines added, new stations receive **`r pct(combined$new_share)`** of the same total journeys.
+
+`r new_top$station` receives about `r estimate(new_top$predicted)` daily entries. Pasir Ris East follows.
+
+Changing the bus-stop radius or minimum distance gives `r pct(min(main_sensitivity$new_share))` to `r pct(max(main_sensitivity$new_share))`. Learning from different station groups gives `r pct(min(review$fold_scenarios$new_share))` to `r pct(max(review$fold_scenarios$new_share))`. Using residents alone gives `r pct(residential_sensitivity$new_share)`.
+:::
+::: {.column width="61%"}
+![](take-home-03/new-stations-summary.png)
+:::
+:::
+
+::: {.smaller}
+Filled dots show the selected model; hollow dots use residents alone. Bars show the bus-stop radius and minimum-distance checks. Aviation Park and Tengah have low estimates. [All new stations](take-home-exercise-03.qmd#low-entry-estimates)
+:::
+
+## Pioneer faces alternatives; Hougang gains a line {#existing-stations}
+
+::: {.columns}
+::: {.column width="40%"}
+`r largest_change$station`: about **`r estimate(abs(largest_change$change))` fewer** daily entries (`r pct(abs(largest_change$percent_change))`).
+
+`r largest_gain$station`: about **`r estimate(largest_gain$change)` more** (`r pct(largest_gain$percent_change)`).
+
+Give Hougang no extra attraction for gaining a line, and its predicted gain becomes a **loss of `r estimate(abs(hougang_check$fixed_change))`**. Much of its forecast depends on this assumption.
+
+::: {.smaller}
+The total journeys stay fixed. Entries exclude transfers inside stations. The model learns from existing interchanges; that cannot establish what an extra line alone will do. [Sensitivity check](take-home-exercise-03.qmd#interchange-sensitivity)
+:::
+:::
+::: {.column width="60%"}
+![](take-home-03/station-changes-summary.png)
+:::
+:::
+
+## Yunnan's journeys could spread across several stations {#catchments}
+
+::: {.columns}
+::: {.column width="40%"}
+Across Singapore, the leading station choice changes in **`r combined$changed_origins` of `r combined$active_origins`** subzones with estimated journeys.
+
+In Yunnan, Pioneer's share falls from `r pct(pioneer$probability[pioneer$scenario == "Existing"])` to `r pct(pioneer$probability[pioneer$scenario == "Both"])`. `r local_leader$station` becomes the leading choice.
+
+The model leaves out final destinations and transfers. Someone needing the EWL may still prefer Pioneer to a closer JRL station. Actual journeys need checking before feeder routes change.
+:::
+::: {.column width="60%"}
+![](take-home-03/local-choices-summary.png)
+:::
+:::
+
+## More homes are closer, with uneven gains {#access}
+
+The share of mapped homes within 800 metres of a station rises from **`r pct(before)` to `r pct(after)`** with both lines.
+
+::: {.columns}
+::: {.column width="52%"}
+![](take-home-03/coverage-summary.png)
+:::
+::: {.column width="48%"}
+![](take-home-03/equity-summary.png)
+:::
+:::
+
+Homes in neighbourhoods with the largest older-resident share gain `r fmt(older$mean_gain)` metres on average; those with the smallest share gain `r fmt(younger$mean_gain)`. The gap in homes within 800 metres widens from **`r round(100 * age_gap_before, 1)` to `r round(100 * age_gap_after, 1)` percentage points**.
+
+::: {.smaller}
+Distances are straight lines to MRT/LRT stations. More homes are within reach at 400 and 1,200 metres too. These results come from mapped distances, independently of the ridership model.
+:::
+
+## Follow up on specific local connections {#recommendations}
+
+The results use today's surroundings and journey total. Future housing and travel patterns could change them.
+
+- Check walks from Garden's mapped homes to **Hong Kah and Tengah Plantation**. Stations become an average of `r fmt(top$gain_m)` metres closer on the map.
+- Check bus travel times and access to stops in **Clementi West and Telok Blangah Way**, two areas with a high share of older residents where all matched homes remain beyond 800 metres.
+- Study connections between Yunnan, Pioneer, Gek Poh and Tawas before changing feeder routes.
+- Find out where trips start around Serangoon North and Pasir Ris East before using these estimates to plan capacity.
+
+[Read the report and sources](take-home-exercise-03.qmd#sources)
