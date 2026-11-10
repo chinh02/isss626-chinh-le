@@ -14,6 +14,22 @@ Extended assignments and spatial analysis completed during ISSS626.
 
 ::: {.exercise-list}
 ::: {.exercise-entry}
+<span>03</span>
+
+## New rail stations and neighbourhood access
+
+How JRL and CRL Phase 1 could change station catchments, and which neighbourhoods gain closer access. A comparison using September 2026 weekday boardings and mapped HDB homes.
+
+[Read the technical report →](take-home-exercise-03.qmd){.section-link}
+
+[View the executive summary →](take-home-exercise-03-summary.qmd){.section-link}
+
+[See the full R workflow →](take-home-exercise-03-workflow.qmd){.section-link}
+
+[GitHub project →](https://github.com/chinh02/isss626-chinh-le){.section-link}
+:::
+
+::: {.exercise-entry}
 <span>02</span>
 
 ## Conflict across Myanmar’s townships

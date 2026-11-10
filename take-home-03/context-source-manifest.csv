@@ -1,0 +1,5 @@
+"file","page","bytes","sha256","retrieved_utc"
+"workplace-industry-2025.json","https://tablebuilder.singstat.gov.sg/table/CT/C020150",45939,"d947eddc745dd0af306199ff4e24a14f4e1d349fa4c5481b81719444c51ed87f","2026-11-04 03:06:50 UTC"
+"BusServices-20261104.rds","https://datamall.lta.gov.sg/content/datamall/en/dynamic-data.html",12913,"10a8f8005806004975833284b2fa0dedae66e97fe6667b05fa3aadeb381eaf0d","2026-11-04 03:05:38 UTC"
+"BusRoutes-20261104.rds","https://datamall.lta.gov.sg/content/datamall/en/dynamic-data.html",226843,"4e653eb21c01f6bcafa1ca0b42f7414aa5227469c47ba0b15a2d1860dad423e0","2026-11-04 03:05:54 UTC"
+"BusStops-20261104.rds","https://datamall.lta.gov.sg/content/datamall/en/dynamic-data.html",127682,"9bb35cb1dcd79c382062880f87da37eb8822f4af1ce3bd579eb56935568ab5de","2026-11-04 03:05:54 UTC"
