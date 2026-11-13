@@ -160,6 +160,10 @@ Building it was not a given. In the early 1980s, some ministers preferred an all
 | 2025–2026 | Hume finally opens, and Circle Line 6 closes the Circle Line loop |
 | 2028–2030 | The Jurong Region Line and Cross Island Line Phase 1 are due |
 
+The animation below shows the network growing from the first two lines into today's web of rings and spokes.
+
+![How the MRT network grew, year by year. Animated map by LMX97 on [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Evolution_of_the_MRT.gif), licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). It was drawn in 2017, so the years after 2017 show the plans of the time and leave out the Jurong Region Line and the current Cross Island Line route.](https://upload.wikimedia.org/wikipedia/commons/7/77/Evolution_of_the_MRT.gif){fig-alt="Animated map of Singapore in which MRT lines appear one after another, from the first North–South and East–West line sections in the late 1980s to the larger network of the 2020s, with the year shown in the corner."}
+
 ### The ideas behind it {#sec-principles}
 
 Three ideas run through Singapore's rail planning:
@@ -690,6 +694,7 @@ For planners, this suggests four next steps:
 - Wikipedia (2026a). [Mass Rapid Transit (Singapore)](https://en.wikipedia.org/wiki/Mass_Rapid_Transit_(Singapore)).
 - Wikipedia (2026b). [Urban planning in Singapore](https://en.wikipedia.org/wiki/Urban_planning_in_Singapore).
 - Wikipedia (2026c). [Light Rail Transit (Singapore)](https://en.wikipedia.org/wiki/Light_Rail_Transit_(Singapore)).
+- LMX97 (2017). [Evolution of the MRT](https://commons.wikimedia.org/wiki/File:Evolution_of_the_MRT.gif) [animated map]. Wikimedia Commons, [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
 
 **Course material and software**
 
