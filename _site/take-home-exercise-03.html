@@ -250,9 +250,11 @@ window.Quarto = {
   </ul></li>
   <li><a href="#sec-mrt" id="toc-sec-mrt" class="nav-link" data-scroll-target="#sec-mrt"><span class="header-section-number">2</span> Singapore’s rail network</a>
   <ul class="collapse">
-  <li><a href="#from-five-stations-to-six-lines" id="toc-from-five-stations-to-six-lines" class="nav-link" data-scroll-target="#from-five-stations-to-six-lines"><span class="header-section-number">2.1</span> From five stations to six lines</a></li>
-  <li><a href="#two-new-lines" id="toc-two-new-lines" class="nav-link" data-scroll-target="#two-new-lines"><span class="header-section-number">2.2</span> Two new lines</a></li>
-  <li><a href="#sec-current-boardings" id="toc-sec-current-boardings" class="nav-link" data-scroll-target="#sec-current-boardings"><span class="header-section-number">2.3</span> Where people board today</a></li>
+  <li><a href="#sec-history" id="toc-sec-history" class="nav-link" data-scroll-target="#sec-history"><span class="header-section-number">2.1</span> A short history</a></li>
+  <li><a href="#sec-principles" id="toc-sec-principles" class="nav-link" data-scroll-target="#sec-principles"><span class="header-section-number">2.2</span> The ideas behind it</a></li>
+  <li><a href="#sec-performance" id="toc-sec-performance" class="nav-link" data-scroll-target="#sec-performance"><span class="header-section-number">2.3</span> How well it works</a></li>
+  <li><a href="#two-new-lines" id="toc-two-new-lines" class="nav-link" data-scroll-target="#two-new-lines"><span class="header-section-number">2.4</span> Two new lines</a></li>
+  <li><a href="#sec-current-boardings" id="toc-sec-current-boardings" class="nav-link" data-scroll-target="#sec-current-boardings"><span class="header-section-number">2.5</span> Where people board today</a></li>
   </ul></li>
   <li><a href="#sec-data" id="toc-sec-data" class="nav-link" data-scroll-target="#sec-data"><span class="header-section-number">3</span> Data</a>
   <ul class="collapse">
@@ -275,7 +277,7 @@ window.Quarto = {
   <li><a href="#sec-catchments" id="toc-sec-catchments" class="nav-link" data-scroll-target="#sec-catchments"><span class="header-section-number">5.4</span> How catchments change</a></li>
   </ul></li>
   <li><a href="#sec-access" id="toc-sec-access" class="nav-link" data-scroll-target="#sec-access"><span class="header-section-number">6</span> Who gets closer to a station</a></li>
-  <li><a href="#sec-limitations" id="toc-sec-limitations" class="nav-link" data-scroll-target="#sec-limitations"><span class="header-section-number">7</span> Limitations</a></li>
+  <li><a href="#sec-limitations" id="toc-sec-limitations" class="nav-link" data-scroll-target="#sec-limitations"><span class="header-section-number">7</span> Assumptions and limitations</a></li>
   <li><a href="#sec-conclusions" id="toc-sec-conclusions" class="nav-link" data-scroll-target="#sec-conclusions"><span class="header-section-number">8</span> Conclusions and recommendations</a></li>
   <li><a href="#sec-references" id="toc-sec-references" class="nav-link" data-scroll-target="#sec-references"><span class="header-section-number">9</span> References</a></li>
   </ul>
@@ -302,33 +304,13 @@ window.Quarto = {
 <section id="what-this-exercise-does" class="level3" data-number="1.2">
 <h3 data-number="1.2" class="anchored" data-anchor-id="what-this-exercise-does"><span class="header-section-number">1.2</span> What this exercise does</h3>
 <p>I use a <strong>Huff model</strong>, the same probabilistic spatial interaction model as in <a href="./hands-on-exercise-08.html">Hands-on Exercise 8</a>. There, shoppers in each village chose between stores. Here, people at each place in Singapore choose which station to start their rail journey from. The model learns from today’s 184 stations how distance and station features affect that choice, then applies what it learned to the new stations.</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Handout objective</th>
-<th>Where it is answered</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Calibrate a probabilistic spatial interaction model for station ridership</td>
-<td><a href="#sec-model" class="quarto-xref">Section&nbsp;4</a></td>
-</tr>
-<tr class="even">
-<td>Predict ridership at the proposed JRL and CRL stations</td>
-<td><a href="#sec-new-stations" class="quarto-xref">Section&nbsp;5.1</a> and <a href="#sec-quiet-stations" class="quarto-xref">Section&nbsp;5.2</a></td>
-</tr>
-<tr class="odd">
-<td>Evaluate the effect on existing stations’ ridership and catchments</td>
-<td><a href="#sec-existing-stations" class="quarto-xref">Section&nbsp;5.3</a> and <a href="#sec-catchments" class="quarto-xref">Section&nbsp;5.4</a></td>
-</tr>
-</tbody>
-</table>
-<p><a href="#sec-access" class="quarto-xref">Section&nbsp;6</a> adds a related question: which neighbourhoods end up closer to a station?</p>
+<p>The report sets out to answer three questions:</p>
+<ol type="1">
+<li>How well do distance and station features explain how many people board at today’s stations?</li>
+<li>How many people might board at each new JRL and CRL station?</li>
+<li>Which existing stations would lose passengers to the new ones, and how would their catchments change?</li>
+</ol>
+<p>A fourth question follows naturally: which neighbourhoods end up within walking distance of a station?</p>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -369,10 +351,67 @@ window.Quarto = {
 </section>
 <section id="sec-mrt" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="sec-mrt"><span class="header-section-number">2</span> Singapore’s rail network</h2>
-<section id="from-five-stations-to-six-lines" class="level3" data-number="2.1">
-<h3 data-number="2.1" class="anchored" data-anchor-id="from-five-stations-to-six-lines"><span class="header-section-number">2.1</span> From five stations to six lines</h3>
-<p>The Mass Rapid Transit (MRT) opened on 7 November 1987 with a 6-kilometre stretch of five stations, Yio Chu Kang to Toa Payoh. It now has 146 stations on six lines and about 246.6 kilometres of track, and carried an average of 3.49 million passengers a day in 2025 (Wikipedia, 2026). Three Light Rail Transit (LRT) systems in Bukit Panjang, Sengkang and Punggol act as feeders, carrying residents from their estates to an MRT station.</p>
+<section id="sec-history" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="sec-history"><span class="header-section-number">2.1</span> A short history</h3>
+<p>Singapore’s MRT was a planning idea long before it was a railway. In 1971, the first Concept Plan imagined a “ring city”: new housing towns in a ring around the central water catchment, joined to the city centre by rapid transit (Wikipedia, 2026b).</p>
+<p>Building it was not a given. In the early 1980s, some ministers preferred an all-bus system, which Harvard specialists said would cost half as much. After a long public debate, the government chose rail. The first trains ran on 7 November 1987, over five stations and 6 kilometres from Yio Chu Kang to Toa Payoh (Wikipedia, 2026a).</p>
 <table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Year</th>
+<th>Milestone</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1971</td>
+<td>The Concept Plan proposes a ring of new towns linked by rapid transit</td>
+</tr>
+<tr class="even">
+<td>1987</td>
+<td>The first MRT trains run, from Yio Chu Kang to Toa Payoh</td>
+</tr>
+<tr class="odd">
+<td>1996</td>
+<td>LTA’s white paper aims to grow the network from 67 km to 360 km of track by 2030</td>
+</tr>
+<tr class="even">
+<td>2003</td>
+<td>The North East Line opens, one of the first fully automated heavy-rail lines in the world. Buangkok station stays shut until 2006, and Woodleigh until 2011</td>
+</tr>
+<tr class="odd">
+<td>2009–2024</td>
+<td>The Circle, Downtown and Thomson–East Coast lines open in stages</td>
+</tr>
+<tr class="even">
+<td>2025–2026</td>
+<td>Hume finally opens, and Circle Line 6 closes the Circle Line loop</td>
+</tr>
+<tr class="odd">
+<td>2028–2030</td>
+<td>The Jurong Region Line and Cross Island Line Phase 1 are due</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="sec-principles" class="level3" data-number="2.2">
+<h3 data-number="2.2" class="anchored" data-anchor-id="sec-principles"><span class="header-section-number">2.2</span> The ideas behind it</h3>
+<p>Three ideas run through Singapore’s rail planning:</p>
+<ul>
+<li><strong>Build towns around stations.</strong> Many HDB towns place the MRT station beside the town centre, the bus interchange and the shops, so residents can walk to the train or take a short feeder bus. This is known as transit-oriented development.</li>
+<li><strong>Spokes and rings.</strong> Radial lines carry people from the towns into the city centre, and circle lines connect the towns without passing through it. The 1991 Concept Plan added regional centres, such as Jurong East, Tampines and Woodlands, to bring jobs closer to homes. All three are among the busiest stations today (<a href="#sec-current-boardings" class="quarto-xref">Section&nbsp;2.5</a>).</li>
+<li><strong>One system with the buses.</strong> Feeder buses and three Light Rail Transit (LRT) systems, in Bukit Panjang, Sengkang and Punggol, bring people to the MRT. Fares are charged on the whole journey, so changing from a bus to a train does not start a new fare. Owning a car is expensive, because buyers must first bid for a certificate of entitlement, so public transport stays the main way to travel.</li>
+</ul>
+</section>
+<section id="sec-performance" class="level3" data-number="2.3">
+<h3 data-number="2.3" class="anchored" data-anchor-id="sec-performance"><span class="header-section-number">2.3</span> How well it works</h3>
+<p>The MRT now has 146 stations on six lines and about 246.6 kilometres of track. It carried an average of 3.49 million passengers a day in 2025 (Wikipedia, 2026a).</p>
+<table class="caption-top table">
+<caption>Lines and stations in September 2026 (Wikipedia, 2026a, 2026c).</caption>
 <colgroup>
 <col style="width: 25%">
 <col style="width: 25%">
@@ -433,10 +472,12 @@ window.Quarto = {
 </tbody>
 </table>
 <p>Interchange stations appear once for each line, so the counts add up to more than the number of buildings. Counted as physical stations, the September 2026 network has <strong>184</strong>: 146 with MRT service and 38 served only by the LRT. The newest are Hume (February 2025) and the three Circle Line 6 stations, Keppel, Cantonment and Prince Edward Road (July 2026).</p>
+<p>It has not always run smoothly. A series of breakdowns, and a flooded North–South Line tunnel in 2017, led to a large renewal of signals, tracks and power systems. In 2018, trains ran an average of 690,000 km between delays, 3.8 times the 2017 figure; on the North–South Line the distance rose tenfold (Wikipedia, 2026a).</p>
+<p>The network also reaches most homes. In the housing data used here, 72.9% of mapped HDB flats are within 800 metres of a station in a straight line (<a href="#sec-access" class="quarto-xref">Section&nbsp;6</a>). The places it still misses, and stations that open to few passengers, are the subject of this report.</p>
 </section>
-<section id="two-new-lines" class="level3" data-number="2.2">
-<h3 data-number="2.2" class="anchored" data-anchor-id="two-new-lines"><span class="header-section-number">2.2</span> Two new lines</h3>
-<p><strong>The Jurong Region Line</strong> has 24 stations in western Singapore. It links Choa Chu Kang, the new Tengah town, Jurong West, Nanyang Technological University and the Jurong industrial area. It is planned to open in three stages between 2028 and 2029 (Wikipedia, 2026).</p>
+<section id="two-new-lines" class="level3" data-number="2.4">
+<h3 data-number="2.4" class="anchored" data-anchor-id="two-new-lines"><span class="header-section-number">2.4</span> Two new lines</h3>
+<p><strong>The Jurong Region Line</strong> has 24 stations in western Singapore. It links Choa Chu Kang, the new Tengah town, Jurong West, Nanyang Technological University and the Jurong industrial area. It is planned to open in three stages between 2028 and 2029 (Wikipedia, 2026a).</p>
 <p><strong>The Cross Island Line, Phase 1</strong> has 12 stations. It runs from Aviation Park near Changi through Loyang, Pasir Ris, Tampines North, Hougang, Serangoon North and Ang Mo Kio to Bright Hill (LTA, 2026). It is due in 2030; later phases continue west to Jurong Lake District. The handout’s “12 Cross Island Line stations” are these Phase 1 stations, codes CR2 to CR13.</p>
 <p>Seven of the 36 new platforms are at existing stations: Choa Chu Kang, Boon Lay and Jurong East on the JRL, and Pasir Ris, Hougang, Ang Mo Kio and Bright Hill on the CRL. The two lines therefore add <strong>29 new station locations</strong>, and seven existing stations become interchanges.</p>
 <details class="code-fold">
@@ -524,8 +565,8 @@ window.Quarto = {
 </div>
 <p>The JRL fills in the west, where Tengah and western Jurong West are far from today’s stations. The CRL runs across the north-east, crossing four existing lines.</p>
 </section>
-<section id="sec-current-boardings" class="level3" data-number="2.3">
-<h3 data-number="2.3" class="anchored" data-anchor-id="sec-current-boardings"><span class="header-section-number">2.3</span> Where people board today</h3>
+<section id="sec-current-boardings" class="level3" data-number="2.5">
+<h3 data-number="2.5" class="anchored" data-anchor-id="sec-current-boardings"><span class="header-section-number">2.5</span> Where people board today</h3>
 <p>LTA’s <em>Passenger Volume by Origin Destination Train Stations</em> counts trips between every pair of stations, by hour, for a month. Each row is one origin station, one destination station and one hour, with the number of trips.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>od_september <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(</span>
@@ -538,13 +579,13 @@ window.Quarto = {
 <div class="cell-output cell-output-stdout">
 <pre><code>Rows: 887,478
 Columns: 7
-$ YEAR_MONTH          &lt;chr&gt; "2026-09", "2026-09", "2026-09", "2026-09", "2026-~
-$ DAY_TYPE            &lt;chr&gt; "WEEKENDS/HOLIDAY", "WEEKDAY", "WEEKDAY", "WEEKEND~
-$ TIME_PER_HOUR       &lt;dbl&gt; 6, 11, 14, 6, 12, 13, 9, 12, 9, 8, 17, 19, 6, 9, 1~
-$ PT_TYPE             &lt;chr&gt; "TRAIN", "TRAIN", "TRAIN", "TRAIN", "TRAIN", "TRAI~
-$ ORIGIN_PT_CODE      &lt;chr&gt; "EW12/DT14", "TE4", "CC24", "PE6", "EW20", "DT17",~
-$ DESTINATION_PT_CODE &lt;chr&gt; "DT7", "CC11", "PE1", "SW7", "NS17/CC15", "CC5", "~
-$ TOTAL_TRIPS         &lt;dbl&gt; 14, 7, 18, 2, 6, 55, 194, 2, 46, 2, 2, 41, 3, 12, ~</code></pre>
+$ YEAR_MONTH          &lt;chr&gt; "2026-09", "2026-09", "2026-09", "2026-09", "2026-…
+$ DAY_TYPE            &lt;chr&gt; "WEEKENDS/HOLIDAY", "WEEKDAY", "WEEKDAY", "WEEKEND…
+$ TIME_PER_HOUR       &lt;dbl&gt; 6, 11, 14, 6, 12, 13, 9, 12, 9, 8, 17, 19, 6, 9, 1…
+$ PT_TYPE             &lt;chr&gt; "TRAIN", "TRAIN", "TRAIN", "TRAIN", "TRAIN", "TRAI…
+$ ORIGIN_PT_CODE      &lt;chr&gt; "EW12/DT14", "TE4", "CC24", "PE6", "EW20", "DT17",…
+$ DESTINATION_PT_CODE &lt;chr&gt; "DT7", "CC11", "PE1", "SW7", "NS17/CC15", "CC5", "…
+$ TOTAL_TRIPS         &lt;dbl&gt; 14, 7, 18, 2, 6, 55, 194, 2, 46, 2, 2, 41, 3, 12, …</code></pre>
 </div>
 </div>
 <p>A journey enters the railway only once, at its origin station; changing lines inside the network is not a new entry. To get each station’s ridership, I add up all weekday trips by origin station and divide by the 22 weekdays in September 2026.</p>
@@ -557,7 +598,7 @@ $ TOTAL_TRIPS         &lt;dbl&gt; 14, 7, 18, 2, 6, 55, 194, 2, 46, 2, 2, 41, 3, 
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(weekday_entries, <span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 5 x 2
+<pre><code># A tibble: 5 × 2
   ORIGIN_PT_CODE entries
   &lt;chr&gt;            &lt;dbl&gt;
 1 EW24/NS1        70508.
@@ -742,7 +783,7 @@ $ TOTAL_TRIPS         &lt;dbl&gt; 14, 7, 18, 2, 6, 55, 194, 2, 46, 2, 2, 41, 3, 
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(origin_id, subzone_id, kind, residents, activity, employment, market_potential) <span class="sc">%&gt;%</span></span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 4 x 7
+<pre><code># A tibble: 4 × 7
   origin_id subzone_id kind     residents activity employment market_potential
   &lt;chr&gt;     &lt;chr&gt;      &lt;chr&gt;        &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt;            &lt;dbl&gt;
 1 D0001     AMSZ01     activity         0       13     1208.            1107.
@@ -778,7 +819,7 @@ $ TOTAL_TRIPS         &lt;dbl&gt; 14, 7, 18, 2, 6, 55, 194, 2, 46, 2, 2, 41, 3, 
 </div>
 </div>
 </div>
-<p>Journeys from homes (orange) come from the HDB towns. Journeys from activity places (green) cluster in the city centre and at town centres, and the largest are where many people work. This matches the boarding pattern in <a href="#sec-current-boardings" class="quarto-xref">Section&nbsp;2.3</a>.</p>
+<p>Journeys from homes (orange) come from the HDB towns. Journeys from activity places (green) cluster in the city centre and at town centres, and the largest are where many people work. This matches the boarding pattern in <a href="#sec-current-boardings" class="quarto-xref">Section&nbsp;2.5</a>.</p>
 <p><strong>Destinations.</strong> Each station has three features that could make it more attractive than a station at the same distance: the number of rail lines it serves, whether it has MRT service (rather than LRT only), and the number of bus stops within 500 metres. New stations have no observed entries yet.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>destinations <span class="sc">%&gt;%</span></span>
@@ -786,7 +827,7 @@ $ TOTAL_TRIPS         &lt;dbl&gt; 14, 7, 18, 2, 6, 55, 194, 2, 46, 2, 2, 41, 3, 
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(station_id <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"JURONGEAST"</span>, <span class="st">"PIONEER"</span>, <span class="st">"GEKPOH"</span>, <span class="st">"SERANGOONNORTH"</span>)) <span class="sc">%&gt;%</span></span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(station, existing, observed_entries, lines, mrt, bus_500, attraction)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 4 x 7
+<pre><code># A tibble: 4 × 7
   station         existing observed_entries lines   mrt bus_500 attraction
   &lt;chr&gt;           &lt;lgl&gt;               &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt;   &lt;int&gt;      &lt;dbl&gt;
 1 Gek Poh         FALSE                 NA      1     1      16       13.2
@@ -796,13 +837,28 @@ $ TOTAL_TRIPS         &lt;dbl&gt; 14, 7, 18, 2, 6, 55, 194, 2, 46, 2, 2, 41, 3, 
 </div>
 </div>
 <p><strong>Spatial interactions.</strong> Every origin is paired with every station: 604,624 pairs for today’s 184 stations and 699,918 with both lines (213 stations). Distances are straight lines in kilometres, with a minimum of 100 metres so that an origin right next to a station does not get an infinite weight.</p>
+<p>Here is the same origin, a group of shops in Ang Mo Kio, in each table, with its four closest stations:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>expanded_si <span class="sc">%&gt;%</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(origin_id <span class="sc">==</span> <span class="fu">first</span>(origin_id)) <span class="sc">%&gt;%</span></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(origin_id, station_id, distance, attraction) <span class="sc">%&gt;%</span></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_min</span>(distance, <span class="at">n =</span> <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>nearest_stations <span class="ot">&lt;-</span> <span class="cf">function</span>(interactions) {</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  interactions <span class="sc">%&gt;%</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(origin_id <span class="sc">==</span> <span class="fu">first</span>(origin_id)) <span class="sc">%&gt;%</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(origin_id, station_id, distance, attraction) <span class="sc">%&gt;%</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">slice_min</span>(distance, <span class="at">n =</span> <span class="dv">4</span>)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="fu">nearest_stations</span>(existing_si)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 4 x 4
+<pre><code># A tibble: 4 × 4
+  origin_id station_id distance attraction
+  &lt;chr&gt;     &lt;chr&gt;         &lt;dbl&gt;      &lt;dbl&gt;
+1 D0001     ANGMOKIO      0.438       13.2
+2 D0001     MAYFLOWER     1.04        13.0
+3 D0001     YIOCHUKANG    1.09        13.3
+4 D0001     LENTOR        1.75        13.0</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nearest_stations</span>(expanded_si)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 4 × 4
   origin_id station_id distance attraction
   &lt;chr&gt;     &lt;chr&gt;         &lt;dbl&gt;      &lt;dbl&gt;
 1 D0001     ANGMOKIO      0.438       42.3
@@ -811,7 +867,7 @@ $ TOTAL_TRIPS         &lt;dbl&gt; 14, 7, 18, 2, 6, 55, 194, 2, 46, 2, 2, 41, 3, 
 4 D0001     YIOCHUKANG    1.09        13.3</code></pre>
 </div>
 </div>
-<p>These are the four closest stations to the first origin, a group of shops in Ang Mo Kio. The interchange at Ang Mo Kio has a higher attraction score because it gains the CRL in this network.</p>
+<p>With both lines, Teck Ghee, a new CRL station, joins the list, and Ang Mo Kio’s attraction score more than triples because it becomes an interchange with the CRL.</p>
 </section>
 <section id="sec-huff" class="level3" data-number="4.2">
 <h3 data-number="4.2" class="anchored" data-anchor-id="sec-huff"><span class="header-section-number">4.2</span> How the Huff model works</h3>
@@ -823,30 +879,30 @@ P_{ij} = \frac{A_j \, d_{ij}^{-\lambda}}{\sum_{k} A_k \, d_{ik}^{-\lambda}}
 <p>This is the calculation <code>MCI::huff.shares()</code> performed for stores in Hands-on Exercise 8 (Wieland, 2017). There, store size was the attraction and λ was left at the default of 2. Here the attraction is built from the station’s features, and both the attraction weights and λ are estimated from the data (<a href="#sec-calibration" class="quarto-xref">Section&nbsp;4.3</a>).</p>
 <p>As an example, I take the largest group of HDB blocks in Yunnan, Jurong West, and compare its station choices before and after the JRL opens.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>yunnan <span class="ot">&lt;-</span> origins <span class="sc">%&gt;%</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(subzone_id <span class="sc">==</span> <span class="st">"JWSZ08"</span>, kind <span class="sc">==</span> <span class="st">"residential"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_max</span>(residents, <span class="at">n =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(origin_id)</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>station_names <span class="ot">&lt;-</span> <span class="fu">st_drop_geometry</span>(destinations) <span class="sc">%&gt;%</span></span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(station_id, station)</span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>top_choices <span class="ot">&lt;-</span> <span class="cf">function</span>(interactions) {</span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  interactions <span class="sc">%&gt;%</span></span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(origin_id <span class="sc">==</span> yunnan) <span class="sc">%&gt;%</span></span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># check_df = FALSE: MCI's input check cannot see a data frame passed through a pipe</span></span>
-<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">huff.shares</span>(<span class="st">"origin_id"</span>, <span class="st">"station_id"</span>, <span class="st">"attraction"</span>, <span class="st">"distance"</span>,</span>
-<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>                <span class="at">gamma =</span> <span class="dv">1</span>, <span class="at">lambda =</span> <span class="sc">-</span>ridership<span class="sc">$</span>fit<span class="sc">$</span>parameters[[<span class="st">"decay"</span>]],</span>
-<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>                <span class="at">check_df =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">left_join</span>(station_names, <span class="at">by =</span> <span class="st">"station_id"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">slice_max</span>(p_ij, <span class="at">n =</span> <span class="dv">4</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">transmute</span>(station,</span>
-<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>              <span class="at">distance_km =</span> <span class="fu">round</span>(distance, <span class="dv">2</span>),</span>
-<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>              <span class="at">probability =</span> <span class="fu">percent</span>(p_ij, <span class="at">accuracy =</span> <span class="fl">0.1</span>))</span>
-<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a><span class="fu">top_choices</span>(existing_si)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>yunnan <span class="ot">&lt;-</span> origins <span class="sc">%&gt;%</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(subzone_id <span class="sc">==</span> <span class="st">"JWSZ08"</span>, kind <span class="sc">==</span> <span class="st">"residential"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_max</span>(residents, <span class="at">n =</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(origin_id)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>station_names <span class="ot">&lt;-</span> <span class="fu">st_drop_geometry</span>(destinations) <span class="sc">%&gt;%</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(station_id, station)</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>top_choices <span class="ot">&lt;-</span> <span class="cf">function</span>(interactions) {</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  interactions <span class="sc">%&gt;%</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(origin_id <span class="sc">==</span> yunnan) <span class="sc">%&gt;%</span></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># check_df = FALSE: MCI's input check cannot see a data frame passed through a pipe</span></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">huff.shares</span>(<span class="st">"origin_id"</span>, <span class="st">"station_id"</span>, <span class="st">"attraction"</span>, <span class="st">"distance"</span>,</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>                <span class="at">gamma =</span> <span class="dv">1</span>, <span class="at">lambda =</span> <span class="sc">-</span>ridership<span class="sc">$</span>fit<span class="sc">$</span>parameters[[<span class="st">"decay"</span>]],</span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>                <span class="at">check_df =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">left_join</span>(station_names, <span class="at">by =</span> <span class="st">"station_id"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">slice_max</span>(p_ij, <span class="at">n =</span> <span class="dv">4</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">transmute</span>(station,</span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>              <span class="at">distance_km =</span> <span class="fu">round</span>(distance, <span class="dv">2</span>),</span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>              <span class="at">probability =</span> <span class="fu">percent</span>(p_ij, <span class="at">accuracy =</span> <span class="fl">0.1</span>))</span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a><span class="fu">top_choices</span>(existing_si)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   station distance_km probability
 1  Pioneer        0.80       66.9%
@@ -854,7 +910,7 @@ P_{ij} = \frac{A_j \, d_{ij}^{-\lambda}}{\sum_{k} A_k \, d_{ik}^{-\lambda}}
 3 Joo Koon        2.71        2.6%
 4 Lakeside        2.79        2.4%</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">top_choices</span>(expanded_si)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">top_choices</span>(expanded_si)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         station distance_km probability
 1        Gek Poh        0.48       43.5%
@@ -1281,11 +1337,12 @@ P_{ij} = \frac{A_j \, d_{ij}^{-\lambda}}{\sum_{k} A_k \, d_{ik}^{-\lambda}}
 <p>The gap between the groups with the lowest and highest share of older residents widens from 0.5 to 8.0 percentage points. The new lines mainly serve newer, younger towns such as Tengah and Jurong West, while older estates like Bedok South, Clementi West and Telok Blangah Way keep many flats beyond 800 metres. For older residents, a long walk to the station is a bigger barrier, so feeder buses and covered walkways matter more there.</p>
 </section>
 <section id="sec-limitations" class="level2" data-number="7">
-<h2 data-number="7" class="anchored" data-anchor-id="sec-limitations"><span class="header-section-number">7</span> Limitations</h2>
+<h2 data-number="7" class="anchored" data-anchor-id="sec-limitations"><span class="header-section-number">7</span> Assumptions and limitations</h2>
 <ul>
 <li><strong>Fixed total journeys.</strong> The model only moves today’s journeys between stations. It cannot estimate new riders from Tengah’s future housing or from people switching from bus or car.</li>
 <li><strong>Proportional competition.</strong> In the Huff model, a new station takes passengers from every nearby station in proportion to their current share. It ignores where people are going and the effort of changing lines.</li>
 <li><strong>Straight-line distances.</strong> Real walking routes are longer, and expressways, rivers and fences can make a nearby station hard to reach.</li>
+<li><strong>Spatial scale.</strong> Homes and activity places are grouped into 500-metre squares, and worker counts are only known for whole planning areas. Results for single stations depend on these choices more than results for whole lines do.</li>
 <li><strong>Residents only.</strong> Population and worker counts leave out foreign workers and international students, which helps explain the errors in the city centre and the uncertainty at industrial stations.</li>
 <li><strong>Associations, not causes.</strong> The model learns how station features relate to ridership today. Applying them to new stations and upgraded interchanges assumes the same relationships hold.</li>
 <li><strong>Recent stations are over-predicted</strong>, so treat the new-station estimates as a starting point rather than a forecast.</li>
@@ -1318,7 +1375,9 @@ P_{ij} = \frac{A_j \, d_{ij}^{-\lambda}}{\sum_{k} A_k \, d_{ik}^{-\lambda}}
 <li>Land Transport Authority (2026). <a href="https://www.lta.gov.sg/content/ltagov/en/newsroom/2026/3/news-releases/next-phase-of-rail-development.html">The next phase of rail development</a>.</li>
 <li>Land Transport Authority (2025). <a href="https://www.lta.gov.sg/content/ltagov/en/newsroom/2025/1/news-releases/hume_station_to_open.html">Hume station to open</a>.</li>
 <li>Land Transport Authority. <a href="https://www.lta.gov.sg/content/ltagov/en/upcoming_projects/rail_expansion/circle_line_6.html">Circle Line 6</a>.</li>
-<li>Wikipedia (2026). <a href="https://en.wikipedia.org/wiki/Mass_Rapid_Transit_(Singapore)">Mass Rapid Transit (Singapore)</a> and <a href="https://en.wikipedia.org/wiki/Light_Rail_Transit_(Singapore)">Light Rail Transit (Singapore)</a>.</li>
+<li>Wikipedia (2026a). <a href="https://en.wikipedia.org/wiki/Mass_Rapid_Transit_(Singapore)">Mass Rapid Transit (Singapore)</a>.</li>
+<li>Wikipedia (2026b). <a href="https://en.wikipedia.org/wiki/Urban_planning_in_Singapore">Urban planning in Singapore</a>.</li>
+<li>Wikipedia (2026c). <a href="https://en.wikipedia.org/wiki/Light_Rail_Transit_(Singapore)">Light Rail Transit (Singapore)</a>.</li>
 </ul>
 <p><strong>Course material and software</strong></p>
 <ul>

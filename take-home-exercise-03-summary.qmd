@@ -218,20 +218,19 @@ The share of mapped homes within 800 metres of a station rises from **`r pct(bef
 :::
 :::
 
-Homes in neighbourhoods with the largest older-resident share gain `r fmt(older$mean_gain)` metres on average; those with the smallest share gain `r fmt(younger$mean_gain)`. The gap in homes within 800 metres widens from **`r round(100 * age_gap_before, 1)` to `r round(100 * age_gap_after, 1)` percentage points**.
+Homes in neighbourhoods with the largest older-resident share gain `r fmt(older$mean_gain)` metres on average; those with the smallest share gain `r fmt(younger$mean_gain)`. The gap in homes within 800 metres widens from **`r format(round(100 * age_gap_before, 1), nsmall = 1)` to `r format(round(100 * age_gap_after, 1), nsmall = 1)` percentage points**.
 
 ::: {.smaller}
 Distances are straight lines to MRT/LRT stations. More homes are within reach at 400 and 1,200 metres too. These results come from mapped distances, independently of the ridership model.
 :::
 
-## Planning priorities {#recommendations}
+## Limitations and planning priorities {#recommendations}
 
-The results use today's surroundings and journey total. Future housing and travel patterns could change them.
+**Limitations.** The model moves today's journeys between stations; it does not add riders from new housing or from buses and cars. Distances are straight lines, population and worker counts cover residents only, and recently opened stations are over-predicted.
 
 - Check walks from Garden's mapped homes to **Hong Kah and Tengah Plantation**. Stations become an average of `r fmt(top$gain_m)` metres closer on the map.
 - Check bus travel times and access to stops in **Clementi West and Telok Blangah Way**, two areas with a high share of older residents where all matched homes remain beyond 800 metres.
 - Study connections between Yunnan, Pioneer, Gek Poh and Tawas before changing feeder routes.
-- Locate workplaces more precisely around Raffles Place and compare bus and rail journeys from Marine Parade; distance adjustments alone did not improve their predictions.
-- Find out where trips start around Serangoon North and Pasir Ris East before using these estimates to plan capacity.
+- Find out where trips start around Serangoon North and Pasir Ris East, and near the quietest new stations, before planning capacity from these estimates.
 
 [Read the report and sources](take-home-exercise-03.qmd#sec-references)

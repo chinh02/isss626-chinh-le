@@ -102,13 +102,13 @@ Two new lines are now under construction: the **Jurong Region Line (JRL)** and t
 
 I use a **Huff model**, the same probabilistic spatial interaction model as in [Hands-on Exercise 8](hands-on-exercise-08.qmd). There, shoppers in each village chose between stores. Here, people at each place in Singapore choose which station to start their rail journey from. The model learns from today's 184 stations how distance and station features affect that choice, then applies what it learned to the new stations.
 
-| Handout objective | Where it is answered |
-|---|---|
-| Calibrate a probabilistic spatial interaction model for station ridership | @sec-model |
-| Predict ridership at the proposed JRL and CRL stations | @sec-new-stations and @sec-quiet-stations |
-| Evaluate the effect on existing stations' ridership and catchments | @sec-existing-stations and @sec-catchments |
+The report sets out to answer three questions:
 
-@sec-access adds a related question: which neighbourhoods end up closer to a station?
+1. How well do distance and station features explain how many people board at today's stations?
+2. How many people might board at each new JRL and CRL station?
+3. Which existing stations would lose passengers to the new ones, and how would their catchments change?
+
+A fourth question follows naturally: which neighbourhoods end up within walking distance of a station?
 
 ::: {.callout-tip}
 ## Key results
@@ -144,9 +144,33 @@ ridership <- analysis$ridership  # observed entries, fitted model and prediction
 
 ## Singapore's rail network {#sec-mrt}
 
-### From five stations to six lines
+### A short history {#sec-history}
 
-The Mass Rapid Transit (MRT) opened on 7 November 1987 with a 6-kilometre stretch of five stations, Yio Chu Kang to Toa Payoh. It now has 146 stations on six lines and about 246.6 kilometres of track, and carried an average of 3.49 million passengers a day in 2025 (Wikipedia, 2026). Three Light Rail Transit (LRT) systems in Bukit Panjang, Sengkang and Punggol act as feeders, carrying residents from their estates to an MRT station.
+Singapore's MRT was a planning idea long before it was a railway. In 1971, the first Concept Plan imagined a "ring city": new housing towns in a ring around the central water catchment, joined to the city centre by rapid transit (Wikipedia, 2026b).
+
+Building it was not a given. In the early 1980s, some ministers preferred an all-bus system, which Harvard specialists said would cost half as much. After a long public debate, the government chose rail. The first trains ran on 7 November 1987, over five stations and 6 kilometres from Yio Chu Kang to Toa Payoh (Wikipedia, 2026a).
+
+| Year | Milestone |
+|---|---|
+| 1971 | The Concept Plan proposes a ring of new towns linked by rapid transit |
+| 1987 | The first MRT trains run, from Yio Chu Kang to Toa Payoh |
+| 1996 | LTA's white paper aims to grow the network from 67 km to 360 km of track by 2030 |
+| 2003 | The North East Line opens, one of the first fully automated heavy-rail lines in the world. Buangkok station stays shut until 2006, and Woodleigh until 2011 |
+| 2009–2024 | The Circle, Downtown and Thomson–East Coast lines open in stages |
+| 2025–2026 | Hume finally opens, and Circle Line 6 closes the Circle Line loop |
+| 2028–2030 | The Jurong Region Line and Cross Island Line Phase 1 are due |
+
+### The ideas behind it {#sec-principles}
+
+Three ideas run through Singapore's rail planning:
+
+- **Build towns around stations.** Many HDB towns place the MRT station beside the town centre, the bus interchange and the shops, so residents can walk to the train or take a short feeder bus. This is known as transit-oriented development.
+- **Spokes and rings.** Radial lines carry people from the towns into the city centre, and circle lines connect the towns without passing through it. The 1991 Concept Plan added regional centres, such as Jurong East, Tampines and Woodlands, to bring jobs closer to homes. All three are among the busiest stations today (@sec-current-boardings).
+- **One system with the buses.** Feeder buses and three Light Rail Transit (LRT) systems, in Bukit Panjang, Sengkang and Punggol, bring people to the MRT. Fares are charged on the whole journey, so changing from a bus to a train does not start a new fare. Owning a car is expensive, because buyers must first bid for a certificate of entitlement, so public transport stays the main way to travel.
+
+### How well it works {#sec-performance}
+
+The MRT now has 146 stations on six lines and about 246.6 kilometres of track. It carried an average of 3.49 million passengers a day in 2025 (Wikipedia, 2026a).
 
 | Line | Station code | First section opened | Stations (September 2026) |
 |---|---|---|---|
@@ -158,11 +182,17 @@ The Mass Rapid Transit (MRT) opened on 7 November 1987 with a 6-kilometre stretc
 | Thomson–East Coast Line | TE | January 2020 | 27 |
 | LRT: Bukit Panjang, Sengkang and Punggol | BP, SE/SW, PE/PW | 1999–2005 | 42 |
 
+: Lines and stations in September 2026 (Wikipedia, 2026a, 2026c).
+
 Interchange stations appear once for each line, so the counts add up to more than the number of buildings. Counted as physical stations, the September 2026 network has **184**: 146 with MRT service and 38 served only by the LRT. The newest are Hume (February 2025) and the three Circle Line 6 stations, Keppel, Cantonment and Prince Edward Road (July 2026).
+
+It has not always run smoothly. A series of breakdowns, and a flooded North–South Line tunnel in 2017, led to a large renewal of signals, tracks and power systems. In 2018, trains ran an average of 690,000 km between delays, 3.8 times the 2017 figure; on the North–South Line the distance rose tenfold (Wikipedia, 2026a).
+
+The network also reaches most homes. In the housing data used here, `r pct(before_800)` of mapped HDB flats are within 800 metres of a station in a straight line (@sec-access). The places it still misses, and stations that open to few passengers, are the subject of this report.
 
 ### Two new lines
 
-**The Jurong Region Line** has 24 stations in western Singapore. It links Choa Chu Kang, the new Tengah town, Jurong West, Nanyang Technological University and the Jurong industrial area. It is planned to open in three stages between 2028 and 2029 (Wikipedia, 2026).
+**The Jurong Region Line** has 24 stations in western Singapore. It links Choa Chu Kang, the new Tengah town, Jurong West, Nanyang Technological University and the Jurong industrial area. It is planned to open in three stages between 2028 and 2029 (Wikipedia, 2026a).
 
 **The Cross Island Line, Phase 1** has 12 stations. It runs from Aviation Park near Changi through Loyang, Pasir Ris, Tampines North, Hougang, Serangoon North and Ang Mo Kio to Bright Hill (LTA, 2026). It is due in 2030; later phases continue west to Jurong Lake District. The handout's "12 Cross Island Line stations" are these Phase 1 stations, codes CR2 to CR13.
 
@@ -381,15 +411,22 @@ destinations %>%
 
 **Spatial interactions.** Every origin is paired with every station: `r fmt(nrow(existing_si))` pairs for today's 184 stations and `r fmt(nrow(expanded_si))` with both lines (213 stations). Distances are straight lines in kilometres, with a minimum of 100 metres so that an origin right next to a station does not get an infinite weight.
 
+Here is the same origin, a group of shops in Ang Mo Kio, in each table, with its four closest stations:
+
 ```{r}
 #| label: interaction-table
-expanded_si %>%
-  filter(origin_id == first(origin_id)) %>%
-  select(origin_id, station_id, distance, attraction) %>%
-  slice_min(distance, n = 4)
+nearest_stations <- function(interactions) {
+  interactions %>%
+    filter(origin_id == first(origin_id)) %>%
+    select(origin_id, station_id, distance, attraction) %>%
+    slice_min(distance, n = 4)
+}
+
+nearest_stations(existing_si)
+nearest_stations(expanded_si)
 ```
 
-These are the four closest stations to the first origin, a group of shops in Ang Mo Kio. The interchange at Ang Mo Kio has a higher attraction score because it gains the CRL in this network.
+With both lines, Teck Ghee, a new CRL station, joins the list, and Ang Mo Kio's attraction score more than triples because it becomes an interchange with the CRL.
 
 ### How the Huff model works {#sec-huff}
 
@@ -613,11 +650,12 @@ age %>%
 
 The gap between the groups with the lowest and highest share of older residents widens from `r dec(100 * gap_before, 1)` to `r dec(100 * gap_after, 1)` percentage points. The new lines mainly serve newer, younger towns such as Tengah and Jurong West, while older estates like Bedok South, Clementi West and Telok Blangah Way keep many flats beyond 800 metres. For older residents, a long walk to the station is a bigger barrier, so feeder buses and covered walkways matter more there.
 
-## Limitations {#sec-limitations}
+## Assumptions and limitations {#sec-limitations}
 
 - **Fixed total journeys.** The model only moves today's journeys between stations. It cannot estimate new riders from Tengah's future housing or from people switching from bus or car.
 - **Proportional competition.** In the Huff model, a new station takes passengers from every nearby station in proportion to their current share. It ignores where people are going and the effort of changing lines.
 - **Straight-line distances.** Real walking routes are longer, and expressways, rivers and fences can make a nearby station hard to reach.
+- **Spatial scale.** Homes and activity places are grouped into 500-metre squares, and worker counts are only known for whole planning areas. Results for single stations depend on these choices more than results for whole lines do.
 - **Residents only.** Population and worker counts leave out foreign workers and international students, which helps explain the errors in the city centre and the uncertainty at industrial stations.
 - **Associations, not causes.** The model learns how station features relate to ridership today. Applying them to new stations and upgraded interchanges assumes the same relationships hold.
 - **Recent stations are over-predicted**, so treat the new-station estimates as a starting point rather than a forecast.
@@ -649,7 +687,9 @@ For planners, this suggests four next steps:
 - Land Transport Authority (2026). [The next phase of rail development](https://www.lta.gov.sg/content/ltagov/en/newsroom/2026/3/news-releases/next-phase-of-rail-development.html).
 - Land Transport Authority (2025). [Hume station to open](https://www.lta.gov.sg/content/ltagov/en/newsroom/2025/1/news-releases/hume_station_to_open.html).
 - Land Transport Authority. [Circle Line 6](https://www.lta.gov.sg/content/ltagov/en/upcoming_projects/rail_expansion/circle_line_6.html).
-- Wikipedia (2026). [Mass Rapid Transit (Singapore)](https://en.wikipedia.org/wiki/Mass_Rapid_Transit_(Singapore)) and [Light Rail Transit (Singapore)](https://en.wikipedia.org/wiki/Light_Rail_Transit_(Singapore)).
+- Wikipedia (2026a). [Mass Rapid Transit (Singapore)](https://en.wikipedia.org/wiki/Mass_Rapid_Transit_(Singapore)).
+- Wikipedia (2026b). [Urban planning in Singapore](https://en.wikipedia.org/wiki/Urban_planning_in_Singapore).
+- Wikipedia (2026c). [Light Rail Transit (Singapore)](https://en.wikipedia.org/wiki/Light_Rail_Transit_(Singapore)).
 
 **Course material and software**
 
